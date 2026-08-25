@@ -1,0 +1,5 @@
+{
+  "layout": "post.njk",
+  "permalink": "/writing/{{ page.fileSlug }}/",
+  "eleventyExcludeFromCollections": false
+}

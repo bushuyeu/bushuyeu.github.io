@@ -1,0 +1,8 @@
+---
+layout: base.njk
+---
+<div class="page-intro">
+  <h1>{{ title }}</h1>
+  {%- if intro %}<p class="lead muted">{{ intro }}</p>{% endif %}
+</div>
+{{ content | safe }}
