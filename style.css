@@ -91,7 +91,6 @@ header.top .wrap {
 }
 .meta a { color: var(--ink-2); }
 .meta a:hover { color: var(--link); text-decoration: none; }
-.meta .avail { color: var(--ink); font-weight: 500; }
 
 /* Sections: hairline drawn inside the column, same width as the text */
 section > .wrap { padding-bottom: 34px; }
