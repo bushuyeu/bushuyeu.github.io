@@ -162,7 +162,7 @@ section[id] { scroll-margin-top: 24px; }
 .row__src a:hover { color: var(--link); }
 .row__src a + a { margin-left: 14px; }
 .row__media { margin-top: 8px; }
-.row__media img { display: block; max-width: 100%; height: auto; border-radius: 10px; }
+.row__media img { display: block; max-width: 100%; max-height: 36rem; width: auto; height: auto; border-radius: 10px; }
 
 /* Prose: long-form review pages */
 .prose { font-size: 1rem; }
