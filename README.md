@@ -17,5 +17,5 @@ Every list is the same shape. To add an entry, copy the first
 `<li class="row">` block in that list, paste it above itself, and change the
 label and text. `paper-review.html` has a commented template to copy.
 
-The tab bar is repeated in each page by hand, so a new tab goes into every
-file. Push to `main` to publish.
+The tab row at the top of the masthead is repeated in each page by hand, so a
+new tab goes into every file. Push to `main` to publish.

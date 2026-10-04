@@ -11,9 +11,9 @@
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, "Helvetica Neue", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  --wrap:   42rem;   /* the one column: hairlines and text share it */
+  --wrap:   60rem;   /* the one column: every rule and every line of text share it */
   --gutter: 28px;
-  --when:   8rem;    /* left-hand label column in .rows */
+  --when:   10rem;   /* left-hand label column in .rows */
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -59,39 +59,18 @@ a:hover { text-decoration: underline; text-underline-offset: 4px; }
 .eyebrow { font: 500 0.8rem/1 var(--font-sans); letter-spacing: 0.01em; color: var(--ink-3); }
 .mono { font-family: var(--font-mono); font-size: 0.86em; letter-spacing: 0; }
 
-/* Tabs: the site navigation, same on every page */
-.tabs .wrap {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 22px;
-  padding-top: 14px;
-  font-size: 0.9rem;
-  letter-spacing: -0.012em;
-}
-.tabs .wrap::after {
-  content: "";
-  flex-basis: 100%;
-  height: 1px;
-  margin-top: 14px;
-  background: var(--hair-soft);
-}
-.tabs a { color: var(--ink-2); }
-.tabs a:hover { color: var(--link); text-decoration: none; }
-.tabs a[aria-current="page"] { color: var(--ink); font-weight: 500; }
-
-/* Eyebrow nav: the same navigation, placed in the masthead's eyebrow slot (home page) */
-.eyebrow-nav { display: flex; flex-wrap: wrap; gap: 4px 18px; }
-.eyebrow-nav a { color: var(--ink-3); }
-.eyebrow-nav a:hover { color: var(--link); text-decoration: none; }
-.eyebrow-nav a[aria-current="page"] { color: var(--ink); font-weight: 500; }
-
-/* Masthead */
+/* Masthead. Identical on every page: nav in the eyebrow slot, h1, standfirst,
+   optional meta line. Same padding everywhere so nothing jumps between pages. */
 header.top .wrap {
-  padding-block: 40px 28px;
+  padding-block: 32px 28px;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
+.eyebrow-nav { display: flex; flex-wrap: wrap; gap: 6px 18px; line-height: 1.4; }
+.eyebrow-nav a { color: var(--ink-3); }
+.eyebrow-nav a:hover { color: var(--link); text-decoration: none; }
+.eyebrow-nav a[aria-current="page"] { color: var(--ink); font-weight: 500; }
 .sub {
   color: var(--ink-2);
   font-size: 1.02rem;
@@ -108,7 +87,7 @@ header.top .wrap {
 .meta a { color: var(--ink-2); }
 .meta a:hover { color: var(--link); text-decoration: none; }
 
-/* Sections: full-bleed hairline on top, column inside */
+/* Sections: hairline drawn inside the column, same width as the text */
 section > .wrap { padding-bottom: 34px; }
 section > .wrap::before {
   content: "";
@@ -127,12 +106,13 @@ section[id] { scroll-margin-top: 24px; }
 .shead .eyebrow { order: -1; }
 .empty { color: var(--ink-3); }
 
-/* Rows: mono label on the left, hairline between items */
+/* Rows: mono label on the left, hairline between items. Baseline-aligned so
+   the label sits on the first line of text. */
 .rows { list-style: none; margin: 0; padding: 0; }
 .row {
   display: grid;
   grid-template-columns: var(--when) 1fr;
-  gap: 4px 0;
+  align-items: baseline;
   padding: 18px 0;
   border-top: 1px solid var(--hair-soft);
 }
@@ -142,7 +122,6 @@ section[id] { scroll-margin-top: 24px; }
   color: var(--ink-3);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
-  padding-top: 0.15rem;
 }
 .row__main {
   min-width: 0;
@@ -161,6 +140,7 @@ section[id] { scroll-margin-top: 24px; }
 .row__title a { color: inherit; }
 .row__title a:hover { color: var(--link); text-decoration: none; }
 .row__sub { font-size: 0.9rem; line-height: 1.5; color: var(--ink-3); }
+.row__sub b { font-weight: 500; color: var(--ink-2); }
 .row__body { color: var(--ink-2); font-size: 0.95rem; }
 .row__body ul { margin: 0.45em 0 0; padding-left: 1.15em; }
 .row__body li + li { margin-top: 0.25em; }
@@ -176,16 +156,15 @@ section[id] { scroll-margin-top: 24px; }
 
 @media (max-width: 640px) {
   .wrap { padding-inline: 22px; }
-  header.top .wrap { padding-block: 30px 22px; }
+  header.top .wrap { padding-block: 24px 22px; }
   section > .wrap { padding-bottom: 26px; }
   section > .wrap::before { margin-bottom: 26px; }
-  .row { grid-template-columns: 1fr; }
-  .row__when { padding-top: 0; }
+  .row { grid-template-columns: 1fr; row-gap: 4px; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 @media print {
   :root { --bg: #fff; --ink: #000; --ink-2: #333; --ink-3: #555; --link: #000; --hair-soft: #bbb; }
-  .tabs { display: none; }
+  .eyebrow-nav { display: none; }
   body { font-size: 10.5pt; }
   .row { break-inside: avoid; }
 }
