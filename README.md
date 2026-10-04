@@ -4,7 +4,7 @@ Personal site of Pavel Bushuyeu. Plain HTML, no build step, served by GitHub
 Pages from the root of `main`.
 
 - `index.html` — home. The intro and News mirror the [profile README](https://github.com/bushuyeu/bushuyeu); the research statement and Awards are the site's own.
-- `projects.html`, `paper-review.html`, `teaching.html`, `product-management.html` — the other tabs.
+- `projects.html`, `paper-review.html`, `teaching.html`, `product-management.html`, `other.html` — the other tabs.
 - `style.css` — shared styles; colours and type are the variables at the top.
 - `favicon.svg`, `Pavel-Bushuyeu-CV.pdf`, `.nojekyll`.
 
