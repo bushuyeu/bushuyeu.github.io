@@ -70,8 +70,6 @@ h1, h2 {
 h1 { font-size: clamp(1.75rem, 3.6vw, 2.3rem); letter-spacing: -0.03em; }
 h2 { font-size: clamp(1.28rem, 2.2vw, 1.55rem); }
 p { margin: 0; }
-ul { margin: 0; padding-left: 1.2em; }
-li + li { margin-top: 0.3em; }
 
 a { color: var(--link); text-decoration: none; }
 a:hover { text-decoration: underline; text-underline-offset: 4px; }
@@ -117,12 +115,6 @@ section[id] { scroll-margin-top: 24px; }
   max-width: var(--prose);
 }
 .shead .eyebrow { order: -1; }
-.cols {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 28px 48px;
-}
-.cols .shead { margin-bottom: 12px; }
 
 /* Rows: mono date on the left, hairline between items */
 .rows { list-style: none; margin: 0; padding: 0; }
@@ -143,12 +135,6 @@ section[id] { scroll-margin-top: 24px; }
 }
 .row__main { min-width: 0; max-width: var(--prose); font-size: 0.98rem; }
 .row__main p + p { margin-top: 0.5em; }
-
-/* Footer */
-footer { border-top: 1px solid var(--hair-soft); }
-footer .wrap { padding-block: 26px 44px; color: var(--ink-3); font-size: 0.86rem; }
-footer a { color: var(--ink-2); }
-footer a:hover { color: var(--link); text-decoration: none; }
 
 @media (max-width: 640px) {
   .wrap { padding-inline: 22px; }
@@ -171,7 +157,7 @@ footer a:hover { color: var(--link); text-decoration: none; }
   <div class="wrap">
     <div class="eyebrow">Graduate AI researcher · University of Hawaiʻi at Mānoa</div>
     <h1>Pavel Bushuyeu</h1>
-    <p class="sub">I am a graduate AI researcher at the
+    <p class="sub">Graduate AI researcher at the
       <a href="https://manoa.hawaii.edu">University of Hawaiʻi at Mānoa</a>,
       at the department of
       <a href="http://ics.hawaii.edu/">Information and Computer Science</a>.</p>
@@ -185,27 +171,15 @@ footer a:hover { color: var(--link); text-decoration: none; }
   </div>
 </header>
 
-<section id="about">
-  <div class="wrap cols">
-    <div>
-      <div class="shead">
-        <div class="eyebrow">Research interests</div>
-        <h2>Embodied AI</h2>
-      </div>
-      <p class="prose">Vision-language-action models (VLAs) for humanoid
-        locomotion and manipulation at
-        <a href="https://igormolybog.github.io">Prof. Igor Molybog Lab</a>.</p>
+<section id="research">
+  <div class="wrap">
+    <div class="shead">
+      <div class="eyebrow">Research interests</div>
+      <h2>Embodied AI</h2>
     </div>
-    <div>
-      <div class="shead">
-        <div class="eyebrow">Teaching</div>
-        <h2>Courses and workshops</h2>
-      </div>
-      <ul class="prose">
-        <li>Computer Methods for Engineering (ME 360)</li>
-        <li>Workshop on applied ML and humanoid robots at ʻIolani Artificial Intelligence Lab</li>
-      </ul>
-    </div>
+    <p class="prose">Vision-language-action models (VLAs) for humanoid
+      locomotion and manipulation at
+      <a href="https://igormolybog.github.io">Prof. Igor Molybog Lab</a>.</p>
   </div>
 </section>
 
@@ -270,12 +244,6 @@ footer a:hover { color: var(--link); text-decoration: none; }
     </ol>
   </div>
 </section>
-
-<footer>
-  <div class="wrap">
-    <p>Feel free to reach me via <a href="mailto:pavelbushuyeu@gmail.com">pavelbushuyeu@gmail.com</a>.</p>
-  </div>
-</footer>
 
 </body>
 </html>
