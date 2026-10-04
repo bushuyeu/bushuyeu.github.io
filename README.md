@@ -1,62 +1,31 @@
 # bushuyeu.github.io
 
-Personal site of Pavel Bushuyeu. Static, built with [Eleventy](https://www.11ty.dev/)
-and deployed to GitHub Pages by GitHub Actions on every push to `main`.
+Personal site of Pavel Bushuyeu. One plain HTML file, served by GitHub Pages
+from the root of `main`. No build step.
 
-## Local development
+- `index.html` — the page, CSS inline. Copy mirrors the
+  [profile README](https://github.com/bushuyeu/bushuyeu).
+- `favicon.svg`, `Pavel-Bushuyeu-CV.pdf` — the only other files served.
+- `.nojekyll` — tells GitHub Pages to serve the files as-is.
 
-```sh
-npm install
-npm run dev      # http://localhost:8080, live reload
-npm run build    # writes _site/
+## Editing
+
+Open `index.html` in a browser to preview, or run
+`python3 -m http.server 8000` in this folder and visit http://localhost:8000.
+
+To add a news item, copy the first `<li class="row">` block in the News list,
+paste it above itself, and change the date and text:
+
+```html
+<li class="row">
+  <div class="row__when"><time datetime="2026-09">Sep 2026</time></div>
+  <div class="row__main"><p>What happened.</p></div>
+</li>
 ```
 
-## Adding content
-
-**A new page** — drop a `.md` file in `src/`:
-
-```markdown
----
-layout: page.njk
-title: Talks
-intro: Optional one-line standfirst under the heading.
-permalink: /talks/
----
-
-Body copy in markdown. Raw HTML works too.
-```
-
-To put it in the top navigation, add an entry to `nav` in `src/_data/site.json`.
-
-**A news item** — add a block to the top of `src/_data/news.yaml`:
-
-```yaml
-- date: 2026-09-01
-  title: Headline
-  description: One or two sentences.
-  href: https://optional-link.example    # omit to leave the headline unlinked
-```
-
-Only the month and year are displayed, so the day can be approximate. Entries
-render in file order, newest first.
-
-**A longer piece** — drop a `.md` file in `src/writing/`:
-
-```markdown
----
-title: On evaluation
-date: 2026-09-01
-intro: One-line summary for the index.
----
-```
-
-It gets its own page at `/writing/<filename>/`, is listed on `/writing/`, and a
-"Writing" link appears in the nav automatically once at least one post exists.
-
-**The CV** — replace `src/assets/Pavel-Bushuyeu-CV.pdf`, keeping the filename.
+To replace the CV, overwrite `Pavel-Bushuyeu-CV.pdf` and keep the filename.
 
 ## Deployment
 
-`.github/workflows/deploy.yml` builds and publishes on push to `main`. This
-requires **Settings → Pages → Source → GitHub Actions** to be selected once in
-the repository settings.
+Push to `main`. GitHub Pages must be set once to **Settings → Pages → Build and
+deployment → Source: Deploy from a branch → `main` / `(root)`**.
