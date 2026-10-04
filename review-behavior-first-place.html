@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Review: the first-place BEHAVIOR 2025 solution — Pavel Bushuyeu</title>
+<meta name="description" content="A review of “Task adaptation of Vision-Language-Action model: 1st Place Solution for the 2025 BEHAVIOR Challenge”: an honest, useful, externally validated report whose central claim is unvalidated.">
+<link rel="canonical" href="https://bushuyeu.github.io/review-behavior-first-place.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Review: the first-place BEHAVIOR 2025 solution — Pavel Bushuyeu">
+<meta property="og:description" content="A review of “Task adaptation of Vision-Language-Action model: 1st Place Solution for the 2025 BEHAVIOR Challenge”: an honest, useful, externally validated report whose central claim is unvalidated.">
+<meta property="og:url" content="https://bushuyeu.github.io/review-behavior-first-place.html">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <nav class="eyebrow eyebrow-nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="publications.html">Publications</a>
+      <a href="projects.html">Projects</a>
+      <a href="paper-review.html" aria-current="page">Paper review</a>
+      <a href="teaching.html">Teaching</a>
+      <a href="product-management.html">Product management</a>
+    </nav>
+    <h1>The first-place BEHAVIOR 2025 solution</h1>
+    <p class="sub">An honest, useful, externally validated competition report whose central technical claim, correlated-noise flow matching, is asserted rather than shown.</p>
+    <div class="meta">
+      <span>Paper: <a href="https://arxiv.org/abs/2512.06951">arXiv:2512.06951</a>, Larchenko, Zarin and Karnatak</span>
+      <span>Role: reviewer</span>
+      <span>September 2026</span>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="prose">
+<h2>Summary</h2>
+<p>The paper describes the winning entry of the 2025 BEHAVIOR Challenge: 50 long-horizon household tasks in OmniGibson, bimanual manipulation and navigation, episodes averaging 6.6 minutes, 10,000 teleoperated demonstrations, and a q-score metric that averages the fraction of goal conditions satisfied. The system adapts π0.5 (SigLIP, a PaliGemma VLM and a 300M flow-matching action expert) in five ways.</p>
+<ol>
+<li><b>Correlated noise for flow matching</b>, the primary contribution. Noise is sampled from N(0, βΣ + (1−β)I), where Σ is the empirical covariance of normalized action chunks (690×690, from 30 timesteps and 23 dimensions) and β = 0.5. At t = 1 the noise already has the correlation structure of real actions. The same Σ supports correlation-aware soft inpainting at inference: corrections to the four overlapping actions of the rolling window propagate to the free dimensions through the conditional-Gaussian map, applied only for t &gt; 0.3.</li>
+<li><b>Learnable mixed-layer attention.</b> Each of the 18 action-expert layers attends to a learned linear combination of all VLM layers' KV caches, initialized to identity, which recovers π0.5's layer-to-layer scheme.</li>
+<li><b>System 2 stage tracking.</b> A linear head on the VLM output classifies the current task stage (5 to 15 per task, from temporal segmentation of the demos). Majority voting over the last three predictions filters noise, with skip-ahead and unanimous-rollback rules, and the voted stage is fed back as input tokens to resolve visually identical states that need different actions.</li>
+<li><b>Training.</b> Fifty trainable task embeddings replace text prompts. Delta actions with per-timestamp normalization. Fifteen (t, ε) samples per VLM forward pass. A FAST auxiliary loss. Attention masks that keep noisy inputs away from reliable ones. Fifteen days of multi-task training on 8×H200, then four task-group fine-tuned checkpoints.</li>
+<li><b>Inference.</b> Cubic-spline action compression (26 predicted steps executed as 20, a 1.3× speedup, disabled near grasps) and correction rules, such as re-opening a wrongly closed gripper.</li>
+</ol>
+<p>The system scores 0.26 on both public and private leaderboards; the runner-up scores 0.251. The paper adds a failure-mode analysis over 15 labeled tasks, where dexterity causes about a third of failures, followed by order errors and out-of-distribution confusion, plus notes on evaluation infrastructure and released code and weights.</p>
+
+<h2>Claims and evidence</h2>
+<p>The authors are candid about the limits of their evidence: Section 1.4 is titled "A Note on Evidence" and Section 10 says plainly that they lack proper ablations. Still, the paper makes causal claims it does not support.</p>
+<ul>
+<li><b>"Correlated noise makes training more efficient."</b> No learning curves and no comparison against standard isotropic noise (β = 1). The mechanism is plausible and Figure 5 motivates it well, but the claim is asserted, not shown.</li>
+<li><b>Learnable mixed-layer attention.</b> Figure 3 shows the learned weights barely move from identity, and the authors write that the shift toward the last VLM layer "could be noise". This is closer to a negative result than a contribution, yet the abstract lists it as an innovation.</li>
+<li><b>Stage prediction at about 99% accuracy on training data.</b> Training accuracy says little here. Figure 8 shows raw inference-time predictions are noisy and jump from stage 1 to stage 9. The paper needs held-out accuracy and the effect of System 2 on q-score.</li>
+<li><b>Multi-sample flow matching "reduces gradient variance".</b> Variance is never measured, and there is no N = 15 versus N = 1 comparison at equal wall-clock.</li>
+<li><b>The gripper correction rule.</b> Section 7.4.1 says it "approximately doubled" success on selected tasks; Section 9.3 reports 2.2× q-score on 13 tasks × 3 episodes. Thirty-nine episodes with no variance estimate cannot support "doubled". Because the rule is competition-specific, the full 50×10 score with and without correction rules would let readers separate the learned policy from the heuristics.</li>
+</ul>
+
+<h2>Strengths</h2>
+<ol>
+<li><b>External validation.</b> The result comes from a competitive benchmark with a held-out private set.</li>
+<li><b>The correlated-noise and inpainting pairing.</b> One estimated covariance serves both training and inference smoothness. It is the most transferable idea in the paper.</li>
+<li><b>Transparency.</b> The evidence is scoped, the unvalidated parts are listed, and negative results are reported: advantage weighting did not help, from-scratch training failed, image-quality degradation did not matter.</li>
+<li><b>Reproducibility.</b> Code and weights are public.</li>
+<li><b>Useful to practitioners.</b> The failure taxonomy, the observation that partial credit gives about half the score, and the finding that undertraining at two epochs rather than model capacity was the limit.</li>
+</ol>
+
+<h2>Weaknesses</h2>
+<ol>
+<li><b>No component ablations, and weak evidence behind the numbers that exist.</b> Stage accuracy is reported on training data, the gripper-rule claim rests on 39 episodes, Figure 3 "could be noise", and nothing has error bars.</li>
+<li><b>The first-place evidence mixes learned and hand-crafted parts.</b> Correction rules alone claim about 2× on failure-prone tasks, and the submission uses four task-specific checkpoints. Without a full-protocol score without heuristics and without task-specific checkpoints, the win cannot be attributed to the method.</li>
+<li><b>Narrow generalization.</b> The challenge tests new spatial configurations only, with no unseen objects, language or tasks. With language replaced by 50 task embeddings, the result says little about vision-language-action modeling.</li>
+</ol>
+
+<h2>Other aspects</h2>
+<p>Originality is moderate: each ingredient has precedent, and the combination is new and practical. Significance is high for the BEHAVIOR community, with a state-of-the-art result, released weights and infrastructure recipes, and limited as general science by the missing ablations and the single benchmark. The writing is clear. There are no ethical issues: simulation only, public benchmark data, sponsorship disclosed.</p>
+
+<h2>Recommendation</h2>
+<p><b>Main track: weak reject.</b> The work is honest, useful and externally validated, but the central claim is unvalidated. With a β ablation, a heuristics-off score and clearer positioning against prior work, I would raise this to accept. <b>Competition track: accept as is.</b> It is among the more transparent and reproducible challenge reports I have read.</p>
+<p class="note"><b>Method.</b> I wrote this review for a reading group in September 2026. I also ran three AI-generated reviews with different emphases as a check on my own; where they disagreed with me I went back to the paper. The text here is mine.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="backlink"><a href="paper-review.html">← All paper reviews</a></p>
+  </div>
+</section>
+
+</body>
+</html>

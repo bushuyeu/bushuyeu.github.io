@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>GR00T N1 in context — Pavel Bushuyeu</title>
+<meta name="description" content="An archeologist’s reading of NVIDIA’s GR00T N1: where it comes from, what it added, and how fast its own successors moved away from it.">
+<link rel="canonical" href="https://bushuyeu.github.io/review-gr00t-n1.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GR00T N1 in context — Pavel Bushuyeu">
+<meta property="og:description" content="An archeologist’s reading of NVIDIA’s GR00T N1: where it comes from, what it added, and how fast its own successors moved away from it.">
+<meta property="og:url" content="https://bushuyeu.github.io/review-gr00t-n1.html">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <nav class="eyebrow eyebrow-nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="publications.html">Publications</a>
+      <a href="projects.html">Projects</a>
+      <a href="paper-review.html" aria-current="page">Paper review</a>
+      <a href="teaching.html">Teaching</a>
+      <a href="product-management.html">Product management</a>
+    </nav>
+    <h1>GR00T N1 in context</h1>
+    <p class="sub">A systems paper whose strongest contributions are in data engineering and in being the first open foundation model for humanoid manipulation. Its dual-system framing is more marketing than architecture, and its own successors moved away from it within nine months.</p>
+    <div class="meta">
+      <span>Paper: <a href="https://arxiv.org/abs/2503.14734">arXiv:2503.14734</a>, NVIDIA, March 2025</span>
+      <span>Role: archeologist</span>
+      <span>February 2026</span>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="prose">
+<h2>The paper in context</h2>
+<p>GR00T N1 sits where three threads meet: vision-language-action models, diffusion-based action generation, and cross-embodiment robot learning. It argues that humanoid robots need a full-stack solution of hardware, models and data, and answers with a dual-system architecture, a VLM for reasoning and a diffusion transformer for actions, trained on a data pyramid of internet video, synthetic trajectories and real teleoperation. The model is open-weight at 2.2B parameters and reports 76.8% success on real GR-1 humanoid tasks against 46.4% for a Diffusion Policy baseline.</p>
+
+<h2>Where it comes from</h2>
+<ul>
+<li><b>π0</b> is the most direct ancestor: a pre-trained VLM plus flow-matching action generation, trained on about 10,000 hours across 68 tasks. GR00T N1 says it takes "a similar approach". It departs by replacing π0's mixture-of-experts routing with cross-attention between the VLM and a separate diffusion transformer, which the paper argues buys flexibility in choosing each component, and by adding the data pyramid, a latent action space for human video, and neural trajectory generation from video models.</li>
+<li><b>Diffusion Policy</b> established iterative denoising for multimodal action distributions and is the main baseline throughout. GR00T N1 swaps the U-Net for a DiT that cross-attends to VLM embeddings and pre-trains at scale.</li>
+<li><b>RT-2</b> established that web-scale VLM pre-training transfers to robot control. GR00T N1 inherits the principle and drops the autoregressive action tokens for continuous flow matching at 120 Hz.</li>
+<li><b>Open X-Embodiment</b> supplies core real-world data, and its "data islands" problem motivates the pyramid, embodiment-specific encoders and latent action unification.</li>
+<li><b>Flow matching</b> gives four-step inference, far cheaper than DDPM-style diffusion.</li>
+</ul>
+
+<h2>What came after</h2>
+<p>The line iterated fast. <b>N1.5</b> (May 2025) moved to a frozen Eagle 2.5 VLM with a simpler adapter, added the FLARE objective that aligns to future latent representations and unlocks learning from human egocentric video, extended embodiment support to single arms and gripper humanoids, and reported real GR-1 language following rising from 46.6% to 93.3%; on the Unitree G1 a post-trained N1.5 reached 98.8% on seen objects and 84.2% on novel ones. <b>N1.6</b> (December 2025) doubled the DiT depth, switched the VLM to a Cosmos-Reason variant with native resolution, removed the adapter and unfroze the top VLM layers instead, and predicted state-relative actions. Each version became less dual-system: the VLM and DiT increasingly share parameters and training signal, converging on the tighter coupling that the π0 family already used. All weights stay under NVIDIA's non-commercial license.</p>
+<p>Elsewhere, DreamGen systematized the neural-trajectory idea into a pipeline; VLA-0 claimed to beat π0, π0.5 and GR00T N1 on LIBERO with actions as plain text and no architectural changes, which challenges the premise that a separate action head is needed; and the LeRobot ecosystem made the Unitree G1 a platform on which ACT, Diffusion Policy, π0, π0.5 and GR00T can be trained on the same data pipeline, positioning GR00T as one option among peers.</p>
+
+<h2>Novelty</h2>
+<p>The novelty is in the combination and engineering rather than any component. The <b>data pyramid</b> is the most original contribution: organizing training data by scale and embodiment specificity, extracting latent actions from human video, and generating neural trajectories with video models, which multiplied 88 hours of data to 827. The <b>latent action space</b> unifying action-less video, simulation and real trajectories is creative, with concurrent work elsewhere. Being the <b>first open VLA aimed at humanoids with dexterous hands</b> filled a real gap. The dual-system framing, borrowed from Kahneman, is a VLM plus a DiT with cross-attention; the paper is forthright that the backbone, loss, DiT, chunking and conditioning are all established.</p>
+
+<h2>Verdict</h2>
+<p>A well-executed systems paper, strongest in data engineering and in opening the humanoid foundation-model space. The rapid move to N1.5 and N1.6, each stepping away from the original design, suggests the paper captured a snapshot of a fast-moving internal program rather than a settled architecture, and the jump from 46.6% to 93.3% on real language following makes the N1 numbers look like an early prototype. Its most lasting effect may be indirect: open weights seeded an ecosystem that commoditized the model layer and pushed NVIDIA's advantage toward its simulation toolchain.</p>
+<p class="note"><b>Method.</b> Written for a reading group in February 2026 in the archeologist role, which traces a paper's ancestry and descendants rather than judging its experiments. Release dates and benchmark figures were checked against the model cards and papers at the time.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="backlink"><a href="paper-review.html">← All paper reviews</a></p>
+  </div>
+</section>
+
+</body>
+</html>

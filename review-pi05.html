@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Review: π0.5 — Pavel Bushuyeu</title>
+<meta name="description" content="A review of π0.5, Physical Intelligence’s vision-language-action model with open-world generalization: the first VLA shown working in homes it never saw, with proprietary hardware and no standard benchmarks.">
+<link rel="canonical" href="https://bushuyeu.github.io/review-pi05.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Review: π0.5 — Pavel Bushuyeu">
+<meta property="og:description" content="A review of π0.5, Physical Intelligence’s vision-language-action model with open-world generalization: the first VLA shown working in homes it never saw, with proprietary hardware and no standard benchmarks.">
+<meta property="og:url" content="https://bushuyeu.github.io/review-pi05.html">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <nav class="eyebrow eyebrow-nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="publications.html">Publications</a>
+      <a href="projects.html">Projects</a>
+      <a href="paper-review.html" aria-current="page">Paper review</a>
+      <a href="teaching.html">Teaching</a>
+      <a href="product-management.html">Product management</a>
+    </nav>
+    <h1>π0.5: a VLA with open-world generalization</h1>
+    <p class="sub">The first VLA demonstrated cleaning kitchens and bedrooms in real homes it never saw during training. The co-training recipe is principled and the ablations are thorough; the paper would be stronger with one standard benchmark and a less buried backbone.</p>
+    <div class="meta">
+      <span>Paper: <a href="https://arxiv.org/abs/2504.16054">arXiv:2504.16054</a>, Physical Intelligence, April 2025</span>
+      <span>Role: reviewer</span>
+      <span>February 2026</span>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="prose">
+<h2>Summary</h2>
+<p>π0.5 extends the π0 VLA with a co-training recipe designed for open-world generalization. The core claim is that broad generalization in mobile manipulation can be achieved by mixing heterogeneous data sources, most of which (97.6% of pre-training examples) do not come from the target mobile manipulator. Training has two stages: pre-training that represents all actions as discrete FAST tokens across a mixture of robot and web data, then post-training that adds a 300M flow-matching action expert, initialized from scratch, and specializes on mobile manipulation. At inference the model first predicts a high-level semantic subtask, then generates low-level actions conditioned on it at 50 Hz. It is evaluated in three real homes not seen during training, on 10 to 15 minute kitchen and bedroom tasks.</p>
+<p>The backbone is PaliGemma, a 2B VLM, a detail disclosed only in Appendix E. The action expert is a 300M transformer with its own attention mask. Both operate on four cameras and an 18 to 19 DoF state and action space. The data sources are about 400 hours of mobile manipulation in about 100 homes, non-mobile arms in diverse homes, cross-embodiment laboratory data including OXE, high-level subtask labels, web data, and verbal-instruction demonstrations used in post-training only.</p>
+
+<h2>Strengths</h2>
+<ol>
+<li><b>First VLA shown to generalize to entirely new real homes.</b> Prior VLAs were evaluated in environments close to their training data. Ten trials per task, two-sided t-tests and interleaved policy evaluation to control for environmental changes are more rigorous than typical robotics papers.</li>
+<li><b>Thorough and honest ablations.</b> Data sources independently and combined, number of training environments from 3 to 104, high-level inference method (none, implicit, GPT-4 oracle, human oracle, full model), and comparisons to π0 and π0-FAST+Flow. The finding that performance needs the full heterogeneous mixture, even when robot data from the test homes is included, is substantive and surprising.</li>
+<li><b>An elegant hybrid recipe.</b> Discrete FAST tokens make pre-training efficient across all modalities; flow matching in post-training gives expressive continuous actions at low latency. One model serves high-level and low-level inference through separate action-expert weights.</li>
+<li><b>The high-level policy beats a GPT-4 oracle, and sometimes a human one.</b> That validates training the high-level policy on robot-specific data rather than relying on a general LLM.</li>
+<li><b>Verbal-instruction supervision is novel and practical.</b> Expert users guiding the low-level policy by selecting subtask labels in real time is a cheap annotation mechanism that substantially improves high-level inference despite being about 11% of the high-level data.</li>
+<li><b>Open weights.</b> Released through <code>Physical-Intelligence/openpi</code> in September 2025, with LeRobot ports.</li>
+</ol>
+
+<h2>Weaknesses</h2>
+<ol>
+<li><b>No standard VLA benchmarks.</b> Only proprietary mock-home environments and three real homes; nothing on LIBERO, SIMPLER, BridgeData v2 or Language Table, so no quantitative comparison with OpenVLA, Octo, CogACT or HiRobot. Community fine-tuning on the four released LIBERO subsets reaches 93 to 98%, and an initially reported 18% on LIBERO-90 turned out to be a distribution mismatch, since the released checkpoint was not trained on it. That is not a weakness of the model, but the paper should say which subsets are covered.</li>
+<li><b>Proprietary hardware limits reproducibility.</b> Both mobile platforms are described abstractly. No one outside the lab can reproduce the main results without similar equipment, and the paper does not say which commercial platforms approximate them.</li>
+<li><b>The PaliGemma backbone is buried in the appendix.</b> Backbone choice determines inference requirements, licensing, fine-tuning compute and tooling compatibility. It belongs in the architecture section.</li>
+<li><b>"Dexterous manipulation" overstates the evaluation.</b> Dishes into a sink, laundry into a basket and making a bed are multi-stage but not fine-dexterity tasks, and success is a partial-completion rubric. No insertion, precision assembly or contact-rich interaction is shown.</li>
+<li><b>Baselines are from the same lab only.</b> No external VLA is compared in the same environments.</li>
+<li><b>The scaling experiment uses a partial recipe.</b> Only post-training data varies across the 3 to 104 environment sweep, so the saturation around 104 environments is conditional on that choice.</li>
+<li><b>No quantitative failure analysis.</b> Failure modes are listed anecdotally, with no breakdown of error types across tasks or homes.</li>
+</ol>
+
+<h2>What I would ask the authors</h2>
+<ul>
+<li>How do you operationalize "dexterous", given the tasks evaluated and the partial-completion rubric?</li>
+<li>Did you try other VLM backbones, and what are the licensing implications of PaliGemma?</li>
+<li>The verbal-instruction data is about 11% of high-level data but produces the largest marginal improvement. How many demonstrations, annotators and hours did it take?</li>
+<li>Is the saturation at about 104 environments robust under the full pre-training plus post-training recipe?</li>
+</ul>
+
+<h2>Recommendation</h2>
+<p><b>Accept.</b> A strong accept for a top workshop, and a solid accept for a main venue with one revision: add at least one standard benchmark. The real-home result is a qualitative step change in open-world robot generalization, the recipe is principled, the ablations are thorough, and the open release benefits the community. The weaknesses are practical limitations that warrant targeted revisions rather than rejection.</p>
+<p class="note"><b>Method.</b> Written for a reading group in February 2026 against the April 2025 arXiv version, with the released openpi weights and the LeRobot ports checked at the time. I used an AI assistant to collect community and usage statistics; the assessment is mine.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="backlink"><a href="paper-review.html">← All paper reviews</a></p>
+  </div>
+</section>
+
+</body>
+</html>

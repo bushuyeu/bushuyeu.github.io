@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Does the universal FAST+ tokenizer transfer to cable routing? — Pavel Bushuyeu</title>
+<meta name="description" content="An experiment with Physical Intelligence’s FAST action tokenizer on the Berkeley cable-routing dataset: how much of a custom-fit tokenizer’s compression the universal FAST+ tokenizer keeps.">
+<link rel="canonical" href="https://bushuyeu.github.io/review-fast.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Does the universal FAST+ tokenizer transfer to cable routing? — Pavel Bushuyeu">
+<meta property="og:description" content="An experiment with Physical Intelligence’s FAST action tokenizer on the Berkeley cable-routing dataset: how much of a custom-fit tokenizer’s compression the universal FAST+ tokenizer keeps.">
+<meta property="og:url" content="https://bushuyeu.github.io/review-fast.html">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <nav class="eyebrow eyebrow-nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="publications.html">Publications</a>
+      <a href="projects.html">Projects</a>
+      <a href="paper-review.html" aria-current="page">Paper review</a>
+      <a href="teaching.html">Teaching</a>
+      <a href="product-management.html">Product management</a>
+    </nav>
+    <h1>Does the universal FAST+ tokenizer transfer to cable routing?</h1>
+    <p class="sub">A small experiment with Physical Intelligence’s FAST action tokenizer on real cable-routing data. The universal FAST+ tokenizer keeps a median 81% of a custom-fit tokenizer’s compression, right at my 80% threshold, and the answer turns on how the custom tokenizer is tuned.</p>
+    <div class="meta">
+      <span>Paper: <a href="https://arxiv.org/abs/2501.09747">FAST, arXiv:2501.09747</a></span>
+      <span>Tokenizer: <a href="https://huggingface.co/physical-intelligence/fast">physical-intelligence/fast</a></span>
+      <span>Role: empiricist</span>
+      <span>January 2026</span>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="prose">
+<h2>Hypothesis</h2>
+<blockquote><p>The FAST+ universal tokenizer achieves at least 80% of the compression ratio of a custom FAST tokenizer on cable manipulation data.</p></blockquote>
+<p>FAST compresses action chunks with a discrete cosine transform followed by byte-pair encoding, and FAST+ is the universal tokenizer trained across many robot datasets. The paper's pitch is that FAST+ works out of the box. Cable routing is a good stress test because it is contact-rich, low-rate and unlike most of the tabletop data FAST+ was fit on. The question matters for the Intrinsic AI for Industry challenge, where the task is cable assembly.</p>
+
+<h2>Setup</h2>
+<ul>
+<li><b>Data:</b> <code>lerobot/berkeley_cable_routing</code>, 1,647 real episodes of a 7-DoF Franka arm routing a cable through clips at 10 Hz.</li>
+<li><b>Tokenizers:</b> naive per-dimension binning as in RT-2 and OpenVLA, the official FAST+ processor, and a custom FAST tokenizer fit on this dataset with the official <code>.fit()</code> on the same code path. Nothing is reimplemented locally.</li>
+<li><b>Sweep:</b> chunk length of 1 or 2 seconds, stride of 1, 2, 5 or 10 steps, BPE vocabulary of 1,024, 2,048 or 4,096, and DCT scale of 8, 10 or 12, for 72 configurations.</li>
+<li><b>Environments:</b> two, because OpenVLA's tokenizer pins <code>draccus==0.8.0</code> and LeRobot pins <code>0.10.0</code>. One environment loads the data, the other tokenizes.</li>
+</ul>
+
+<h2>Results</h2>
+<div class="scroll"><table>
+<thead><tr><th>Chunk</th><th class="num">Naive tokens</th><th class="num">FAST+ compression</th><th class="num">Custom FAST, median</th><th class="num">Custom FAST, best</th><th class="num">FAST+ ÷ custom, median</th></tr></thead>
+<tbody>
+<tr><td>1 s (10 steps × 7 dims)</td><td class="num">70</td><td class="num">2.60×</td><td class="num">3.38×</td><td class="num">4.65×</td><td class="num">0.77</td></tr>
+<tr><td>2 s (20 steps × 7 dims)</td><td class="num">140</td><td class="num">2.78×</td><td class="num">3.32×</td><td class="num">4.72×</td><td class="num">0.84</td></tr>
+</tbody></table></div>
+<p>Across all 72 configurations the FAST+ compression ratio stays in a narrow band, 2.58 to 2.79×, while the custom tokenizer ranges from 2.18 to 4.72×. The ratio of the two, which is what the hypothesis is about, runs from 0.56 to 1.19 with a median of 0.81. So the hypothesis holds at the median, by one point, and does not hold robustly. The deciding variable is the custom tokenizer's DCT scale. At a loose scale of 10 the custom tokenizer is worse than FAST+ on every vocabulary, so the ratio exceeds 1. At a tight scale of 8 with a 4,096 vocabulary it beats FAST+ by nearly 2×. Longer chunks help both tokenizers a little.</p>
+<p>Both tokenizers compress far less than the 3 to 10× the paper reports on its datasets. My reading is that 10 Hz cable-routing actions carry less temporal redundancy than the 50 Hz data FAST was designed for, so there is less for the DCT to remove.</p>
+<figure>
+<img src="media/fast-figure3.png" alt="Two line charts. Left: next-token cross-entropy loss against sample length for naive, FAST+ and custom FAST tokens; naive stays near 2.9 while FAST+ and custom FAST sit between 4.5 and 5.5. Right: token prediction accuracy; naive stays near 0.46 while FAST tokens fall between 0.07 and 0.17." loading="lazy">
+<figcaption>A second metric, after the paper's Figure 3. Naive binned tokens are far easier to predict than FAST tokens at every chunk length.</figcaption>
+</figure>
+<p>The second metric reproduces the paper's motivation rather than its headline. Naive tokens are almost trivially predictable from their predecessors, with cross-entropy near 2.9 and accuracy near 0.46 regardless of chunk length, because consecutive per-dimension bins are nearly identical at any reasonable control rate. FAST tokens are much harder to predict, with loss between 4.5 and 5.5 and accuracy below 0.17. That is the point of the DCT: it removes the redundancy that would otherwise let a policy minimize its loss without learning anything about the task.</p>
+
+<h2>What I take from it</h2>
+<ul>
+<li>FAST+ is a safe default on out-of-distribution data: a stable 2.6 to 2.8× with no fitting step.</li>
+<li>A custom tokenizer is worth it only if you tune it. Default-ish settings can be worse than FAST+, and the best settings nearly double its compression.</li>
+<li>Compression is a proxy. The experiment I would run next is to train a small policy on each tokenization of the same demonstrations and measure downstream success, then repeat at 50 Hz where FAST's advantage should be larger.</li>
+</ul>
+<p class="note"><b>Method.</b> Scripts, sweep table and figure are mine, from January 2026. All tokenization uses the official processor from Hugging Face.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="backlink"><a href="paper-review.html">← All paper reviews</a></p>
+  </div>
+</section>
+
+</body>
+</html>

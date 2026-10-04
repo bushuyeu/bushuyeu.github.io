@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Review: Cosmos-Predict2.5 — Pavel Bushuyeu</title>
+<meta name="description" content="A review of NVIDIA’s Cosmos-Predict2.5 and Cosmos-Transfer2.5 world foundation models for Physical AI: a useful open release evaluated mainly on a benchmark its authors wrote.">
+<link rel="canonical" href="https://bushuyeu.github.io/review-cosmos-predict25.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Review: Cosmos-Predict2.5 — Pavel Bushuyeu">
+<meta property="og:description" content="A review of NVIDIA’s Cosmos-Predict2.5 and Cosmos-Transfer2.5 world foundation models for Physical AI: a useful open release evaluated mainly on a benchmark its authors wrote.">
+<meta property="og:url" content="https://bushuyeu.github.io/review-cosmos-predict25.html">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <nav class="eyebrow eyebrow-nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="publications.html">Publications</a>
+      <a href="projects.html">Projects</a>
+      <a href="paper-review.html" aria-current="page">Paper review</a>
+      <a href="teaching.html">Teaching</a>
+      <a href="product-management.html">Product management</a>
+    </nav>
+    <h1>Cosmos-Predict2.5: world simulation for Physical AI</h1>
+    <p class="sub">A useful open release of video world models aimed at robots and driving, with a compelling robot-augmentation result. Its primary evaluation is a benchmark the same company authored, the robotics experiment is underpowered, and nothing in the recipe is ablated.</p>
+    <div class="meta">
+      <span>Paper: <a href="https://arxiv.org/abs/2511.00062">arXiv:2511.00062</a>, NVIDIA, October 2025</span>
+      <span>Role: reviewer</span>
+      <span>February 2026</span>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="prose">
+<h2>Summary</h2>
+<p>Cosmos-Predict2.5 is NVIDIA's second generation of open video world foundation models for Physical AI. It introduces two families: Predict2.5 at 2B and 14B, a flow-based unified text-, image- and video-to-world generator, and Transfer2.5 at 2B, a ControlNet-style sim-to-real and real-to-real translation model that is 3.5× smaller than its predecessor while outperforming it. The training ingredients are a 200M-clip curated dataset surviving a 4% filter from more than 6B raw clips, domain-specific fine-tuning, model merging, RL post-training, and timestep distillation to four-step inference. The T5 text encoder is replaced with Cosmos-Reason1, a physical-AI-specialized VLM, and EDM diffusion gives way to flow matching. Demonstrated applications include robot policy augmentation through sim-to-real translation, multi-view driving simulation, camera-controllable multi-view generation, synthetic VLA training data, and action-conditioned world generation.</p>
+
+<h2>Strengths</h2>
+<ol>
+<li><b>The first comprehensive open platform for Physical-AI world models.</b> Two sizes, twelve specialized variants and a permissive license lower the barrier for robotics and driving researchers.</li>
+<li><b>Efficiency at scale.</b> The 2B model is competitive on PAI-Bench with a 27B mixture-of-experts baseline at 93% fewer parameters, and human voting puts the 14B model ahead of a 14B competitor.</li>
+<li><b>The robot augmentation result is compelling.</b> Transfer2.5 augmentation gives 24 of 30 successes across ten test conditions against 5 of 30 for standard image augmentation and 1 of 30 with none, on realistic adversarial conditions of novel objects, lighting and backgrounds, with semantic control through text prompts.</li>
+<li><b>Sound ablations in several places:</b> RL post-training, the merging strategy, action-conditioning injection, and long-video degradation with a new relative metric.</li>
+<li><b>A thoughtful data pipeline.</b> Seven curation stages, multi-level captioning, semantic deduplication and content sharding across 26 categories, with task-aware captions for robotics data.</li>
+</ol>
+
+<h2>Weaknesses</h2>
+<ol>
+<li><b>PAI-Bench is NVIDIA-authored.</b> It is the primary quantitative evaluation and the sole basis for ranking against external models, with no independent benchmark alongside it. For a venue submission that is a serious methodological concern.</li>
+<li><b>The robot policy experiment is drastically underpowered.</b> One task, 100 demonstrations, three trials per condition, one robot and one camera, compared against a naive augmentation baseline rather than the field's domain-randomization methods. Three trials per condition cannot support conclusions across ten scenarios.</li>
+<li><b>No ablation of the full recipe.</b> Flow matching, the new encoder, RL post-training, merging and domain fine-tuning arrive together, so nothing isolates which ingredient matters.</li>
+<li><b>Physical plausibility is claimed but weakly evaluated.</b> A physics dataset is curated and described, yet no physics-specific metric appears and the benchmark's physics sub-scores are not reported.</li>
+<li><b>The comparison set is narrow.</b> Only two Wan versions, omitting several contemporaneous open models.</li>
+<li><b>Table 12 is hard to read</b>, with Transfer2.5 quality scores far below Transfer1's and ambiguous direction markers.</li>
+<li><b>The action-conditioned evaluation is limited</b> to 100 Bridge episodes at low resolution and 5.8-second clips, with no closed-loop policy evaluation using the model as a simulator.</li>
+<li><b>Deformable and contact-rich dynamics are absent</b>, which is exactly where a world model would be most valuable.</li>
+</ol>
+
+<h2>What I would ask the authors</h2>
+<ul>
+<li>How was the PAI-Bench test set kept free of contamination with Cosmos training data?</li>
+<li>Were the base, baseline and augmented policies retrained for each comparison, and how sensitive are three-trial results to the seed?</li>
+<li>What does Cosmos-Reason1 contribute as the text encoder relative to any VLM of similar scale?</li>
+<li>What dominates the 96% of clips that the 4% filter removes, and does that bias the pre-training distribution?</li>
+</ul>
+
+<h2>Recommendation</h2>
+<p><b>Weak accept.</b> The open release, the augmentation demonstration and the Transfer2.5 efficiency gain are genuine contributions. Self-evaluation on a self-authored benchmark, an underpowered robotics experiment and the missing ablation keep it short of a strong accept without revision. In practice the community has voted: Transfer2.5-2B was the most downloaded model of the family within months, which says the sim-to-real translation use case is the one people find useful.</p>
+<p class="note"><b>Method.</b> Written for a reading group in February 2026, with download figures and community discussion checked at the time with the help of an AI assistant. The assessment is mine.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="backlink"><a href="paper-review.html">← All paper reviews</a></p>
+  </div>
+</section>
+
+</body>
+</html>

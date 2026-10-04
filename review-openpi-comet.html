@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Openpi Comet, a reproduction attempt — Pavel Bushuyeu</title>
+<meta name="description" content="Reproducing the second-place solution of the 2025 BEHAVIOR Challenge from its released checkpoints and dataset: what survives contact with the artifacts.">
+<link rel="canonical" href="https://bushuyeu.github.io/review-openpi-comet.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Openpi Comet, a reproduction attempt — Pavel Bushuyeu">
+<meta property="og:description" content="Reproducing the second-place solution of the 2025 BEHAVIOR Challenge from its released checkpoints and dataset: what survives contact with the artifacts.">
+<meta property="og:url" content="https://bushuyeu.github.io/review-openpi-comet.html">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <nav class="eyebrow eyebrow-nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="publications.html">Publications</a>
+      <a href="projects.html">Projects</a>
+      <a href="paper-review.html" aria-current="page">Paper review</a>
+      <a href="teaching.html">Teaching</a>
+      <a href="product-management.html">Product management</a>
+    </nav>
+    <h1>Openpi Comet: a reproduction attempt</h1>
+    <p class="sub">Team Comet released code, two checkpoints and the rejection-sampling dataset behind their second place in the 2025 BEHAVIOR Challenge. I priced each claim, ran the two I could afford, and found that the free one was the most informative.</p>
+    <div class="meta">
+      <span>Paper: <a href="https://arxiv.org/abs/2512.10071">arXiv:2512.10071</a></span>
+      <span>Role: empiricist</span>
+      <span>September 2026</span>
+      <a href="https://github.com/bushuyeu/openpi-comet">my fork with fixes</a>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="prose">
+<p>Comet took second place at NeurIPS 2025 with a Q-score of 0.2514 on the held-out test set, then reported 0.345 on public validation after the challenge, up from 0.192 after pre-training. The recipe is a π0.5 backbone, about 1.5K hours of trajectories, and three rounds of rejection-sampling fine-tuning (RFT). What makes the report worth an empiricist's time is the last line of its abstract: everything was released. Most competition reports are unreproducible by construction. This one shipped its artifacts, so the question becomes which claims survive contact with them.</p>
+
+<h2>Price the claims before running anything</h2>
+<p>Reproduction is not one thing. The report makes five testable claims, and their costs span four orders of magnitude.</p>
+<div class="scroll"><table>
+<thead><tr><th>Claim</th><th>Their cost</th><th>My cost</th><th>Reachable</th></tr></thead>
+<tbody>
+<tr><td>Pre-training (pt50)</td><td>50k steps on about 40 H200s</td><td></td><td>No. The config is literally named <code>_gpu40</code></td></tr>
+<tr><td>RFT post-training</td><td>3 rounds of about 8,500 rollouts</td><td>3,500+ GPU-hours</td><td>No</td></tr>
+<tr><td>Per-task evaluation of the released checkpoint</td><td></td><td>30 to 60 GPU-hours</td><td>Yes</td></tr>
+<tr><td>pt12 versus pt50</td><td></td><td>30 to 60 GPU-hours</td><td>Yes</td></tr>
+<tr><td>Table 3 inference ablations</td><td></td><td>10 to 20 GPU-hours</td><td>Yes, cheapest and sharpest</td></tr>
+<tr><td>Characterising the released RFT dataset</td><td></td><td>none</td><td>Yes, free</td></tr>
+</tbody></table></div>
+<p>Two things fall out of the table before any GPU is touched. The inference-time ablations are the highest-value target, because they are runtime flags and the released checkpoints make them testable with no training. And the released RFT dataset lets me interrogate the post-training claim, the one I categorically cannot re-run, for free.</p>
+
+<h2>The barrier nobody states: RT Cores</h2>
+<p>BEHAVIOR-1K runs on OmniGibson, which runs on Isaac Sim, which draws the scene with hardware ray tracing. NVIDIA lists the A100 and H100 as unsupported; they have no RT Cores. The V100 is older still. This inverts the usual ranking of hardware: the report trained on H200s, but you cannot evaluate on one.</p>
+<div class="scroll"><table>
+<thead><tr><th>Architecture</th><th>Example</th><th>RT Cores</th><th>Runs the benchmark</th></tr></thead>
+<tbody>
+<tr><td>Volta</td><td>V100</td><td>No</td><td>No</td></tr>
+<tr><td>Ampere GA100</td><td>A100</td><td>No</td><td>No</td></tr>
+<tr><td>Hopper</td><td>H100, H200, GH200</td><td>No</td><td>No</td></tr>
+<tr><td>Ampere GA102</td><td>A40, A10, RTX 3090</td><td>Yes</td><td>Yes</td></tr>
+<tr><td>Ada</td><td>L40S, RTX 4090</td><td>Yes</td><td>Yes</td></tr>
+<tr><td>Blackwell</td><td>RTX 5090</td><td>Yes</td><td>Yes, on driver 580</td></tr>
+</tbody></table></div>
+<p>My two best-specced machines were the two that could not do the job: a DGX with eight V100s and an A100 vGPU allocation. The A40 nodes on NCSA Delta were the only clearly RT-capable GPUs in the ACCESS-CI catalog. The national GPU buildout optimised for tensor-core throughput, and embodied-AI simulation fell outside it.</p>
+<p>This explains a design decision in the paper. Section 4.3 rejects online RL partly because it needs GPUs with RT Cores for simulation and GPUs with Tensor Cores for training at the same time. RFT is not only a sample-efficiency choice. It lets training and simulation be decoupled in time, so you never need both GPU types at once. It is arguably the most transferable idea in the report, and it is buried in one sentence.</p>
+
+<h2>What the released RFT dataset says</h2>
+<p>The report attributes the move from 0.224 to 0.345 to a refined task-balancing strategy when selecting 1,469 trajectories from about 25,500 rollouts. If balancing drove the gain, the kept set should be more uniform across tasks than raw rejection sampling would produce. I pulled <code>meta/episodes.jsonl</code> and <code>meta/info.json</code> from <code>delinqu/comet-1.5k</code> and computed per-task counts, per-task mean horizon, and the rank correlation between them. Zero GPU-hours.</p>
+<ol>
+<li><b>Provenance checks out.</b> Exactly 1,469 episodes, matching Section 4.3.</li>
+<li><b>Task balancing is a cap, not a rebalance.</b> Five tasks sit at exactly 120 episodes and three more just below it. Over-represented tasks were capped; rare tasks were not lifted. The set stays skewed 120 to 1, the top five tasks hold 40.8% of the data, and the median task contributes 12 episodes.</li>
+<li><b>RFT yield collapses with task horizon.</b> Spearman correlation between episodes kept and mean episode length is −0.45. The eight tasks with 100 or more episodes average 4.1 minutes; the 31 tasks with fewer than 100 average about 9 minutes.</li>
+<li><b>Eleven of fifty tasks yielded nothing.</b> Thirty-nine tasks appear. About 25,500 rollouts produced no retained success on the other eleven.</li>
+<li><b>Native resolution is 720 for the head camera and 480 for the wrists</b>, which is exactly the "high resolution" row of Table 3.</li>
+</ol>
+<p>The report credits task balancing. The artifact shows that balancing did comparatively little. What the data shows instead is a horizon-dependent sampling bias: rejection sampling harvests almost entirely from the short half of the benchmark and is silent exactly where the benchmark is hardest. That sharpens the report's own admission that sampling efficiency is too low. RFT cannot close the gap to the 0.611 theoretical best by construction, because it generates no signal on the eleven tasks that need it most.</p>
+<p>Finding 5 also recasts the resolution result in Table 3. The gain from 0.30 to 0.60 is not from adding information; it is from ceasing to discard it. "High-fidelity perception is essential" is more honestly stated as "do not downsample your data."</p>
+
+<h2>The radio probe</h2>
+<p>Figure 4 of the report gives a success rate of 1.00 on <code>turning_on_radio</code>, the task the authors use for every cell of Tables 3 and 4. It is also the shortest task in the benchmark, 934 frames or 31 seconds, and a rate of 1.00 is easy to disprove. I evaluated the released <code>pi05-b1kpt50-cs32</code> checkpoint with receding-horizon control and native resolution on all 20 public test instances, on two machines with different GPUs, drivers and installs.</p>
+<div class="scroll"><table>
+<thead><tr><th>Machine</th><th>GPU</th><th class="num">Report</th><th class="num">n</th><th class="num">Ours</th><th>95% CI</th></tr></thead>
+<tbody>
+<tr><td>marklxxxv</td><td>RTX 3090</td><td class="num">1.00</td><td class="num">20</td><td class="num">0.00</td><td>[0.00, 0.16]</td></tr>
+<tr><td>b3iq</td><td>RTX 5090</td><td class="num">1.00</td><td class="num">20</td><td class="num">0.00</td><td>[0.00, 0.16]</td></tr>
+</tbody></table></div>
+<p>The policy failed all 40 instances, each running to the 4,300-step limit with a partial-credit Q-score of 0.000. A broken harness also gives zero, so the first question is whether the harness works. On training instances, which the policy saw during training, it succeeded on 1 of 4 with a mean Q of 0.25. The harness can record a success. The policy succeeds about a quarter of the time on data it trained on.</p>
+<p>My first run was wrong, and the error was mine. I had changed the wrapper to 224×224 to match Table 3, and the released checkpoint scores zero at that resolution even on training data. The 224×224 numbers in Table 3 come from single-task models that are not public. The positive control caught this. Without it I would have reported a false result about the authors' work.</p>
+<p>Three readings of 0 of 20 remain: the claim does not reproduce; the released checkpoint is not the model in Figure 4; or my setup is wrong in a way I did not find. The public record cannot settle the second. The checkpoint's build date and model card point to the 0.345 model, while its directory name and the README's model-zoo text point to the pre-training model, and the README calls the same files both things. The third is bounded by the control: a dead harness cannot succeed on training instances.</p>
+
+<h2>What else I found</h2>
+<ul>
+<li>Three faults block the documented setup path, and each stops evaluation: a config pointing at a module path that the install step renames, a dependency step that upgrades numpy past 2.0 and segfaults <code>og.launch()</code>, and a setup script that downloads the 2026 task instances while the evaluator reads the 2025 ones. Fixes for all three are in my fork.</li>
+<li>The RTX 5090 segfaults on driver 595.84 and runs on 580.173. An earlier version of my notes blamed the GPU architecture. That was wrong; one driver is not a sample.</li>
+<li>Tables 3 and 4 move in steps of 0.05 to 0.10 at n of 10 to 20. At p = 0.3 the 95% interval is roughly [0.07, 0.65], so several reported effects are not distinguishable from sampling noise. The paper shares this limitation and does not state it.</li>
+<li>The dataset's <code>info.json</code> frame count is 18% below the sum of episode lengths, probably not rebuilt after the last filter step. Nothing above depends on it.</li>
+</ul>
+
+<h2>What I would run next</h2>
+<ul>
+<li>Finish the Table 3 control-mode arm, with the caveat that a policy scoring 0.00 everywhere agrees with every prediction of zero, which means little.</li>
+<li>Per-task evaluation against Figure 4, which would also settle the checkpoint ambiguity.</li>
+<li>Test the implication of the dataset finding directly: if RFT yield is horizon-limited, truncating long tasks into sub-episodes before rejection sampling should raise yield on the eleven dead tasks. That is the step the report's own analysis points to but does not take.</li>
+</ul>
+<p class="note"><b>Method.</b> The cost table, the dataset analysis and the evaluation runs are mine, carried out in September 2026. Fixes to the evaluation stack are in the fork linked above.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="backlink"><a href="paper-review.html">← All paper reviews</a></p>
+  </div>
+</section>
+
+</body>
+</html>

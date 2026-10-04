@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>What closes SigLIP’s predicate gap on BEHAVIOR? — Pavel Bushuyeu</title>
+<meta name="description" content="A hypothesis and preliminary linear-probe results on whether frozen SigLIP encoders capture the spatial goal predicates that the BEHAVIOR Challenge actually scores.">
+<link rel="canonical" href="https://bushuyeu.github.io/review-siglip-predicates.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="What closes SigLIP’s predicate gap on BEHAVIOR? — Pavel Bushuyeu">
+<meta property="og:description" content="A hypothesis and preliminary linear-probe results on whether frozen SigLIP encoders capture the spatial goal predicates that the BEHAVIOR Challenge actually scores.">
+<meta property="og:url" content="https://bushuyeu.github.io/review-siglip-predicates.html">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <nav class="eyebrow eyebrow-nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="publications.html">Publications</a>
+      <a href="projects.html">Projects</a>
+      <a href="paper-review.html" aria-current="page">Paper review</a>
+      <a href="teaching.html">Teaching</a>
+      <a href="product-management.html">Product management</a>
+    </nav>
+    <h1>What closes SigLIP’s predicate gap on BEHAVIOR?</h1>
+    <p class="sub">Every published BEHAVIOR baseline reads the world through a frozen SigLIP-family encoder, and the benchmark scores spatial relations, not object identity. A research note with a registered hypothesis, exact simulator labels, and first probe results that sit near chance.</p>
+    <div class="meta">
+      <span>Role: empiricist</span>
+      <span>September 2026</span>
+      <span>Related: <a href="review-openpi-comet.html">Comet reproduction</a>, <a href="review-behavior-first-place.html">first-place review</a></span>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="prose">
+<h2>The problem</h2>
+<p>The BEHAVIOR head camera renders at 720×720 and the wrist cameras at 480×480, but π0.5 consumes 224×224. That is a 10.3× reduction in area, and at patch 14 one token covers a 45×45 region of the native render. GR00T N1 reads SigLIP-2 through Eagle-2; N1.5 and N1.6 use SigLIP2-So400m/16 at 512 through Eagle 2.5; N1.7 uses SigLIP2-Large/16 through Cosmos-Reason2-2B.</p>
+<p>The score does not count object identity. It counts goal predicates, such as whether the plate is <code>inside</code> the cabinet or the radio is <code>toggled_on</code>. Across the 100 tasks of the 2026 challenge there are 359 goal predicates, and 72% are spatial relations: <code>inside</code> appears 123 times across 54 tasks, <code>ontop</code> 81 times across 40, <code>nextto</code> 36 times, <code>open</code> 28 times. Object recognition alone scores zero.</p>
+<p>An image-text encoder learns from web captions, which are dominated by nouns and thin on relations, so a gap is plausible. It had not been measured on BEHAVIOR. Two published results measure it elsewhere. Newman et al. (arXiv:2409.10488) report CLIP at 0.918 on objects and 0.614 on states, falling to 0.408 against state-minimal-pair negatives, and their Table 4 shows ground-truth crops do not help. VLM4VLA (arXiv:2601.03309) runs the resolution ablation for policies: resolution buys nothing, and the frozen-encoder penalty grows with resolution.</p>
+<p>Neither 2025 BEHAVIOR report supports a resolution effect either. The first-place team lost NGX on their evaluation machines, saw "easily noticeable image-quality degradation" and "very small impact on success rate". Openpi Comet reports that resolution "more than doubled" success, but that doubling is 3 of 10 against 6 of 10, Fisher exact p = 0.37, and the released code pins <code>IMAGE_RESOLUTION = (224, 224)</code>.</p>
+
+<h2>The hypothesis</h2>
+<blockquote><p><b>H.</b> Frozen SigLIP encodes object categories better than the goal predicates BEHAVIOR scores. Raising the token budget from 256 to 1024 closes less of that gap than swapping to an encoder trained with dense objectives.</p></blockquote>
+<div class="scroll"><table>
+<thead><tr><th>Branch</th><th>Holds if</th></tr></thead>
+<tbody>
+<tr><td>H1, objective</td><td>the gap survives the budget increase</td></tr>
+<tr><td>H2, budget</td><td>the gap closes as tokens rise</td></tr>
+<tr><td>H3, readout</td><td>the gap is in the pooled vector but not in the patch tokens</td></tr>
+</tbody></table></div>
+
+<h2>The tests</h2>
+<p>Frozen forward passes only, no fine-tuning and no rollouts. <b>Labels</b> come from the simulator: the raw 2026 challenge data ships each episode's serialized scene state, OmniGibson rebuilds the task from it and runs the BDDL checking functions, which gives exact per-frame predicate truth. I take the frame before each predicate flip and the frame after, from the same episode. <b>Readouts</b> are mean over patch tokens, max over patch tokens, and the pooled vector; the patch tokens are what the baselines consume, because π0.5 projects <code>last_hidden_state</code> into Gemma and never uses the pooling head. <b>Arms</b> form a 2×2 over objective and budget: SigLIP 2 NaFlex So400m at 256 and 1024 tokens with the weights pinned, which isolates budget from weights; SigLIP 1 So400m/14 at 256; and DINOv2 ViT-L/14 at 256 as a non-contrastive objective.</p>
+<p>I test <code>ontop</code> before <code>inside</code>. <code>inside</code> carries the most credit, but an object inside a cabinet is occluded once the door shuts, so a low score there is ambiguous between "not encoded" and "not visible". <code>ontop</code> is visible by construction. Controls still owed: a proprioception-only baseline, a time-shuffled null, arm-present-but-unflipped pairs, and leave-one-scene-out folds.</p>
+
+<h2>Preliminary results</h2>
+<p>Two runs, one per predicate class, with exact labels from simulator replay, matched pairs, chance at 0.50, and episode-grouped cross-validation. No confidence intervals yet.</p>
+<div class="scroll"><table>
+<thead><tr><th>Run</th><th>Task</th><th>Predicate</th><th>Class</th><th class="num">Pairs</th><th class="num">Episodes</th></tr></thead>
+<tbody>
+<tr><td>A</td><td><code>turning_on_radio</code></td><td><code>toggled_on</code></td><td>unary state</td><td class="num">120</td><td class="num">120</td></tr>
+<tr><td>B</td><td><code>putting_up_Christmas_decorations</code></td><td><code>ontop</code></td><td>spatial relation</td><td class="num">140</td><td class="num">68</td></tr>
+</tbody></table></div>
+<h3>Budget, SigLIP 2 NaFlex</h3>
+<div class="scroll"><table>
+<thead><tr><th>Readout</th><th>A: <code>toggled_on</code>, 256 → 1024</th><th>B: <code>ontop</code>, 256 → 1024</th></tr></thead>
+<tbody>
+<tr><td>patch mean</td><td>0.533 → 0.592 (+0.058, p = 0.19)</td><td>0.518 → 0.568 (+0.050, p = 0.27)</td></tr>
+<tr><td>patch max</td><td>0.525 → 0.571 (+0.046, p = 0.35)</td><td>0.521 → <b>0.429</b> (−0.093, <b>p = 0.033</b>)</td></tr>
+<tr><td>pooled</td><td>0.508 → <b>0.617</b> (+0.108, <b>p = 0.019</b>)</td><td>0.525 → 0.496 (−0.029, p = 0.57)</td></tr>
+</tbody></table></div>
+<p>At 256 tokens, the budget every baseline runs, all six readouts sit between 0.508 and 0.533. The published figure for object categories on comparable encoders is about 0.92. The relation is the flatter of the two classes; all three of its readouts land within 2.5 points of chance. Added tokens do not close the relation gap: on the unary predicate the increase helped, though only the pooled readout reached significance, and on the relation it did not help, with one readout falling significantly. That non-monotone outcome was not anticipated by the design. It agrees with the published work: VLM4VLA found resolution buys nothing for policies, and Newman et al. found crops do not help.</p>
+<h3>Encoder swap at a matched 256 tokens, run A only</h3>
+<div class="scroll"><table>
+<thead><tr><th>Encoder</th><th>Objective</th><th class="num">patch mean</th><th class="num">patch max</th><th class="num">pooled</th></tr></thead>
+<tbody>
+<tr><td>SigLIP 1 So400m/14</td><td>image-text contrastive</td><td class="num">0.525</td><td class="num">0.508</td><td class="num">0.554</td></tr>
+<tr><td>SigLIP 2 NaFlex</td><td>the same, plus dense objectives</td><td class="num">0.533</td><td class="num">0.525</td><td class="num">0.508</td></tr>
+<tr><td>DINOv2 ViT-L/14</td><td>self-supervised, no text</td><td class="num"><b>0.562</b></td><td class="num">0.475</td><td class="num"><b>0.579</b></td></tr>
+</tbody></table></div>
+<p>SigLIP 2 adds captioning and self-distillation losses specifically to strengthen local features, yet at a matched budget it gains 0.008 on patch mean over SigLIP 1, against 0.058 from the token increase on the same readout. DINOv2, with no text supervision, scores highest on two readouts of three. So H is contradicted on run A: the budget closed more of the gap than the dense swap. On run B the budget closes nothing, so H cannot be settled there until the encoder arm runs on relations. One caveat covers every number here: they all lie between 0.429 and 0.617, so these are differences between near-chance quantities with no intervals attached.</p>
+
+<h2>What needs to run</h2>
+<ol>
+<li>The encoder arm on relations: SigLIP 1 against SigLIP 2 against DINOv2 at 256 tokens on run B. The frames are already extracted.</li>
+<li>A category control. Without the difference between state and category accuracy the numbers have no reference point.</li>
+<li>Bootstrap confidence intervals over episodes.</li>
+<li>Power: about 310 episodes for the category-by-budget interaction, against 120 and 68 now.</li>
+<li><code>inside</code>, deliberately, reporting occlusion as part of the result.</li>
+</ol>
+<p class="note"><b>Method.</b> Every factual claim in the note is covered by 97 scripted checks against the source PDFs, the Comet repository, the challenge page, the released dataset schema and the BDDL goal definitions; each script exits non-zero on failure. The probe numbers were produced on one RTX 5090 on 14 September 2026. An adversarial review pass, four AI-generated reviews with different emphases, changed the design in two places: the probe now reads patch tokens rather than the pooled vector, and the hypothesis is stated as a comparison between two unmeasured levers rather than a ceiling.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="backlink"><a href="paper-review.html">← All paper reviews</a></p>
+  </div>
+</section>
+
+</body>
+</html>
