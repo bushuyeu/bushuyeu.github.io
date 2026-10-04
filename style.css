@@ -141,6 +141,9 @@ section[id] { scroll-margin-top: 24px; }
 .row__title a:hover { color: var(--link); text-decoration: none; }
 .row__sub { font-size: 0.9rem; line-height: 1.5; color: var(--ink-3); }
 .row__sub b { font-weight: 500; color: var(--ink-2); }
+.row__note { font-size: 0.8rem; line-height: 1.5; color: var(--ink-3); }
+.row__sub sup, .row__note sup { font-size: 0.7em; line-height: 0; vertical-align: 0.45em; }
+.row__note sup { margin-right: 0.1em; }
 .row__body { color: var(--ink-2); font-size: 0.95rem; }
 .row__body ul { margin: 0.45em 0 0; padding-left: 1.15em; }
 .row__body li + li { margin-top: 0.25em; }
