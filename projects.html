@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Projects — Pavel Bushuyeu</title>
+<meta name="description" content="Projects by Pavel Bushuyeu: benchmark analysis, vision-language-action experiments, and a humanoid teleoperation pipeline.">
+<link rel="canonical" href="https://bushuyeu.github.io/projects.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Projects — Pavel Bushuyeu">
+<meta property="og:description" content="Projects by Pavel Bushuyeu: benchmark analysis, vision-language-action experiments, and a humanoid teleoperation pipeline.">
+<meta property="og:url" content="https://bushuyeu.github.io/projects.html">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="tabs" aria-label="Main">
+  <div class="wrap">
+    <a href="index.html">Home</a>
+    <a href="projects.html" aria-current="page">Projects</a>
+    <a href="paper-review.html">Paper review</a>
+    <a href="teaching.html">Teaching</a>
+  </div>
+</nav>
+
+<header class="top">
+  <div class="wrap">
+    <div class="eyebrow">Pavel Bushuyeu</div>
+    <h1>Projects</h1>
+    <p class="sub">Code and write-ups. Each links to its page or repository.</p>
+  </div>
+</header>
+
+<section id="projects">
+  <div class="wrap">
+    <ol class="rows">
+
+      <li class="row">
+        <div class="row__when">Analysis</div>
+        <div class="row__main">
+          <div class="row__title"><a href="https://bushuyeu.github.io/behavior-1k-data/">BEHAVIOR-1K 2026 data composition</a></div>
+          <div class="row__body">What the 100-task BEHAVIOR Challenge 2026 benchmark is made of, read from the evaluator’s code and all 20,000 recorded demonstrations.</div>
+          <div class="row__src"><a href="https://github.com/bushuyeu/behavior-1k-data">github.com/bushuyeu/behavior-1k-data</a></div>
+        </div>
+      </li>
+
+      <li class="row">
+        <div class="row__when">Workshop</div>
+        <div class="row__main">
+          <div class="row__title"><a href="https://bushuyeu.github.io/iolani-g1-workshop/">robotica: video-to-robot teleoperation for the Unitree G1</a></div>
+          <div class="row__body">A pipeline that turns an ordinary video into motion on a Unitree G1 humanoid: PromptHMR estimates 3D pose, GMR retargets the joints, and GR00T whole-body control drives simulation or hardware. The codebase for the ʻIolani workshop on applied ML and humanoid robots.</div>
+          <div class="row__src"><a href="https://github.com/bushuyeu/iolani-g1-workshop">github.com/bushuyeu/iolani-g1-workshop</a></div>
+        </div>
+      </li>
+
+      <li class="row">
+        <div class="row__when">Experiments</div>
+        <div class="row__main">
+          <div class="row__title"><a href="https://bushuyeu.github.io/smolvla-force-torque/">SmolVLA force-torque experiments</a></div>
+          <div class="row__body">Three experiments on adding 6-axis force-torque sensing to SmolVLA, a 0.45B vision-language-action model, for contact-rich manipulation tasks. SmolVLA takes vision and joint positions as input but has no sense of touch; the experiments test whether force augmentation works at that scale.</div>
+          <div class="row__src"><a href="https://github.com/bushuyeu/smolvla-force-torque">github.com/bushuyeu/smolvla-force-torque</a><a href="https://huggingface.co/bushuyeu/smolvla-ft-checkpoints">checkpoints on Hugging Face</a></div>
+        </div>
+      </li>
+
+      <li class="row">
+        <div class="row__when">Tool</div>
+        <div class="row__main">
+          <div class="row__title"><a href="https://github.com/bushuyeu/tg2kindle">tg2kindle</a></div>
+          <div class="row__body">Send a book to a Telegram bot and it forwards it to your Kindle.</div>
+          <div class="row__src"><a href="https://github.com/bushuyeu/tg2kindle">github.com/bushuyeu/tg2kindle</a></div>
+        </div>
+      </li>
+
+    </ol>
+  </div>
+</section>
+
+</body>
+</html>
