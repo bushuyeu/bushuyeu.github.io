@@ -161,12 +161,26 @@ section[id] { scroll-margin-top: 24px; }
 .row__src a { color: var(--ink-2); }
 .row__src a:hover { color: var(--link); }
 .row__src a + a { margin-left: 14px; }
-.row__media { margin-top: 8px; }
-.row__media img { display: block; max-width: 100%; max-height: 36rem; width: auto; height: auto; border-radius: 10px; }
-.row__video { margin-top: 10px; max-width: 48rem; }
-.row__video iframe { display: block; width: 100%; aspect-ratio: 16 / 9; height: auto; border: 0; border-radius: 10px; background: var(--tint); }
-.row__video--portrait { max-width: 20rem; }
-.row__video--portrait iframe { aspect-ratio: 9 / 16; }
+/* Gallery: photos and videos side by side at one height; swipe or scroll,
+   the next item peeks in from the right. CSS scroll-snap, no JavaScript. */
+.gallery {
+  --slide: 26rem;
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--hair) transparent;
+}
+.gallery > figure { margin: 0; flex: 0 0 auto; scroll-snap-align: start; height: var(--slide); }
+.gallery img { display: block; height: 100%; width: auto; max-width: none; border-radius: 10px; }
+.gallery iframe { display: block; height: 100%; border: 0; border-radius: 10px; background: var(--tint); }
+.gallery .wide iframe { width: calc(var(--slide) * 16 / 9); }
+.gallery .tall iframe { width: calc(var(--slide) * 9 / 16); }
+.gallery__hint { margin-top: 2px; font-size: 0.78rem; color: var(--ink-3); }
 
 /* Prose: long-form review pages */
 .prose { font-size: 1rem; }
@@ -203,6 +217,7 @@ section[id] { scroll-margin-top: 24px; }
   section > .wrap { padding-bottom: 26px; }
   section > .wrap::before { margin-bottom: 26px; }
   .row { grid-template-columns: 1fr; row-gap: 4px; }
+  .gallery { --slide: 16rem; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 @media print {
