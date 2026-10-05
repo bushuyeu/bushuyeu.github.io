@@ -1,0 +1,22 @@
+# Pavel Bushuyeu
+
+> Graduate AI researcher at the University of Hawaiʻi at Mānoa, Department of Information and Computer Sciences. Works on vision-language-action models for humanoid locomotion and manipulation in Prof. Igor Molybog's lab. Prior career in software product management.
+
+Site: https://bushuyeu.com
+Contact: pavelbushuyeu@gmail.com
+Profiles: https://linkedin.com/in/bushuyeu · https://github.com/bushuyeu · https://huggingface.co/bushuyeu
+
+## Research
+
+- Fiatlux: A Long-Horizon Benchmark for Humanoid Ladder Climbing and Light-Bulb Replacement (arXiv:2609.38216, 2026). Co-first author. A Unitree G1 benchmark in NVIDIA Isaac Lab with baselines from RSL-RL PPO to GR00T N1.7. Project page: https://fiatlux-bench.github.io
+- Data-Efficient Curation for Multimodal Reasoning under Fixed Training Protocols (arXiv:2601.10922, 2026). Co-first author. Workshop paper at the Efficient Multimodal Question Answering workshop, ICML 2026. Earlier title: What Matters in Data Curation for Multimodal Reasoning? Insights from the DCVLR Challenge.
+- First place, Data Curation for Vision Language Reasoning (DCVLR) challenge, NeurIPS 2025, with Yosub Shin, Michael Buriek, Boris Sobolev, Vikas Kumar, Haoyang Xu and Samuel Watson.
+- NSF NRT-AI DESCARTES fellowship, 2026.
+
+## Pages
+
+- Publications and conference presentations: https://bushuyeu.com/publications.html
+- Paper reviews and small experiments on robot-learning papers (π0.5, FAST, openpi Comet, GR00T N1, Cosmos-Predict2.5, SigLIP probes): https://bushuyeu.com/paper-review.html
+- Teaching at UH Mānoa and the ʻIolani Artificial Intelligence Lab: https://bushuyeu.com/teaching.html
+- Product management career, 2014 to 2025: https://bushuyeu.com/product-management.html
+- Other: https://bushuyeu.com/other.html
