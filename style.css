@@ -191,6 +191,7 @@ section[id] { scroll-margin-top: 24px; }
 }
 .video:hover::after { background-color: rgba(0, 0, 0, 0.8); }
 .gallery .wide { width: calc(var(--slide) * 16 / 9); }
+.gallery video { display: block; width: 100%; height: 100%; border-radius: 10px; background: #000; object-fit: cover; }
 .gallery .tall { width: calc(var(--slide) * 9 / 16); }
 
 /* Prose: long-form review pages */
