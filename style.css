@@ -177,9 +177,21 @@ section[id] { scroll-margin-top: 24px; }
 }
 .gallery > figure { margin: 0; flex: 0 0 auto; scroll-snap-align: start; height: var(--slide); }
 .gallery img { display: block; height: 100%; width: auto; max-width: none; border-radius: 10px; }
-.gallery iframe { display: block; height: 100%; border: 0; border-radius: 10px; background: var(--tint); }
-.gallery .wide iframe { width: calc(var(--slide) * 16 / 9); }
-.gallery .tall iframe { width: calc(var(--slide) * 9 / 16); }
+.video { position: relative; display: block; height: 100%; border-radius: 10px; overflow: hidden; background: var(--tint); }
+.video img { height: 100%; width: 100%; object-fit: cover; }
+.video::after {
+  content: "";
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 64px; height: 64px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.62) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M9 6.5v11l9-5.5z'/%3E%3C/svg%3E") center / 34px no-repeat;
+  transition: background-color 0.15s;
+}
+.video:hover::after { background-color: rgba(0, 0, 0, 0.8); }
+.gallery .wide { width: calc(var(--slide) * 16 / 9); }
+.gallery .tall { width: calc(var(--slide) * 9 / 16); }
 
 /* Prose: long-form review pages */
 .prose { font-size: 1rem; }
