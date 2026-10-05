@@ -72,7 +72,7 @@ header.top .wrap {
   flex-direction: column;
   gap: 12px;
 }
-.eyebrow-nav { display: flex; flex-wrap: wrap; gap: 6px 18px; line-height: 1.4; }
+.eyebrow-nav { display: flex; flex-wrap: wrap; gap: 6px 18px; line-height: 1.4; margin-bottom: 14px; }
 .eyebrow-nav a { color: var(--ink-3); }
 .eyebrow-nav a:hover { color: var(--link); text-decoration: none; }
 .eyebrow-nav a[aria-current="page"] { color: var(--ink); font-weight: 500; }
