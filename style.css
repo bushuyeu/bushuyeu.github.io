@@ -164,7 +164,7 @@ section[id] { scroll-margin-top: 24px; }
 /* Gallery: photos and videos side by side at one height; swipe or scroll,
    the next item peeks in from the right. CSS scroll-snap, no JavaScript. */
 .gallery {
-  --slide: 26rem;
+  --slide: 23rem;
   margin-top: 10px;
   display: flex;
   gap: 10px;
