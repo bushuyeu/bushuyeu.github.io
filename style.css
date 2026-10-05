@@ -180,7 +180,6 @@ section[id] { scroll-margin-top: 24px; }
 .gallery iframe { display: block; height: 100%; border: 0; border-radius: 10px; background: var(--tint); }
 .gallery .wide iframe { width: calc(var(--slide) * 16 / 9); }
 .gallery .tall iframe { width: calc(var(--slide) * 9 / 16); }
-.gallery__hint { margin-top: 2px; font-size: 0.78rem; color: var(--ink-3); }
 
 /* Prose: long-form review pages */
 .prose { font-size: 1rem; }
