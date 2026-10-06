@@ -9,7 +9,7 @@ Profiles: https://linkedin.com/in/bushuyeu · https://github.com/bushuyeu · htt
 ## Research
 
 - Fiatlux: A Long-Horizon Benchmark for Humanoid Ladder Climbing and Light-Bulb Replacement (arXiv:2609.38216, 2026). Co-first author. A Unitree G1 benchmark in NVIDIA Isaac Lab with baselines from RSL-RL PPO to GR00T N1.7. Project page: https://fiatlux-bench.github.io
-- Data-Efficient Curation for Multimodal Reasoning under Fixed Training Protocols (arXiv:2601.10922, 2026). Co-first author. Workshop paper at the Efficient Multimodal Question Answering workshop, ICML 2026. Earlier title: What Matters in Data Curation for Multimodal Reasoning? Insights from the DCVLR Challenge.
+- Data-Efficient Curation for Multimodal Reasoning under Fixed Training Protocols (arXiv:2601.10922, 2026). Co-first author. Workshop paper at the Efficient Multimodal Question Answering workshop, ICML 2026.
 - First place, Data Curation for Vision Language Reasoning (DCVLR) challenge, NeurIPS 2025 (https://dcvlr-neurips.github.io), with Yosub Shin, Michael Buriek, Boris Sobolev, Vikas Kumar, Haoyang Xu and Samuel Watson.
 - ShepBERT: an OMOP-portable EHR transformer for multi-cancer risk prediction in Native Hawaiian and Pacific Islander-serving health systems, with the University of Hawaiʻi Cancer Center. Preliminary results presented at the UH Cancer Center × Google Cloud AI Research Workshop 2026; poster: https://bushuyeu.com/media/shepbert-poster-2026.pdf
 - NSF NRT-AI DESCARTES fellowship, 2026.
