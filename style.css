@@ -118,6 +118,8 @@ section[id] { scroll-margin-top: 24px; }
 }
 .pill-link:hover { border-color: var(--link); color: var(--link); text-decoration: none; }
 .meta { align-items: center; }
+.sub-row { display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; }
+a.pill-link--accent { color: var(--bg); }
 .meta .pill-link { margin-left: auto; }
 .pill-link--accent { background: var(--ink); border-color: var(--ink); color: var(--bg); }
 .meta a.pill-link--accent { color: var(--bg); }
