@@ -6,7 +6,7 @@ Pages from the root of `main`.
 - `index.html` — home. The intro and News mirror the [profile README](https://github.com/bushuyeu/bushuyeu); the research statement and Awards are the site's own.
 - `projects.html`, `paper-review.html`, `teaching.html`, `product-management.html`, `other.html` — the other tabs.
 - `style.css` — shared styles; colours and type are the variables at the top.
-- `favicon.svg`, `Pavel-Bushuyeu-CV.pdf`, `.nojekyll`, and `CNAME`, which binds
+- `favicon-32.png`, `apple-touch-icon.png`, `icon-512.png`, `Pavel-Bushuyeu-CV.pdf`, `.nojekyll`, and `CNAME`, which binds
   the custom domain; DNS for bushuyeu.com is managed at GoDaddy.
 
 ## Editing
