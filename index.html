@@ -30,40 +30,95 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "Person",
-  "name": "Pavel Bushuyeu",
-  "url": "https://bushuyeu.com/",
-  "image": "https://bushuyeu.com/media/og-card.jpg",
-  "email": "mailto:pavelbushuyeu@gmail.com",
-  "jobTitle": "Graduate AI researcher",
-  "affiliation": {
-    "@type": "CollegeOrUniversity",
-    "name": "University of Hawaiʻi at Mānoa",
-    "url": "https://manoa.hawaii.edu"
-  },
-  "knowsAbout": [
-    "vision-language-action models",
-    "humanoid robots",
-    "robot learning",
-    "embodied AI",
-    "multimodal data curation",
-    "clinical language models",
-    "AI evaluation"
-  ],
-  "sameAs": [
-    "https://linkedin.com/in/bushuyeu",
-    "https://github.com/bushuyeu",
-    "https://huggingface.co/bushuyeu",
-    "https://scholar.google.com/citations?user=ub3osgUAAAAJ",
-    "https://orcid.org/0009-0009-7183-6714",
-    "https://www.semanticscholar.org/author/2405429742",
-    "https://www.researchgate.net/profile/Pavel-Bushuyeu",
-    "https://shepherdresearchlab.org/about/our-team/pavel-bushuyeu/"
-  ],
-  "memberOf": [
+  "@graph": [
     {
-      "@type": "Organization",
-      "name": "Hawaiʻi AI Initiative (HawAII)"
+      "@type": "ProfilePage",
+      "@id": "https://bushuyeu.com/#profile",
+      "url": "https://bushuyeu.com/",
+      "name": "Pavel Bushuyeu",
+      "dateModified": "2026-10-05",
+      "mainEntity": {
+        "@id": "https://bushuyeu.com/#person"
+      }
+    },
+    {
+      "@type": "Person",
+      "@id": "https://bushuyeu.com/#person",
+      "name": "Pavel Bushuyeu",
+      "url": "https://bushuyeu.com/",
+      "image": "https://bushuyeu.com/media/portrait.jpg",
+      "email": "mailto:pavelbushuyeu@gmail.com",
+      "jobTitle": "Graduate AI researcher",
+      "description": "AI researcher working on vision-language-action models for humanoid locomotion and manipulation, multimodal data curation and clinical language models. Prior career in software product management.",
+      "affiliation": {
+        "@type": "CollegeOrUniversity",
+        "name": "University of Hawaiʻi at Mānoa",
+        "url": "https://manoa.hawaii.edu",
+        "department": {
+          "@type": "Organization",
+          "name": "Department of Information and Computer Sciences",
+          "url": "http://ics.hawaii.edu/"
+        }
+      },
+      "memberOf": [
+        {
+          "@type": "Organization",
+          "name": "Hawaiʻi AI Initiative (HawAII)"
+        }
+      ],
+      "alumniOf": [
+        {
+          "@type": "CollegeOrUniversity",
+          "name": "American University in Bulgaria"
+        },
+        {
+          "@type": "CollegeOrUniversity",
+          "name": "University of Utah"
+        }
+      ],
+      "award": [
+        "NSF NRT-AI DESCARTES fellowship (2026)",
+        "First place, Data Curation for Vision Language Reasoning challenge, NeurIPS 2025"
+      ],
+      "knowsAbout": [
+        "vision-language-action models",
+        "humanoid robots",
+        "robot learning",
+        "embodied AI",
+        "multimodal data curation",
+        "clinical language models",
+        "AI evaluation"
+      ],
+      "sameAs": [
+        "https://linkedin.com/in/bushuyeu",
+        "https://github.com/bushuyeu",
+        "https://huggingface.co/bushuyeu",
+        "https://scholar.google.com/citations?user=ub3osgUAAAAJ",
+        "https://orcid.org/0009-0009-7183-6714",
+        "https://www.semanticscholar.org/author/2405429742",
+        "https://www.researchgate.net/profile/Pavel-Bushuyeu",
+        "https://shepherdresearchlab.org/about/our-team/pavel-bushuyeu/"
+      ]
+    },
+    {
+      "@type": "ScholarlyArticle",
+      "name": "Fiatlux: A Long-Horizon Benchmark for Humanoid Ladder Climbing and Light-Bulb Replacement",
+      "url": "https://arxiv.org/abs/2609.38216",
+      "sameAs": "https://doi.org/10.48550/arXiv.2609.38216",
+      "datePublished": "2026-09-27",
+      "author": {
+        "@id": "https://bushuyeu.com/#person"
+      }
+    },
+    {
+      "@type": "ScholarlyArticle",
+      "name": "Data-Efficient Curation for Multimodal Reasoning under Fixed Training Protocols",
+      "url": "https://arxiv.org/abs/2601.10922",
+      "sameAs": "https://doi.org/10.48550/arXiv.2601.10922",
+      "datePublished": "2026-01-16",
+      "author": {
+        "@id": "https://bushuyeu.com/#person"
+      }
     }
   ]
 }
@@ -87,6 +142,8 @@
       <a href="mailto:pavelbushuyeu@gmail.com">pavelbushuyeu@gmail.com</a>
       <a target="_blank" rel="me noopener" href="https://linkedin.com/in/bushuyeu/">LinkedIn</a>
       <a target="_blank" rel="me noopener" href="https://github.com/bushuyeu">GitHub</a>
+      <a target="_blank" rel="me noopener" href="https://scholar.google.com/citations?user=ub3osgUAAAAJ">Google Scholar</a>
+      <a target="_blank" rel="me noopener" href="https://orcid.org/0009-0009-7183-6714">ORCID</a>
       <a href="Pavel-Bushuyeu-CV.pdf">CV</a>
       <a href="https://follow.it/pavel-bushuyeu-news" class="pill-link pill-link--accent" data-subscribe>Subscribe to updates</a>
     </div>
@@ -204,6 +261,8 @@
           <li><a rel="noopener" target="_blank" href="https://linkedin.com/in/bushuyeu/">LinkedIn</a></li>
           <li><a rel="noopener" target="_blank" href="https://github.com/bushuyeu">GitHub</a></li>
           <li><a rel="noopener" target="_blank" href="https://huggingface.co/bushuyeu">Hugging Face</a></li>
+          <li><a rel="noopener" target="_blank" href="https://scholar.google.com/citations?user=ub3osgUAAAAJ">Google Scholar</a></li>
+          <li><a rel="noopener" target="_blank" href="https://orcid.org/0009-0009-7183-6714">ORCID</a></li>
           <li><a rel="noopener" target="_blank" href="https://www.semanticscholar.org/author/2405429742">Semantic Scholar</a></li>
           <li><a rel="noopener" target="_blank" href="https://www.researchgate.net/profile/Pavel-Bushuyeu">ResearchGate</a></li>
           <li><a rel="noopener" target="_blank" href="https://www.strava.com/athletes/pavlb">Strava</a></li>
