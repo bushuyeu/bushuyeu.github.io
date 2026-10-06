@@ -110,9 +110,14 @@ section[id] { scroll-margin-top: 24px; }
 }
 .shead .eyebrow { order: -1; }
 .empty { color: var(--ink-3); }
-.subscribe { font-size: 0.84rem; color: var(--ink-3); }
-.subscribe a { color: var(--ink-2); }
-.subscribe a:hover { color: var(--link); text-decoration: none; }
+.shead__row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.pill-link {
+  display: inline-flex; align-items: center;
+  padding: 5px 14px; border: 1px solid var(--hair); border-radius: 980px;
+  font-size: 0.84rem; font-weight: 500; line-height: 1.2; color: var(--ink); white-space: nowrap;
+  transition: border-color 0.15s, color 0.15s;
+}
+.pill-link:hover { border-color: var(--link); color: var(--link); text-decoration: none; }
 
 /* Rows: mono label on the left, hairline between items. Baseline-aligned so
    the label sits on the first line of text. */
