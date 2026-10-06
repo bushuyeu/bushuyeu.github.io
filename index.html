@@ -170,7 +170,7 @@
   <form method="dialog" class="subscribe__close-row"><button class="subscribe__close" aria-label="Close">×</button></form>
   <h2 id="subscribe-title">Subscribe to updates</h2>
   <p class="subscribe__note">Get my news by email, about once a month. Unsubscribe any time.</p>
-  <form class="subscribe__form" action="https://api.follow.it/subscription-form/cUxuMndBbDhibGZiRzlwaHNYV0dBbFd1ZXR2MHRSWVdWRk1HNjIvUyszRUxLRXRacjJBRG1hRSsxTHg5aitKR25QNTJLaEJYNW1jV0hHdW85NjZMYTFJZFhHaXJOVDE5MjduMTYwQ1JzVDEvTGEzREhTSlBpWXRaUGhzWUVnUE98eTZrN0p5cVVHa01JZTNQalJ5UVAxNnFWaVVTN3FiKzAwU3hUcUNuTTlWTT0=/8" method="post" target="_blank">
+  <form class="subscribe__form" action="https://api.follow.it/subscription-form/cUxuMndBbDhibGZiRzlwaHNYV0dBbFd1ZXR2MHRSWVdWRk1HNjIvUyszRUxLRXRacjJBRG1hRSsxTHg5aitKR25QNTJLaEJYNW1jV0hHdW85NjZMYTFJZFhHaXJOVDE5MjduMTYwQ1JzVDEvTGEzREhTSlBpWXRaUGhzWUVnUE98eTZrN0p5cVVHa01JZTNQalJ5UVAxNnFWaVVTN3FiKzAwU3hUcUNuTTlWTT0=/8" method="post" target="followit">
     <input type="email" name="email" required placeholder="Your email" autocomplete="email" aria-label="Email address">
     <button type="submit" class="pill-link pill-link--accent">Subscribe</button>
   </form>
@@ -185,7 +185,12 @@ if (location.pathname.endsWith('/index.html')) history.replaceState(null, '', lo
     a.addEventListener('click', function (e) { if (e.metaKey || e.ctrlKey) return; e.preventDefault(); d.showModal(); d.querySelector('input').focus(); });
   });
   d.addEventListener('click', function (e) { if (e.target === d) d.close(); });
-  d.querySelector('.subscribe__form').addEventListener('submit', function () { setTimeout(function () { d.close(); }, 100); });
+  d.querySelector('.subscribe__form').addEventListener('submit', function () {
+    var w = 520, h = 680;
+    var left = window.screenX + (window.outerWidth - w) / 2, top = window.screenY + (window.outerHeight - h) / 2;
+    window.open('about:blank', 'followit', 'popup,width=' + w + ',height=' + h + ',left=' + left + ',top=' + top);
+    setTimeout(function () { d.close(); }, 100);
+  });
 })();
 </script>
 </body>
