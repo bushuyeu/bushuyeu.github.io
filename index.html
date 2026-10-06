@@ -54,7 +54,7 @@
 <header class="top">
   <div class="wrap">
     <nav class="eyebrow eyebrow-nav" aria-label="Main">
-      <a href="index.html" aria-current="page">Home</a>
+      <a href="/" aria-current="page">Home</a>
       <a href="publications.html">Publications</a>
       <a href="teaching.html">Teaching</a>
       <a href="professional-services.html">Professional services</a>
@@ -172,6 +172,7 @@
 </section>
 
 <script>
+if (location.pathname.endsWith('/index.html')) history.replaceState(null, '', location.pathname.slice(0, -10) + location.search + location.hash);
 document.addEventListener('click', function (e) {
   var a = e.target.closest('a[data-popup]');
   if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
