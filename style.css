@@ -254,6 +254,8 @@ a.pill-link--accent { color: var(--bg); }
   .footer-cols, .footer-cols:has(.footer-portrait) { grid-template-columns: 1fr 1fr; column-gap: 24px; }
   .footer-portrait { grid-column: 1 / -1; width: 96px; height: 96px; margin-right: 0; }
   .footer-cols > div:last-child { grid-column: 1 / -1; }
+  .row__src { font-size: 0.82rem; line-height: 2; }
+  .row__src a + a { margin-left: 18px; }
   .site-footer li { overflow-wrap: anywhere; }
 }
 
