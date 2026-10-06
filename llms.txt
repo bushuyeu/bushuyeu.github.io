@@ -18,5 +18,6 @@ Profiles: https://linkedin.com/in/bushuyeu · https://github.com/bushuyeu · htt
 - Publications and conference presentations: https://bushuyeu.com/publications.html
 - Paper reviews and small experiments on robot-learning papers (π0.5, FAST, openpi Comet, GR00T N1, Cosmos-Predict2.5, SigLIP probes): https://bushuyeu.com/paper-review.html
 - Teaching at UH Mānoa and the ʻIolani Artificial Intelligence Lab: https://bushuyeu.com/teaching.html
+- Professional services, peer review and mentoring: https://bushuyeu.com/professional-services.html
 - Product management career, 2014 to 2025: https://bushuyeu.com/product-management.html
 - Other: https://bushuyeu.com/other.html
