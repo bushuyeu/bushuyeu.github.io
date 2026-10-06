@@ -238,6 +238,21 @@ a.pill-link--accent { color: var(--bg); }
 .prose figcaption { font-size: 0.84rem; color: var(--ink-3); margin-top: 0.5em; }
 .backlink { font-family: var(--font-mono); font-size: 0.84rem; }
 
+/* Subscribe dialog */
+.subscribe { width: min(420px, calc(100vw - 32px)); padding: 22px 26px 24px; border: 1px solid var(--hair-soft); border-radius: 14px; background: var(--bg); color: var(--ink); box-shadow: 0 20px 60px rgba(0,0,0,0.18); }
+.subscribe::backdrop { background: rgba(0,0,0,0.35); }
+.subscribe h2 { font-size: 1.28rem; margin-bottom: 6px; }
+.subscribe__close-row { display: flex; justify-content: flex-end; margin: -8px -12px 0 0; }
+.subscribe__close { all: unset; cursor: pointer; font-size: 1.5rem; line-height: 1; color: var(--ink-3); padding: 4px 8px; border-radius: 6px; }
+.subscribe__close:hover { color: var(--ink); }
+.subscribe__note { color: var(--ink-2); font-size: 0.95rem; }
+.subscribe__form { display: flex; gap: 8px; margin-top: 16px; }
+.subscribe__form input { flex: 1; min-width: 0; font: inherit; font-size: 0.95rem; color: var(--ink); background: var(--bg); padding: 8px 14px; border: 1px solid var(--hair); border-radius: 980px; outline: none; }
+.subscribe__form input:focus { border-color: var(--link); }
+.subscribe__form button { cursor: pointer; font: inherit; font-size: 0.9rem; font-weight: 500; }
+.subscribe__fine { margin-top: 14px; font-size: 0.78rem; color: var(--ink-3); }
+.subscribe__fine a { color: var(--ink-2); }
+
 @media (max-width: 640px) {
   .wrap { padding-inline: 22px; }
   header.top .wrap { padding-block: 24px 22px; }

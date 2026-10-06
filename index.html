@@ -25,7 +25,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="alternate" type="application/rss+xml" title="Pavel Bushuyeu — News" href="https://bushuyeu.com/feed.xml">
-<link rel="stylesheet" href="style.css?v=16">
+<link rel="stylesheet" href="style.css?v=17">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -71,7 +71,7 @@
       <a target="_blank" rel="me noopener" href="https://linkedin.com/in/bushuyeu/">LinkedIn</a>
       <a target="_blank" rel="me noopener" href="https://github.com/bushuyeu">GitHub</a>
       <a href="Pavel-Bushuyeu-CV.pdf">CV</a>
-      <a href="/feed.xml" class="pill-link pill-link--accent" type="application/rss+xml" title="RSS feed of news updates">Subscribe to updates</a>
+      <a href="https://follow.it/pavel-bushuyeu-news" class="pill-link pill-link--accent" data-subscribe>Subscribe to updates</a>
     </div>
   </div>
 </header>
@@ -175,8 +175,27 @@
   </div>
 </section>
 
+<dialog id="subscribe" class="subscribe" aria-labelledby="subscribe-title">
+  <form method="dialog" class="subscribe__close-row"><button class="subscribe__close" aria-label="Close">×</button></form>
+  <h2 id="subscribe-title">Subscribe to updates</h2>
+  <p class="subscribe__note">Get my news by email, about once a month. Unsubscribe any time.</p>
+  <form class="subscribe__form" action="https://api.follow.it/subscription-form/cUxuMndBbDhibGZiRzlwaHNYV0dBbFd1ZXR2MHRSWVdWRk1HNjIvUyszRUxLRXRacjJBRG1hRSsxTHg5aitKR25QNTJLaEJYNW1jV0hHdW85NjZMYTFJZFhHaXJOVDE5MjduMTYwQ1JzVDEvTGEzREhTSlBpWXRaUGhzWUVnUE98eTZrN0p5cVVHa01JZTNQalJ5UVAxNnFWaVVTN3FiKzAwU3hUcUNuTTlWTT0=/8" method="post" target="_blank">
+    <input type="email" name="email" required placeholder="Your email" autocomplete="email" aria-label="Email address">
+    <button type="submit" class="pill-link pill-link--accent">Subscribe</button>
+  </form>
+  <p class="subscribe__fine">Delivered by <a rel="noopener" target="_blank" href="https://follow.it">follow.it</a>. Prefer a feed reader? Use the <a href="/feed.xml">RSS feed</a>.</p>
+</dialog>
 <script>
 if (location.pathname.endsWith('/index.html')) history.replaceState(null, '', location.pathname.slice(0, -10) + location.search + location.hash);
+(function () {
+  var d = document.getElementById('subscribe');
+  if (!d || !d.showModal) return;
+  document.querySelectorAll('[data-subscribe]').forEach(function (a) {
+    a.addEventListener('click', function (e) { if (e.metaKey || e.ctrlKey) return; e.preventDefault(); d.showModal(); d.querySelector('input').focus(); });
+  });
+  d.addEventListener('click', function (e) { if (e.target === d) d.close(); });
+  d.querySelector('.subscribe__form').addEventListener('submit', function () { setTimeout(function () { d.close(); }, 100); });
+})();
 </script>
 </body>
 </html>

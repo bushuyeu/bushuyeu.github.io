@@ -18,7 +18,7 @@ Open any page in a browser, or run `python3 -m http.server 8000` here and
 visit http://localhost:8000.
 
 When you add a News item to `index.html`, add the same item at the top of
-`feed.xml`, which powers the RSS subscription.
+`feed.xml`, which follow.it reads to email subscribers (the Subscribe dialog on the home page posts to follow.it).
 
 Every list is the same shape. To add an entry, copy the first
 `<li class="row">` block in that list, paste it above itself, and change the
