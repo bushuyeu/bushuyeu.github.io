@@ -110,6 +110,9 @@ section[id] { scroll-margin-top: 24px; }
 }
 .shead .eyebrow { order: -1; }
 .empty { color: var(--ink-3); }
+.subscribe { font-size: 0.84rem; color: var(--ink-3); }
+.subscribe a { color: var(--ink-2); }
+.subscribe a:hover { color: var(--link); text-decoration: none; }
 
 /* Rows: mono label on the left, hairline between items. Baseline-aligned so
    the label sits on the first line of text. */
