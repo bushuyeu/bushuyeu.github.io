@@ -250,7 +250,12 @@ a.pill-link--accent { color: var(--bg); }
 .site-footer a { color: var(--ink-2); }
 .site-footer a:hover { color: var(--link); text-decoration: none; }
 .footer-base { margin-top: 28px; font-size: 0.78rem; color: var(--ink-3); }
-@media (max-width: 640px) { .footer-cols { grid-template-columns: 1fr 1fr; } .footer-portrait { grid-column: 1 / -1; width: 96px; height: 96px; } }
+@media (max-width: 640px) {
+  .footer-cols, .footer-cols:has(.footer-portrait) { grid-template-columns: 1fr 1fr; column-gap: 24px; }
+  .footer-portrait { grid-column: 1 / -1; width: 96px; height: 96px; margin-right: 0; }
+  .footer-cols > div:last-child { grid-column: 1 / -1; }
+  .site-footer li { overflow-wrap: anywhere; }
+}
 
 /* Subscribe dialog */
 .subscribe { width: min(420px, calc(100vw - 32px)); padding: 22px 26px 24px; border: 1px solid var(--hair-soft); border-radius: 14px; background: var(--bg); color: var(--ink); box-shadow: 0 20px 60px rgba(0,0,0,0.18); }
