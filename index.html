@@ -71,7 +71,7 @@
       <a target="_blank" rel="me noopener" href="https://linkedin.com/in/bushuyeu/">LinkedIn</a>
       <a target="_blank" rel="me noopener" href="https://github.com/bushuyeu">GitHub</a>
       <a href="Pavel-Bushuyeu-CV.pdf">CV</a>
-      <a rel="noopener" target="_blank" href="https://blogtrottr.com/?subscribe=https://bushuyeu.com/feed.xml" class="pill-link pill-link--accent" data-popup title="Get my news updates by email">Subscribe to updates</a>
+      <a href="/feed.xml" class="pill-link pill-link--accent" type="application/rss+xml" title="RSS feed of news updates">Subscribe via RSS</a>
     </div>
   </div>
 </header>
@@ -172,15 +172,6 @@
 
 <script>
 if (location.pathname.endsWith('/index.html')) history.replaceState(null, '', location.pathname.slice(0, -10) + location.search + location.hash);
-document.addEventListener('click', function (e) {
-  var a = e.target.closest('a[data-popup]');
-  if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
-  var w = 520, h = 720;
-  var left = window.screenX + (window.outerWidth - w) / 2;
-  var top = window.screenY + (window.outerHeight - h) / 2;
-  var win = window.open(a.href, 'subscribe', 'popup,width=' + w + ',height=' + h + ',left=' + left + ',top=' + top);
-  if (win) { e.preventDefault(); win.focus(); }
-});
 </script>
 </body>
 </html>
