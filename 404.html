@@ -22,6 +22,15 @@
     if (window.faro) faro.api.pushEvent("page_not_found", { path: location.pathname, referrer: document.referrer || "direct" });
   });
 </script>
+<style>
+  .lost { display: grid; grid-template-columns: auto 1fr; gap: 28px 40px; align-items: center; }
+  .lost video { width: 160px; height: auto; aspect-ratio: 1; border-radius: 50%; object-fit: cover; }
+  .lost p + p { margin-top: 12px; }
+  .lost code { font-family: var(--font-mono); font-size: 0.92em; overflow-wrap: anywhere; }
+  .lost ul { margin: 18px 0 0; padding-left: 1.2em; }
+  .lost li + li { margin-top: 4px; }
+  @media (max-width: 560px) { .lost { grid-template-columns: 1fr; } .lost video { width: 120px; } }
+</style>
 </head>
 <body>
 
@@ -34,15 +43,32 @@
       <a href="/product-management">Product management</a>
       <a href="/services">Services</a>
     </nav>
-    <h1>Page not found</h1>
+    <h1>404: out of distribution</h1>
   </div>
 </header>
 
 <section id="not-found">
   <div class="wrap">
-    <p>This page doesn&rsquo;t exist, or it has moved. Try the <a href="/">home page</a>, <a href="/research">research</a> or <a href="/paper-review">paper reviews</a>.</p>
+  <div class="lost">
+    <video src="/media/404.mp4" poster="/media/404-poster.jpg" width="400" height="400" muted loop playsinline preload="auto" data-no-track aria-label="Pavel in a motorcycle helmet and sunglasses, making faces at the missing page"></video>
+    <div>
+      <p>The policy reached for <code id="lost-path">this page</code> and grasped thin air. It saw a lot of URLs in training, but not this one.</p>
+      <p>Likely causes: a typo, a page that moved, or a hallucinated link. Suggested recovery behaviors:</p>
+      <ul>
+        <li><a href="/">Return to the home position</a></li>
+        <li><a href="/research">Re-plan toward the research</a></li>
+        <li><a href="/paper-review">Read some paper reviews instead</a></li>
+      </ul>
+    </div>
+  </div>
   </div>
 </section>
+<script>
+  document.getElementById("lost-path").textContent = location.pathname;
+  // Autoplay starts from script, not the attribute, so visitors who ask for
+  // reduced motion see the still poster instead of a looping clip.
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) document.querySelector(".lost video").play().catch(function () {});
+</script>
 
 <footer class="site-footer">
   <div class="wrap">
