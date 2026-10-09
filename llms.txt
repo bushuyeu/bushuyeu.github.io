@@ -16,7 +16,7 @@ Profiles: https://linkedin.com/in/bushuyeu · https://github.com/bushuyeu · htt
 
 ## Pages
 
-- Research, publications, conferences and reviews: https://bushuyeu.com/publications.html
-- Teaching at UH Mānoa and the ʻIolani Artificial Intelligence Lab: https://bushuyeu.com/teaching.html
-- Professional services, agentic systems development and product advisory: https://bushuyeu.com/services.html
-- Product management career: https://bushuyeu.com/product-management.html
+- Research, publications, conferences and reviews: https://bushuyeu.com/research
+- Teaching at UH Mānoa and the ʻIolani Artificial Intelligence Lab: https://bushuyeu.com/teaching
+- Professional services, agentic systems development and product advisory: https://bushuyeu.com/services
+- Product management career: https://bushuyeu.com/product-management

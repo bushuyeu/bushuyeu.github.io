@@ -4,7 +4,8 @@ Personal site of Pavel Bushuyeu. Plain HTML, no build step, served by GitHub
 Pages from the root of `main`.
 
 - `index.html` — home. The intro and News mirror the [profile README](https://github.com/bushuyeu/bushuyeu); the research statement and Awards are the site's own.
-- `publications.html` (the Research tab), `teaching.html`, `services.html`, `product-management.html` — the other tabs.
+- `research.html` (the Research tab), `teaching.html`, `services.html`, `product-management.html` — the other tabs.
+- `publications.html` and `professional-services.html` are redirect stubs to `/research` and `/services`, so old links keep working.
 - `projects.html`, `paper-review.html` and `review-*.html` are hidden from the tab row
   but stay in `sitemap.xml`, so search engines still index them. To bring one back,
   add its tab to every page.
