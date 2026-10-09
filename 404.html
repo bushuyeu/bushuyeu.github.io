@@ -23,13 +23,14 @@
   });
 </script>
 <style>
-  .lost { display: grid; grid-template-columns: auto 1fr; gap: 28px 40px; align-items: center; }
-  .lost video { width: 160px; height: auto; aspect-ratio: 1; border-radius: 50%; object-fit: cover; }
+  /* Same column, gap and breakpoint as .footer-cols, so the clip lines up with the footer portrait. */
+  .lost { display: grid; grid-template-columns: 120px 1fr; gap: 28px 48px; align-items: center; }
+  .lost video { display: block; width: 120px; height: 120px; border-radius: 50%; object-fit: cover; }
   .lost p + p { margin-top: 12px; }
   .lost code { font-family: var(--font-mono); font-size: 0.92em; overflow-wrap: anywhere; }
   .lost ul { margin: 18px 0 0; padding-left: 1.2em; }
   .lost li + li { margin-top: 4px; }
-  @media (max-width: 560px) { .lost { grid-template-columns: 1fr; } .lost video { width: 120px; } }
+  @media (max-width: 640px) { .lost { grid-template-columns: 1fr; } .lost video { width: 96px; height: 96px; } }
 </style>
 </head>
 <body>
