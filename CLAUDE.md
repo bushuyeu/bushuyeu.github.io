@@ -1,8 +1,9 @@
 # bushuyeu.com
 
-Static site served by GitHub Pages: plain HTML pages sharing `style.css`, no build step and no templates.
+GitHub Pages serves this static site. Each page is plain HTML and shares `style.css`. The site has no build step and no templates.
 
 ## Rules
 
-- **Every new HTML page loads `faro.js`.** Put `<script src="faro.js" async></script>` on the line right before `</head>`. Without it, Grafana Frontend Observability gets no page views, Web Vitals or file-open events for that page, and nothing warns you. The only exception is a pure redirect stub such as `professional-services.html`: it would count a view that the target page counts again.
-- **Link files under `media/` or the site root with a plain `<a href>`.** `faro.js` counts clicks on `.pdf` and `.mp4` links and the first play of each inline `<video>`. Opening a file from script (`window.open` and similar) is not counted.
+- **Every new HTML page loads `faro.js`.** Put `<script src="faro.js" async></script>` on the line before `</head>`. If a page does not load it, Grafana Frontend Observability gets no data for that page, and no tool tells you. A redirect stub such as `professional-services.html` is the only exception, because the target page already counts the visit.
+- **Link each `.pdf` and `.mp4` file with a plain `<a href>`.** `faro.js` counts clicks on these links and the first play of each inline `<video>`. It does not count a file that a script opens, for example with `window.open`.
+- **Use root-absolute URLs in `404.html`.** GitHub Pages serves this page for a missing URL at any depth, such as `/a/b/c.html`. A relative URL like `style.css` then points to the wrong folder.
