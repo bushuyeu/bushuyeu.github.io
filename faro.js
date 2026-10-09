@@ -67,7 +67,8 @@
   // the number that matters.
   document.addEventListener("play", function (e) {
     var video = e.target;
-    if (video.tagName !== "VIDEO" || video.dataset.faroPlayed) return;
+    // data-no-track marks decorative autoplaying clips, which no visitor chose to play.
+    if (video.tagName !== "VIDEO" || video.dataset.faroPlayed || video.hasAttribute("data-no-track")) return;
     video.dataset.faroPlayed = "1";
     push("video_play", { file: fileName(video.currentSrc) });
   }, true);
