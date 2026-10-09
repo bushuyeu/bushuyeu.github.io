@@ -109,6 +109,9 @@ section[id] { scroll-margin-top: 24px; }
   margin-bottom: 20px;
 }
 .shead .eyebrow { order: -1; }
+/* A permalink beside a section heading, so a visitor can copy a link to the section. */
+.anchor { display: inline-flex; vertical-align: middle; padding: 6px; margin: -6px 0; color: var(--ink-3); }
+.anchor:hover, .anchor:focus-visible { color: var(--link); }
 .empty { color: var(--ink-3); }
 .pill-link {
   display: inline-flex; align-items: center;
