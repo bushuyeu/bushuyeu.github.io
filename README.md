@@ -5,9 +5,11 @@ Pages from the root of `main`.
 
 - `index.html` — home. The intro and News mirror the [profile README](https://github.com/bushuyeu/bushuyeu); the research statement and Awards are the site's own.
 - `publications.html` (the Research tab), `teaching.html`, `services.html`, `product-management.html` — the other tabs.
-- `other.html`, `projects.html`, `paper-review.html` and `review-*.html` are hidden from the tab row
+- `projects.html`, `paper-review.html` and `review-*.html` are hidden from the tab row
   but stay in `sitemap.xml`, so search engines still index them. To bring one back,
   add its tab to every page.
+- `other.html` is linked from nowhere, not even the footer, and is reachable only by
+  its URL or through `sitemap.xml`. To bring it back, add its footer link to every page.
 - `style.css` — shared styles; colours and type are the variables at the top.
 - `favicon-32.png`, `apple-touch-icon.png`, `icon-512.png`, `Pavel-Bushuyeu-CV.pdf`, `.nojekyll`, and `CNAME`, which binds
   the custom domain; DNS for bushuyeu.com is managed at GoDaddy.
