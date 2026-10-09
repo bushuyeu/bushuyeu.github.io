@@ -3,6 +3,12 @@
 // public by design: Grafana only accepts it from the allowed origins.
 // Tracing is left out because a static site has no backend to trace.
 (function () {
+  // GitHub Pages serves /x.html and /x alike and cannot redirect, so old links
+  // keep .html in the address bar. Rewriting it here, before Faro starts, also
+  // keeps both forms under one page id in Grafana.
+  var clean = location.pathname.replace(/(^|\/)index\.html$/, "$1").replace(/\.html$/, "");
+  if (clean !== location.pathname) history.replaceState(history.state, "", clean + location.search + location.hash);
+
   // Events raised before the SDK finishes loading wait here instead of being lost.
   var queued = [];
 
