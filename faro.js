@@ -13,6 +13,19 @@
     else queued.push([name, attributes]);
   }
 
+  // The owner's visits and automated test runs would skew real-visitor numbers.
+  // They go to a separate "internal" environment instead of being dropped, so
+  // they stay visible but can be filtered out. Opening any page with ?internal
+  // marks this browser (?internal=off clears it). localStorage can throw in
+  // private windows, which then count as production.
+  var internal = navigator.webdriver === true;
+  try {
+    var flag = new URLSearchParams(location.search).get("internal");
+    if (flag === "off") localStorage.removeItem("faro-internal");
+    else if (flag !== null) localStorage.setItem("faro-internal", "1");
+    internal = internal || localStorage.getItem("faro-internal") === "1";
+  } catch (e) {}
+
   var sdk = document.createElement("script");
   // Pinned so a new SDK release can't change what runs on the site unannounced.
   sdk.src = "https://unpkg.com/@grafana/faro-web-sdk@2.12.1/dist/bundle/faro-web-sdk.iife.js";
@@ -20,7 +33,7 @@
   sdk.onload = function () {
     window.GrafanaFaroWebSdk.initializeFaro({
       url: "https://faro-collector-prod-us-west-0.grafana.net/collect/ffdabc71ad614712d9e4cfc0ffd25aae",
-      app: { name: "bushuyeu.com", version: "1.0.0", environment: "production" },
+      app: { name: "bushuyeu.com", version: "1.0.0", environment: internal ? "internal" : "production" },
     });
     queued.forEach(function (e) { push(e[0], e[1]); });
     queued = [];
