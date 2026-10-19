@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<title>PAGE TITLE — slides</title>
+<!-- Starter for a review deck. Copy to decks/<page>.html (same name as the review page), replace every
+     slide's content with the review's own, delete the slide types you do not need, then build:
+     uv run tools/build_deck.py decks/<page>.html   ->  media/<page>-slides.pdf
+     Slide types below: title, two columns, rows, table, bullets, quote, figure, live capture, sources.
+     Keep each slide to what fits: the build warns when a slide overflows. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body style='--deck: "SHORT NAME · bushuyeu.com/PAGE"'>
+
+<section class="slide slide--title">
+  <p class="eyebrow">Paper review · ROLE</p>
+  <h1>Review title, as on the page</h1>
+  <p class="sub">Paper title. Authors. Institutions.</p>
+  <div class="rule"></div>
+  <div class="meta"><span>arXiv:0000.00000 · Month Year</span><span>Pavel Bushuyeu · Month Year</span><span>bushuyeu.com/PAGE</span></div>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">Section</p><h2>Two columns</h2></div>
+  <div class="cols">
+    <div class="stack"><h3>Left</h3><p>Text.</p><div class="callout">One number or claim to remember.</div></div>
+    <div class="stack"><h3>Right</h3><p>Text.</p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">Section</p><h2>Rows, oldest first</h2></div>
+  <ol class="rows"><!-- add "rows--tight" for seven rows -->
+    <li class="row"><span class="row__when">Mon 2025</span><div class="row__main"><span class="row__title">Paper</span><span class="role role--extends">Extends</span><span class="row__body">One line on what it did.</span></div></li>
+  </ol>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">Section</p><h2>Table</h2></div>
+  <table>
+    <thead><tr><th>Name</th><th>Text</th><th class="num">Number</th></tr></thead>
+    <tbody><tr><td>Name<span class="when">Mon 2025</span></td><td>Text.</td><td class="num">0.0%</td></tr></tbody>
+  </table>
+  <p class="note">Where the numbers come from.</p>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">Section</p><h2>Bullets</h2></div>
+  <ul class="points"><li><b>Claim.</b> <span>Support for it.</span></li></ul>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">Section</p><h2>Quote</h2></div>
+  <div class="fill"><blockquote>“Quoted sentence.”<cite>Source, section</cite></blockquote></div>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">Section</p><h2>Figure from media/</h2></div>
+  <div class="fill"><figure><img src="/media/FILE.png" alt="What the figure shows."><figcaption>Fig. N of PAPER: caption. Authors, arXiv:ID, LICENSE.</figcaption></figure></div>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">Section</p><h2>Live capture of an element on a page</h2></div>
+  <div class="fill"><figure class="flat wide"><img data-capture-url="/PAGE.html" data-capture-selector="CSS SELECTOR" data-capture-wait="SELECTOR THAT EXISTS WHEN READY" data-capture-width="1900" data-capture-css="CSS TO RESTYLE IT FOR SLIDES" alt="What it shows."><figcaption>Caption.</figcaption></figure></div>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">Sources</p><h2>Sources</h2></div>
+  <ol class="sources"><li>Authors. Title. arXiv:ID, year.</li></ol>
+</section>
+
+</body>
+</html>

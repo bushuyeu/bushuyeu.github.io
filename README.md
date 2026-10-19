@@ -21,6 +21,20 @@ Pages from the root of `main`.
 - `favicon-32.png`, `apple-touch-icon.png`, `icon-512.png`, `Pavel-Bushuyeu-CV.pdf`, `.nojekyll`, and `CNAME`, which binds
   the custom domain; DNS for bushuyeu.com is managed at GoDaddy.
 
+## Slide decks for paper reviews
+
+Each paper review page has a PDF deck for presenting it, linked from the page
+header as "Download presentation":
+
+- `decks/<page>.html` is the deck source: one `<section class="slide">` per
+  16:9 slide, written by hand from the review. Start from `decks/_template.html`.
+- `decks/deck.css` is the shared deck style: light theme only, the same tokens,
+  fonts and hairlines as `style.css`.
+- `uv run tools/build_deck.py decks/<page>.html` renders the deck in Chrome to
+  `media/<page>-slides.pdf`. An `<img data-capture-url=… data-capture-selector=…>`
+  becomes a screenshot of that element from the live page, such as the citation
+  timeline on `review-fast-lineage.html`.
+
 ## Editing
 
 Open any page in a browser, or run `python3 -m http.server 8000` here and

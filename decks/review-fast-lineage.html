@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<title>Where FAST came from, and what it led to — slides</title>
+<!-- Deck source for /review-fast-lineage. Build: uv run tools/build_deck.py decks/review-fast-lineage.html -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body style='--deck: "FAST lineage · bushuyeu.com/review-fast-lineage"'>
+
+<section class="slide slide--title">
+  <p class="eyebrow">Paper review · Archeologist</p>
+  <h1>Where FAST came from, and what it led to</h1>
+  <p class="sub">FAST: Efficient Action Tokenization for Vision-Language-Action Models. Pertsch, Stachowicz, Ichter, Driess, Nair, Vuong, Mees, Finn and Levine. Physical Intelligence, UC Berkeley and Stanford.</p>
+  <div class="rule"></div>
+  <div class="meta"><span>arXiv:2501.09747 · January 2025</span><span>Pavel Bushuyeu · October 2026</span><span>bushuyeu.com/review-fast-lineage</span></div>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">The paper</p><h2>FAST in one slide</h2></div>
+  <div class="cols cols--wide-left">
+    <div class="stack">
+      <h3>The problem</h3>
+      <p>RT-2 and OpenVLA turn each action dimension at each time step into one of 256 bin tokens. At high control rates neighbouring tokens are almost the same, so the model learns to copy the last token.</p>
+      <h3>The fix</h3>
+      <p>Compress each one-second action chunk before tokenizing: a discrete cosine transform per dimension, scale and round as JPEG does, then byte-pair encoding.</p>
+      <div class="callout">π0-FAST matches diffusion π0 with <b>5× fewer GPU hours</b> of training, but needs about <b>750 ms</b> per action chunk at inference against about 100 ms.</div>
+    </div>
+    <div class="stack">
+      <table>
+        <thead><tr><th>Dataset</th><th class="num">Rate</th><th class="num">Binning</th><th class="num">FAST</th><th class="num">Ratio</th></tr></thead>
+        <tbody>
+          <tr><td>BridgeV2</td><td class="num">5 Hz</td><td class="num">35</td><td class="num">20</td><td class="num">1.75×</td></tr>
+          <tr><td>DROID</td><td class="num">15 Hz</td><td class="num">105</td><td class="num">29</td><td class="num">3.6×</td></tr>
+          <tr><td>Table bussing</td><td class="num">20 Hz</td><td class="num">140</td><td class="num">28</td><td class="num">5.0×</td></tr>
+          <tr><td>Shirt folding</td><td class="num">50 Hz</td><td class="num">700</td><td class="num">53</td><td class="num">13.2×</td></tr>
+        </tbody>
+      </table>
+      <p class="note">Tokens per one-second chunk at similar reconstruction error. FAST, Table I.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">The paper</p><h2>The FAST tokenizer</h2></div>
+  <div class="fill">
+    <figure><img src="/media/fast-lineage-fast-fig4.png" alt="FAST pipeline: normalized action chunk, DCT frequency components, sparse quantized frequency matrix, flattened low frequencies first, byte-pair encoding into compressed action tokens."><figcaption>Fig. 4 of FAST: DCT per action dimension, quantization to a sparse matrix, flattening with the low frequencies first, then byte-pair encoding. Pertsch et al., arXiv:2501.09747, CC BY 4.0.</figcaption></figure>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">The lineage</p><h2>Citation timeline</h2></div>
+  <div class="fill">
+    <figure class="flat wide"><img data-capture-url="/review-fast-lineage.html" data-capture-selector=".lineage__graph svg" data-capture-wait="g.node" data-capture-width="1900" data-capture-css=".lineage{max-width:none} .lbl{font-size:20px} .lbl.fast{font-size:22px} .lane-name{font-size:18px} .axis text{font-size:17px}" alt="Citation timeline of FAST"><figcaption>References left of January 2025, citing papers right; higher means more cited; rings mark the papers in this talk. Semantic Scholar, 19 Oct 2026.</figcaption></figure>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">Before FAST</p><h2>Prior works</h2></div>
+  <ol class="rows rows--tight">
+    <li class="row"><span class="row__when">1974–2016</span><div class="row__main"><span class="row__title">DCT, JPEG and byte-pair encoding</span><span class="row__body">The compression idea, from outside robotics: a frequency transform, rounding, then BPE.</span></div></li>
+    <li class="row"><span class="row__when">2017–2024</span><div class="row__main"><span class="row__title">VQ-VAE, FSQ, VQ-BeT, MiniVLA</span><span class="row__body">The road not taken: learned quantizers work for coarse reconstruction, fail on high-frequency control.</span></div></li>
+    <li class="row"><span class="row__when">Apr 2023</span><div class="row__main"><span class="row__title">ACT and ALOHA</span><span class="row__body">Action chunking: predict a second of actions at once.</span></div></li>
+    <li class="row"><span class="row__when">Jul 2023</span><div class="row__main"><span class="row__title">RT-2</span><span class="row__body">The first VLA: one bin token per action dimension per time step.</span></div></li>
+    <li class="row"><span class="row__when">Mar 2024</span><div class="row__main"><span class="row__title">DROID</span><span class="row__body">Binning-based VLAs trained poorly on it; π0-FAST works zero-shot in new scenes.</span></div></li>
+    <li class="row"><span class="row__when">Jun 2024</span><div class="row__main"><span class="row__title">OpenVLA</span><span class="row__body">An open 7B VLA that kept binning; FAST's main baseline.</span></div></li>
+    <li class="row"><span class="row__when">Oct 2024</span><div class="row__main"><span class="row__title">π0</span><span class="row__body">The same lab's earlier model: FAST's base and its point of comparison.</span></div></li>
+  </ol>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">How prior work shaped FAST</p><h2>OpenVLA and RT-2, then π0</h2></div>
+  <div class="cols">
+    <div class="stack">
+      <h3>Binning, kept and replaced</h3>
+      <ul class="points">
+        <li>FAST keeps their recipe: a VLM fine-tuned to write action tokens, trained with next-token prediction.</li>
+        <li>It changes only the tokenizer. Its baseline is labelled “OpenVLA-style” (Fig. 2).</li>
+        <li>Karl Pertsch, FAST's first author, co-wrote RT-2, OpenVLA, Octo and DROID: FAST fixes a limit of his own earlier models.</li>
+      </ul>
+    </div>
+    <div class="stack">
+      <h3>π0: same lab, the base model</h3>
+      <p>π0 is PaliGemma-3B with a flow-matching action expert. π0-FAST keeps the backbone, drops the expert and writes FAST tokens into the VLM's vocabulary.</p>
+      <p>The paper compares the two decoders on one model: about 5× less training compute for π0-FAST, about 750 ms against 100 ms per chunk at inference.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">After FAST</p><h2>What came after</h2></div>
+  <ol class="rows">
+    <li class="row"><span class="row__when">Apr 2025</span><div class="row__main"><span class="row__title">π0.5</span><span class="role role--validates">Validates</span><span class="row__body">Pre-trains on FAST tokens for all robot data; flow matching produces the actions. 8 of FAST's 9 authors.</span></div></li>
+    <li class="row"><span class="row__when">May 2025</span><div class="row__main"><span class="row__title">Knowledge Insulation</span><span class="role role--extends">Extends</span><span class="row__body">FAST tokens and a flow-matching expert, trained together with a stop-gradient.</span></div></li>
+    <li class="row"><span class="row__when">Jun 2025</span><div class="row__main"><span class="row__title">Real-time chunking</span><span class="role role--extends">Extends</span><span class="row__body">Removes the pause while the next action chunk is generated.</span></div></li>
+    <li class="row"><span class="row__when">Nov 2025</span><div class="row__main"><span class="row__title">π*0.6</span><span class="role role--validates">Validates</span><span class="row__body">Still predicts FAST tokens during training, through Knowledge Insulation.</span></div></li>
+    <li class="row"><span class="row__when">Dec 2025</span><div class="row__main"><span class="row__title">FASTer</span><span class="role role--extends">Extends</span><span class="row__body">A learned VQ tokenizer that treats an action chunk as an image.</span></div></li>
+  </ol>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">How later work extends FAST</p><h2>Knowledge Insulation does FAST's future work</h2></div>
+  <div class="fill">
+    <blockquote>“…testing the combination of compression-based action encodings with non-autoregressive decoding approaches like diffusion…”<cite>FAST, discussion of future work</cite></blockquote>
+    <ul class="points">
+      <li><b>Knowledge Insulation</b> (May 2025; Driess, Pertsch, Levine and others): the VLM learns from FAST tokens, a flow-matching expert produces the actions, and a stop-gradient keeps the expert from damaging the VLM.</li>
+      <li>Train fast like π0-FAST, run fast like π0. <span>π0.5 and π*0.6 use the same recipe.</span></li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">Comparison 1 of 2 · speed and simplicity</p><h2>FAST against its challengers</h2></div>
+  <table>
+    <thead><tr><th style="width:15%">Paper</th><th style="width:28%">Objection to FAST</th><th style="width:25%">Uses instead</th><th>FAST against it, in that paper's setup</th></tr></thead>
+    <tbody>
+      <tr><td>OpenVLA-OFT<span class="when">Feb 2025</span></td><td>About 750 ms between action chunks is too slow for high-frequency bimanual robots.</td><td>Continuous actions, parallel decoding and an L1 loss.</td><td>LIBERO, fine-tuned: π0-FAST <b>85.5%</b>, π0 94.2%, OpenVLA-OFT <b>97.1%</b>.</td></tr>
+      <tr><td>BEAST<span class="when">Jun 2025</span></td><td>Chunks of one length give token sequences of different lengths, which blocks parallel decoding.</td><td>Fixed-length B-spline tokens, no tokenizer training.</td><td>Same Florence-2, no robot pre-training: matches FAST on LIBERO-Long, beats it on CALVIN ABC→D.</td></tr>
+      <tr><td>VLA-0<span class="when">Oct 2025</span></td><td>Custom tokenizers “often require intricate training pipelines”.</td><td>Actions written as plain-text numbers.</td><td>LIBERO: π0-FAST <b>86.0%</b> with robot pre-training, 71.8% without; VLA-0 <b>94.7%</b> without.</td></tr>
+    </tbody>
+  </table>
+  <p class="note">Each paper's own setup: compare within a row, not across rows. LIBERO is the average success over its four suites.</p>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">Comparison 2 of 2 · the tokenizer itself</p><h2>FAST against its challengers</h2></div>
+  <table>
+    <thead><tr><th style="width:15%">Paper</th><th style="width:28%">Objection to FAST</th><th style="width:25%">Uses instead</th><th>FAST against it, in that paper's setup</th></tr></thead>
+    <tbody>
+      <tr><td>ActionCodec<span class="when">Feb 2026</span></td><td>“Fixed geometric priors” limit transfer across robots; decoded length must match exactly, so they pad or truncate.</td><td>A learned tokenizer designed from VLA training behaviour.</td><td>Same SmolVLM2-2.2B, tokenizer swapped: FAST <b>90.6%</b>, best of five existing tokenizers; ActionCodec <b>95.5%</b>.</td></tr>
+      <tr><td>OAT<span class="when">Feb 2026</span></td><td>Not every token sequence decodes; invalid ones make the policy “unstable, overly aggressive”.</td><td>Learned, ordered tokens; any prefix decodes.</td><td>Small policies from scratch, LIBERO: FAST <b>23.0%</b>, diffusion policy 36.6%, OAT <b>56.3%</b>.</td></tr>
+      <tr><td>The Compression Gap<span class="when">Apr 2026</span></td><td>A fixed-capacity discrete code caps what a better vision encoder can add.</td><td>An analysis; continuous actions avoid the cap.</td><td>Not tested on FAST; shown for OAT and diffusion policy.</td></tr>
+    </tbody>
+  </table>
+  <p class="note">Each paper's own setup: compare within a row, not across rows. LIBERO is the average success over its four suites.</p>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">Comparison</p><h2>What the comparison shows</h2></div>
+  <ul class="points">
+    <li><b>As a tokenizer, FAST holds up.</b> <span>With only the tokenizer swapped it beats binning and VQ tokenizers (ActionCodec); BEAST only matches it on LIBERO-Long.</span></li>
+    <li><b>Decoding is the common objection.</b> <span>Sequences that do not decode (OAT, ActionCodec), the delay per chunk (OpenVLA-OFT), variable length against parallel decoding (BEAST).</span></li>
+    <li><b>It needs robot pre-training.</b> <span>Without it π0-FAST drops from 86.0% to 71.8% on LIBERO (VLA-0) and learns late (BEAST).</span></li>
+    <li><b>Its own lab answered the speed objection differently.</b> <span>π0.5, Knowledge Insulation and π*0.6 train on FAST tokens and decode with flow matching.</span></li>
+  </ul>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">Appendix · architecture</p><h2>OpenVLA-OFT</h2></div>
+  <div class="fill"><figure><img src="/media/fast-lineage-oft-fig2.png" alt="Autoregressive against parallel decoding; discrete tokens against continuous actions."><figcaption>Fig. 2 of OpenVLA-OFT: autoregressive against parallel decoding (left), discrete action tokens against continuous actions (right). Kim, Finn and Liang, arXiv:2502.19645, CC BY 4.0.</figcaption></figure></div>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">Appendix · architecture</p><h2>BEAST</h2></div>
+  <div class="fill">
+    <figure class="half"><img src="/media/fast-lineage-beast-fig2.png" alt="BEAST encoding pipeline from B-spline control points to discrete tokens."></figure>
+    <figure class="half"><img src="/media/fast-lineage-beast-fig3.png" alt="BEAST-F: Florence-2 with BEAST tokens and a B-spline decoder."><figcaption>Figs. 2 and 3 of BEAST: the encoding pipeline (top) and BEAST-F, BEAST with Florence-2, where tokens of uniform length allow parallel decoding (bottom). Zhou et al., arXiv:2506.06072, CC BY-NC-SA 4.0.</figcaption></figure>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">Appendix · architecture</p><h2>VLA-0</h2></div>
+  <div class="fill"><figure><img src="/media/fast-lineage-vla0-fig3.png" alt="VLA-0: an unchanged VLM reads prompts and images and writes actions as integers."><figcaption>Fig. 3 of VLA-0: the VLM is not changed; it writes actions as space-separated integers. Goyal et al., arXiv:2510.13054, arXiv non-exclusive license; shown for commentary.</figcaption></figure></div>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">Appendix · architecture</p><h2>ActionCodec</h2></div>
+  <div class="fill"><figure><img src="/media/fast-lineage-actioncodec-fig2.png" alt="ActionCodec: Perceiver-like encoder and decoder around a vector quantizer."><figcaption>Fig. 2 of ActionCodec: a Perceiver-like encoder and decoder around a vector quantizer, with an embedding per embodiment and four training losses. Dong et al., arXiv:2602.15397, CC BY 4.0.</figcaption></figure></div>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">Appendix · architecture</p><h2>OAT</h2></div>
+  <div class="fill"><figure><img src="/media/fast-lineage-oat-fig3.png" alt="OAT: transformer encoder with registers, FSQ and nested dropout; an autoregressive policy generates the tokens."><figcaption>Fig. 3 of OAT: ordered tokens from a transformer encoder with registers, FSQ and nested dropout (left), generated by an autoregressive policy (right). Liu et al., arXiv:2602.04215, CC BY 4.0.</figcaption></figure></div>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">Appendix · architecture</p><h2>The Compression Gap</h2></div>
+  <div class="fill"><figure><img src="/media/fast-lineage-compression-gap-fig1.png" alt="Continuous and discrete pipelines with their bottlenecks."><figcaption>Fig. 1 of The Compression Gap: the vision encoder is the bottleneck with continuous actions, the codebook with discrete tokens. Shiba, arXiv:2604.03191, CC BY 4.0.</figcaption></figure></div>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">Sources</p><h2>Sources</h2></div>
+  <ol class="sources">
+    <li>Pertsch et al. FAST: Efficient Action Tokenization for Vision-Language-Action Models. arXiv:2501.09747, 2025.</li>
+    <li>Semantic Scholar Graph API: 781 citing papers, their citing sentences and reference lists, read 19 October 2026.</li>
+    <li>Black et al. π0. arXiv:2410.24164, 2024.</li>
+    <li>Kim et al. OpenVLA. arXiv:2406.09246, 2024.</li>
+    <li>Brohan et al. RT-2. arXiv:2307.15818, 2023.</li>
+    <li>Physical Intelligence. π0.5. arXiv:2504.16054, 2025.</li>
+    <li>Driess et al. Knowledge Insulating VLA Models. arXiv:2505.23705, 2025.</li>
+    <li>Kim, Finn and Liang. OpenVLA-OFT. arXiv:2502.19645, 2025.</li>
+    <li>Zhou et al. BEAST. arXiv:2506.06072, 2025.</li>
+    <li>Goyal et al. VLA-0. arXiv:2510.13054, 2025.</li>
+    <li>Dong et al. ActionCodec. arXiv:2602.15397, 2026.</li>
+    <li>Liu et al. OAT: Ordered Action Tokenization. arXiv:2602.04215, 2026.</li>
+    <li>Shiba. The Compression Gap. arXiv:2604.03191, 2026.</li>
+    <li>This review with the interactive timeline: bushuyeu.com/review-fast-lineage.</li>
+  </ol>
+</section>
+
+</body>
+</html>
