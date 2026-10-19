@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Where FAST came from, and what it led to — Pavel Bushuyeu</title>
+<meta name="description" content="The citation lineage of Physical Intelligence’s FAST action tokenizer: the papers that shaped it, from per-dimension binning in RT-2 and OpenVLA to π0, and the later work that extends, validates or challenges it, from π0.5 and Knowledge Insulation to OpenVLA-OFT and BEAST.">
+<link rel="canonical" href="https://bushuyeu.com/review-fast-lineage">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Where FAST came from, and what it led to — Pavel Bushuyeu">
+<meta property="og:description" content="The citation lineage of Physical Intelligence’s FAST action tokenizer: what shaped it, and the later work that extends, validates or challenges it.">
+<meta property="og:url" content="https://bushuyeu.com/review-fast-lineage">
+<meta property="og:image" content="https://bushuyeu.com/media/og-card.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Pavel Bushuyeu, AI researcher, University of Hawaiʻi at Mānoa">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://bushuyeu.com/media/og-card.jpg">
+<link rel="icon" href="favicon-32.png?v=3" type="image/png" sizes="32x32">
+<link rel="icon" href="icon-512.png?v=3" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="alternate" type="application/rss+xml" title="Pavel Bushuyeu — News" href="https://bushuyeu.com/feed.xml">
+<link rel="stylesheet" href="style.css?v=30">
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "WebPage", "author": {"@type": "Person", "@id": "https://bushuyeu.com/#person", "name": "Pavel Bushuyeu", "url": "https://bushuyeu.com/"}}
+</script>
+<style>
+/* Page-only styles for the citation timeline. Built on the tokens in style.css;
+   the four data colours below are the only additions, one per role in the story. */
+:root {
+  --viz-before:     var(--ink-3);
+  --viz-after:      var(--link);
+  --viz-fast:       var(--ink);
+  --viz-extends:    #248a3d;
+  --viz-validates:  #8944ab;
+  --viz-challenges: #d70015;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --viz-extends:    #30d158;
+    --viz-validates:  #bf5af2;
+    --viz-challenges: #ff453a;
+  }
+}
+.lineage { max-width: 84rem; margin: 0 auto; padding-inline: var(--gutter); padding-bottom: 34px; display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 20px; align-items: start; }
+@media (max-width: 1080px) { .lineage { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 640px) { .lineage { padding-inline: 22px; } }
+.lineage__graph { border: 1px solid var(--hair-soft); border-radius: 12px; overflow-x: auto; background: var(--bg); }
+.lineage__graph svg { display: block; width: 100%; min-width: 860px; height: auto; }
+.lineage__hint { min-width: 860px; padding: 10px 14px; border-top: 1px solid var(--hair-soft); font-size: 0.8rem; color: var(--ink-3); }
+.lineage__panel { border: 1px solid var(--hair-soft); border-radius: 12px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; font-size: 0.92rem; min-width: 0; }
+.lineage__panel h3 { font-size: 1.05rem; }
+.lineage__panel .meta { gap: 2px 14px; }
+.lineage__panel blockquote { margin: 0; padding-left: 0.9em; border-left: 2px solid var(--hair); color: var(--ink-2); font-size: 0.86rem; }
+.lineage__panel .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; margin-top: 4px; }
+.toolbar input { font: inherit; font-size: 0.88rem; color: var(--ink); background: var(--bg); padding: 6px 14px; border: 1px solid var(--hair); border-radius: 980px; width: 15rem; max-width: 100%; outline: none; }
+.toolbar input:focus { border-color: var(--link); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 0.8rem; color: var(--ink-3); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.swatch { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.swatch--ring { width: 10px; height: 10px; border: 2px solid; background: none; }
+button.pill-link { font: inherit; font-size: 0.84rem; font-weight: 500; background: none; cursor: pointer; }
+button.pill-link[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+button.pill-link--small { padding: 3px 11px; font-size: 0.8rem; }
+.role { display: inline-flex; align-items: center; gap: 6px; font-weight: 500; color: var(--ink-2); }
+.role::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.role--shaped { color: var(--ink-2); }
+.role--extends { color: var(--viz-extends); }
+.role--validates { color: var(--viz-validates); }
+.role--challenges { color: var(--viz-challenges); }
+svg text { font-family: var(--font-sans); }
+.lane { fill: var(--tint); }
+.lane-name { fill: var(--ink-3); font-size: 10.5px; font-weight: 500; letter-spacing: 0.02em; }
+.axis line { stroke: var(--hair); }
+.axis text { fill: var(--ink-3); font: 10.5px var(--font-mono); }
+.fast-rule { stroke: var(--viz-fast); stroke-width: 1; stroke-dasharray: 3 4; }
+.node { cursor: pointer; transition: opacity 0.15s; }
+.node circle.core { stroke: var(--bg); stroke-width: 1; }
+.node circle.halo { fill: none; stroke-width: 2.2; }
+.node:focus-visible { outline: none; }
+.node:focus-visible circle.core, .node.sel circle.core { stroke: var(--ink); stroke-width: 2.2; }
+.node.dim { opacity: 0.15; }
+.lbl { font-size: 11px; fill: var(--ink); paint-order: stroke; stroke: var(--tint); stroke-width: 3.5px; stroke-linejoin: round; pointer-events: none; }
+.lbl.key { font-weight: 600; }
+.lbl.fast { font-size: 13px; font-weight: 600; }
+.edge { fill: none; stroke-width: 1.3; opacity: 0.7; }
+.edge.faint { stroke: var(--ink-3); stroke-width: 0.6; opacity: 0.1; }
+.edge.out { stroke: var(--viz-before); opacity: 0.55; }
+.edge.in { stroke: var(--viz-after); opacity: 0.4; }
+.prose details summary { cursor: pointer; font-weight: 600; }
+.prose details > * + * { margin-top: 0.9em; }
+.prose .tall { max-height: 34rem; overflow: auto; }
+.prose tr[data-id] { cursor: pointer; }
+.prose tr[data-id]:hover td { background: var(--tint); }
+@media (prefers-reduced-motion: reduce) { .node { transition: none; } }
+</style>
+<script src="faro.js" async></script>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <nav class="eyebrow eyebrow-nav" aria-label="Main">
+      <a href="/">Home</a>
+      <a href="/research">Research</a>
+      <a href="/teaching">Teaching</a>
+      <a href="/product-management">Product management</a>
+      <a href="/services">Services</a>
+    </nav>
+    <h1>Where FAST came from, and what it led to</h1>
+    <p class="sub">FAST replaced the per-dimension binning of RT-2 and OpenVLA with JPEG-style compression of action chunks. Physical Intelligence’s later models, π0.5 and π*0.6, still train on FAST tokens but decode actions with flow matching, while other groups argue for fixed-length tokens, learned tokenizers or no tokenizer at all.</p>
+    <div class="meta">
+      <span>Paper: <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2501.09747">FAST, arXiv:2501.09747</a></span>
+      <span>Data: <a rel="noopener" target="_blank" href="https://www.semanticscholar.org/paper/3880f5bad862ba1b18f4f8ec060038b326b118ed">Semantic Scholar</a>, 19 Oct 2026</span>
+      <span>Role: archeologist</span>
+      <span>October 2026</span>
+    </div>
+  </div>
+</header>
+
+<section id="timeline">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Citation timeline</h2>
+      <p class="eyebrow">72 references · 141 of 781 citing papers</p>
+    </div>
+    <p>Every paper FAST cites sits to the left of January 2025; papers that cite FAST sit to the right. Higher means more cited. A ring marks the papers discussed below. Click a paper to draw all its links to the others; for a citing paper the panel quotes the sentences it uses to cite FAST.</p>
+    <div class="toolbar">
+      <div role="group" aria-label="Which links to draw" style="display:flex;gap:6px">
+        <button type="button" class="pill-link" id="mode-story" aria-pressed="true">Story links</button>
+        <button type="button" class="pill-link" id="mode-all" aria-pressed="false">All links</button>
+      </div>
+      <input id="find" list="names" type="search" placeholder="Find a paper: OpenVLA, BEAST, π0.5" autocomplete="off" aria-label="Find a paper">
+      <datalist id="names"></datalist>
+      <div class="legend">
+        <span><i class="swatch" style="background:var(--viz-before)"></i>Cited by FAST</span>
+        <span><i class="swatch" style="background:var(--viz-fast)"></i>FAST</span>
+        <span><i class="swatch" style="background:var(--viz-after)"></i>Cites FAST</span>
+        <span><i class="swatch swatch--ring" style="border-color:var(--viz-extends)"></i>Extends</span>
+        <span><i class="swatch swatch--ring" style="border-color:var(--viz-validates)"></i>Validates</span>
+        <span><i class="swatch swatch--ring" style="border-color:var(--viz-challenges)"></i>Challenges</span>
+      </div>
+    </div>
+  </div>
+  <div class="lineage">
+    <div class="lineage__graph">
+      <svg id="g" role="img" aria-label="Citation timeline of FAST: references to the left of January 2025, citing papers to the right"><text x="24" y="40" style="fill:var(--ink-3);font-size:13px">Loading the citation graph…</text></svg>
+      <p class="lineage__hint">Left to right: publication date, stretched near 2025. Up: citations, log scale. Dot size: citations.</p>
+    </div>
+    <aside class="lineage__panel" id="panel" aria-live="polite">
+      <h3>Click any paper</h3>
+      <p>Grey dots are papers FAST cites, blue dots cite FAST. Rings mark the papers in the two lists below.</p>
+    </aside>
+  </div>
+</section>
+
+<section id="before">
+  <div class="wrap">
+    <div class="shead">
+      <h2>What shaped FAST</h2>
+      <p class="eyebrow">Prior work</p>
+    </div>
+    <ol class="rows">
+      <li class="row">
+        <div class="row__when">Oct 2024</div>
+        <div class="row__main">
+          <div class="row__title"><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2410.24164">π0: a vision-language-action flow model</a></div>
+          <div class="row__sub"><span class="role role--shaped">Shaped FAST</span> · Physical Intelligence · ref. [7], cited 28 times, more than any other</div>
+          <div class="row__body">FAST’s backbone and its rival. π0 avoids action tokens with a flow-matching action expert. π0-FAST matches its success with 5× fewer GPU hours, but needs about 750 ms per one-second chunk against about 100 ms, because it decodes 30 to 60 tokens with the 2B backbone instead of 10 denoising steps in a 300M expert.</div>
+        </div>
+      </li>
+      <li class="row">
+        <div class="row__when">Jun 2024</div>
+        <div class="row__main">
+          <div class="row__title"><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2406.09246">OpenVLA</a></div>
+          <div class="row__sub"><span class="role role--shaped">Shaped FAST</span> · ref. [39], cited 18 times</div>
+          <div class="row__body">An open 7B VLA that kept RT-2’s binning, and FAST’s main baseline (“OpenVLA-style” in its Figure 2). FAST’s first author, Karl Pertsch, is a co-author of RT-2, OpenVLA, Octo and DROID, so FAST fixes a limit of his own earlier models.</div>
+        </div>
+      </li>
+      <li class="row">
+        <div class="row__when">Mar 2024</div>
+        <div class="row__main">
+          <div class="row__title"><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2403.12945">DROID</a></div>
+          <div class="row__sub"><span class="role role--shaped">Shaped FAST</span> · ref. [38], cited 11 times</div>
+          <div class="row__body">A large in-the-wild manipulation dataset that binning-based autoregressive VLAs could not train on well. FAST calls the π0-FAST policy trained on it the first language-conditioned generalist manipulation policy that works zero-shot in unseen environments.</div>
+        </div>
+      </li>
+      <li class="row">
+        <div class="row__when">Jul 2023</div>
+        <div class="row__main">
+          <div class="row__title"><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2307.15818">RT-2</a></div>
+          <div class="row__sub"><span class="role role--shaped">Shaped FAST</span> · Google DeepMind · ref. [10], cited 11 times</div>
+          <div class="row__body">The first VLA. It turns each action dimension at each time step into one of 256 bin tokens. FAST’s case study shows why this breaks at high control rates: consecutive tokens are almost identical, so the next-token loss is low when the model just copies the last token.</div>
+        </div>
+      </li>
+      <li class="row">
+        <div class="row__when">Apr 2023</div>
+        <div class="row__main">
+          <div class="row__title"><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2304.13705">ACT and ALOHA</a></div>
+          <div class="row__sub"><span class="role role--shaped">Shaped FAST</span> · ref. [69]</div>
+          <div class="row__body">Action chunking: predict a second of future actions at once. This makes long, high-frequency chunks the target that a tokenizer has to handle.</div>
+        </div>
+      </li>
+      <li class="row">
+        <div class="row__when">2017–2024</div>
+        <div class="row__main">
+          <div class="row__title">Learned quantizers: VQ-VAE, FSQ, VQ-BeT, MiniVLA</div>
+          <div class="row__sub"><span class="role role--shaped">Shaped FAST</span> · refs. [59], [48], [41], [3]</div>
+          <div class="row__body">The road FAST did not take. FAST finds that these work for coarse reconstruction but fail on high-frequency tasks that need fine control; FSQ is its learned-compression ablation.</div>
+        </div>
+      </li>
+      <li class="row">
+        <div class="row__when">1974–2016</div>
+        <div class="row__main">
+          <div class="row__title">The DCT, JPEG and byte-pair encoding</div>
+          <div class="row__sub"><span class="role role--shaped">Shaped FAST</span> · refs. [1], [61], [27], [57]</div>
+          <div class="row__body">The idea comes from outside robotics. Take the discrete cosine transform of each action dimension, scale and round so small high-frequency terms vanish, as JPEG does for image blocks, then merge frequent patterns with BPE, as language models do for text. A one-second shirt-folding chunk at 50 Hz goes from 700 binning tokens to 53 FAST tokens.</div>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section id="after">
+  <div class="wrap">
+    <div class="shead">
+      <h2>What came after</h2>
+      <p class="eyebrow">Later work that cites FAST</p>
+    </div>
+    <ol class="rows">
+      <li class="row">
+        <div class="row__when">Feb 2025</div>
+        <div class="row__main">
+          <div class="row__title"><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2502.19645">OpenVLA-OFT</a></div>
+          <div class="row__sub"><span class="role role--challenges">Challenges</span> · Kim, Finn and Liang · 1,088 citations</div>
+          <div class="row__body">“Significant latency between action chunks (e.g., 750 ms for the recent FAST approach) still limits real-time deployment on high-frequency bimanual robots.” It drops tokens altogether, with parallel decoding, continuous actions and an L1 loss, and reports higher success than the best fine-tuned π0 policies, π0-FAST included.</div>
+        </div>
+      </li>
+      <li class="row">
+        <div class="row__when">Apr 2025</div>
+        <div class="row__main">
+          <div class="row__title"><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2504.16054">π0.5</a></div>
+          <div class="row__sub"><span class="role role--validates">Validates</span> · Physical Intelligence · 2,415 citations, the most of any paper citing FAST</div>
+          <div class="row__body">All pre-training data, robot actions included, is discrete tokens via FAST, “which leads to simple, scalable, and efficient training”; flow matching produces the actions at inference. Eight of FAST’s nine authors are on it.</div>
+        </div>
+      </li>
+      <li class="row">
+        <div class="row__when">May 2025</div>
+        <div class="row__main">
+          <div class="row__title"><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2505.23705">Knowledge Insulating VLA models</a></div>
+          <div class="row__sub"><span class="role role--extends">Extends</span> · Driess, Pertsch, Levine and others, Physical Intelligence</div>
+          <div class="row__body">Trains the VLM on FAST tokens and a flow-matching action expert at the same time, with a stop-gradient so the expert cannot damage the VLM: FAST’s training speed with π0’s inference speed. FAST’s own discussion lists this as future work, “the combination of compression-based action encodings with non-autoregressive decoding approaches like diffusion”.</div>
+        </div>
+      </li>
+      <li class="row">
+        <div class="row__when">Jun 2025</div>
+        <div class="row__main">
+          <div class="row__title"><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2506.06072">BEAST</a></div>
+          <div class="row__sub"><span class="role role--challenges">Challenges</span> · B-spline action tokenizer</div>
+          <div class="row__body">FAST gives “variable-length token sequences for inputs of the same duration, which complicates applying fast token generation techniques such as parallel decoding.” B-spline control points give fixed-length, smooth tokens and need no tokenizer training.</div>
+        </div>
+      </li>
+      <li class="row">
+        <div class="row__when">Jun 2025</div>
+        <div class="row__main">
+          <div class="row__title"><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2506.07339">Real-time chunking</a></div>
+          <div class="row__sub"><span class="role role--extends">Extends</span> · Physical Intelligence</div>
+          <div class="row__body">Removes the pause between action chunks. It cites FAST among the prior work that stops the robot while the next chunk is generated.</div>
+        </div>
+      </li>
+      <li class="row">
+        <div class="row__when">Oct 2025</div>
+        <div class="row__main">
+          <div class="row__title"><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2510.13054">VLA-0</a></div>
+          <div class="row__sub"><span class="role role--challenges">Challenges</span> · actions as plain text</div>
+          <div class="row__body">Writes actions as plain text numbers with no custom tokenizer, calls π0-FAST a “custom” VLA, and reports higher LIBERO success than OpenVLA-OFT, π0.5 with Knowledge Insulation and SmolVLA.</div>
+        </div>
+      </li>
+      <li class="row">
+        <div class="row__when">Nov 2025</div>
+        <div class="row__main">
+          <div class="row__title"><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2511.14759">π*0.6</a></div>
+          <div class="row__sub"><span class="role role--validates">Validates</span> · Physical Intelligence</div>
+          <div class="row__body">Still predicts FAST tokens during training, through the Knowledge Insulation recipe.</div>
+        </div>
+      </li>
+      <li class="row">
+        <div class="row__when">Dec 2025</div>
+        <div class="row__main">
+          <div class="row__title"><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2512.04952">FASTer</a></div>
+          <div class="row__sub"><span class="role role--extends">Extends</span> · learned action tokenizer</div>
+          <div class="row__body">Replaces the DCT with a learned VQ tokenizer that treats an action chunk as an image, and adds block-wise autoregressive decoding with a small action expert.</div>
+        </div>
+      </li>
+      <li class="row">
+        <div class="row__when">Feb 2026</div>
+        <div class="row__main">
+          <div class="row__title"><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2602.15397">ActionCodec</a> and <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2602.04215">OAT</a></div>
+          <div class="row__sub"><span class="role role--challenges">Challenges</span> · tokenizer design principles</div>
+          <div class="row__body">ActionCodec says FAST’s “reliance on fixed geometric priors limits its capacity for cross-embodiment knowledge transfer” and that it “requires a specialized sequence-length alignment heuristic”. OAT asks for tokenizers that compress, always decode and are ordered left to right, and learns one that does all three.</div>
+        </div>
+      </li>
+      <li class="row">
+        <div class="row__when">Apr 2026</div>
+        <div class="row__main">
+          <div class="row__title"><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2604.03191">The Compression Gap</a></div>
+          <div class="row__sub"><span class="role role--challenges">Challenges</span> · Shiba</div>
+          <div class="row__body">Argues that a discrete action codebook caps how much a better vision encoder can help, and notes that FAST “suffers from partial decodability”.</div>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section id="lists">
+  <div class="wrap">
+    <div class="shead">
+      <h2>All papers in the graph</h2>
+      <p class="eyebrow">Click a row to find it in the timeline</p>
+    </div>
+    <div class="prose">
+      <details>
+        <summary>FAST’s 72 references, by how often FAST cites them</summary>
+        <div class="scroll tall"><table><thead><tr><th>Ref.</th><th>Paper</th><th class="num">Year</th><th class="num">Cited in FAST</th><th class="num">Citations</th></tr></thead><tbody id="refs-body"></tbody></table></div>
+      </details>
+      <details>
+        <summary>141 papers that cite FAST, by citations</summary>
+        <div role="group" aria-label="Filter citing papers" style="display:flex;flex-wrap:wrap;gap:6px">
+          <button type="button" class="pill-link pill-link--small" data-f="all" aria-pressed="true">All</button>
+          <button type="button" class="pill-link pill-link--small" data-f="key" aria-pressed="false">Discussed above</button>
+          <button type="button" class="pill-link pill-link--small" data-f="influential" aria-pressed="false">Influential</button>
+          <button type="button" class="pill-link pill-link--small" data-f="tokenizer" aria-pressed="false">Action tokenizers</button>
+          <button type="button" class="pill-link pill-link--small" data-f="pi" aria-pressed="false">Physical Intelligence</button>
+        </div>
+        <div class="scroll tall"><table><thead><tr><th>Paper</th><th class="num">Date</th><th class="num">Citations</th><th>Influential</th></tr></thead><tbody id="cit-body"></tbody></table></div>
+      </details>
+      <p class="note"><b>Method.</b> Citation data from the Semantic Scholar Graph API on 19 October 2026: 781 citing papers, 115 flagged as influential (they cite FAST many times or in their method), the sentences each one uses to cite FAST, and the reference lists used to draw the links between papers. Semantic Scholar has no reference list for FAST, so the 75 references were parsed from the arXiv v1 PDF; six of them (JPEG, Huffman coding, BPE from 1994, GPT-2, MiniVLA and Lai et al.) are not matched to a Semantic Scholar record. The graph shows all 72 distinct references and 141 citing papers: the 60 most cited, the 60 most cited influential ones, and every action-tokenizer paper. The extends, validates and challenges labels are my reading of each paper. The empiricist side of this paper is in <a href="/review-fast">Does the universal FAST+ tokenizer transfer to cable routing?</a></p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="backlink"><a href="/paper-review">← All paper reviews</a></p>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <img class="footer-portrait" src="media/portrait.jpg" alt="Portrait of Pavel Bushuyeu" width="640" height="640" loading="lazy">
+      <nav aria-label="Site">
+        <h2 class="footer-h">Site</h2>
+        <ul>
+          <li><a href="/research">Research</a></li>
+          <li><a href="/teaching">Teaching</a></li>
+          <li><a href="/product-management">Product management</a></li>
+          <li><a href="/services">Services</a></li>
+          <li><a href="/projects">Projects</a></li>
+          <li><a href="/paper-review">Paper review</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Profiles">
+        <h2 class="footer-h">Elsewhere</h2>
+        <ul>
+          <li><a rel="noopener" target="_blank" href="https://linkedin.com/in/bushuyeu/">LinkedIn</a></li>
+          <li><a rel="noopener" target="_blank" href="https://github.com/bushuyeu">GitHub</a></li>
+          <li><a rel="noopener" target="_blank" href="https://huggingface.co/bushuyeu">Hugging Face</a></li>
+          <li><a rel="noopener" target="_blank" href="https://scholar.google.com/citations?user=ub3osgUAAAAJ">Google Scholar</a></li>
+          <li><a rel="noopener" target="_blank" href="https://orcid.org/0009-0009-7183-6714">ORCID</a></li>
+          <li><a rel="noopener" target="_blank" href="https://openreview.net/profile?id=~Pavel_Bushuyeu1">OpenReview</a></li>
+          <li><a rel="noopener" target="_blank" href="https://www.semanticscholar.org/author/2405429742">Semantic Scholar</a></li>
+          <li><a rel="noopener" target="_blank" href="https://www.researchgate.net/profile/Pavel-Bushuyeu">ResearchGate</a></li>
+        </ul>
+      </nav>
+      <div>
+        <h2 class="footer-h">Contact</h2>
+        <ul>
+          <li><a href="mailto:pavelbushuyeu@gmail.com">pavelbushuyeu@gmail.com</a></li>
+          <li><a rel="noopener" target="_blank" href="https://calendar.app.google/9iBTcxt9PBrxYwr29">Schedule a call</a></li>
+          <li><a href="https://follow.it/pavel-bushuyeu-news" rel="noopener" target="_blank">Subscribe to updates</a></li>
+          <li><a href="/feed.xml">RSS feed</a></li>
+          <li><a href="Pavel-Bushuyeu-CV.pdf" download>Download Resume</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="footer-base">© 2026 Pavel Bushuyeu</p>
+  </div>
+</footer>
+
+<script src="/media/fast-lineage.js" defer></script>
+</body>
+</html>
