@@ -68,15 +68,15 @@
 .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; margin-top: 4px; }
 .toolbar input { font: inherit; font-size: 0.88rem; color: var(--ink); background: var(--bg); padding: 6px 14px; border: 1px solid var(--hair); border-radius: 980px; width: 15rem; max-width: 100%; outline: none; }
 .toolbar input:focus { border-color: var(--link); }
-/* Legend chips double as filters: each one shows or hides its group of papers */
+/* Legend chips are a "show only" filter: All by default; picked chips show only their groups (FAST always stays) */
 .legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 0.8rem; }
-.legend .filter { display: inline-flex; align-items: center; gap: 6px; font: inherit; color: var(--ink-2); background: none; border: 1px solid var(--hair); border-radius: 980px; padding: 4px 11px; cursor: pointer; transition: border-color 0.15s, opacity 0.15s; }
-.legend .filter:hover { border-color: var(--link); }
-.legend .filter[aria-pressed="false"] { opacity: 0.45; border-style: dashed; text-decoration: line-through; }
-.legend .count { font-family: var(--font-mono); font-size: 0.92em; color: var(--ink-3); }
-.legend .filter-reset { font: inherit; color: var(--link); background: none; border: 0; padding: 4px 6px; cursor: pointer; }
-.legend .filter-reset:hover { text-decoration: underline; text-underline-offset: 4px; }
-@media (max-width: 640px) { .legend .filter { padding: 8px 13px; } }
+.legend .filter { display: inline-flex; align-items: center; gap: 6px; font: inherit; font-weight: 500; color: var(--ink-2); background: none; border: 1px solid var(--hair); border-radius: 980px; padding: 4px 11px; cursor: pointer; transition: border-color 0.15s, background-color 0.15s, color 0.15s; }
+.legend .filter:hover { border-color: var(--link); color: var(--ink); }
+.legend .filter[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.legend .swatch { box-shadow: 0 0 0 1.5px var(--bg); }
+.legend .count { font-family: var(--font-mono); font-size: 0.92em; opacity: 0.7; }
+.legend__sep { width: 1px; height: 18px; background: var(--hair); margin-inline: 4px; }
+@media (max-width: 640px) { .legend .filter { padding: 8px 13px; } .legend__sep { display: none; } }
 .node.off { display: none; }
 .swatch { width: 9px; height: 9px; border-radius: 50%; flex: none; }
 .swatch--ring { width: 10px; height: 10px; border: 2px solid; background: none; }
@@ -159,7 +159,7 @@ svg text { font-family: var(--font-sans); }
       <h2>Citation timeline</h2>
       <p class="eyebrow">72 references · 141 of 781 citing papers</p>
     </div>
-    <p>Every paper FAST cites sits to the left of January 2025; papers that cite FAST sit to the right. Higher means more cited. A ring marks the papers discussed below. The chips under the search box show or hide each group. Click a paper to draw all its links to the others; for a citing paper the panel quotes the sentences it uses to cite FAST.</p>
+    <p>Every paper FAST cites sits to the left of January 2025; papers that cite FAST sit to the right. Higher means more cited. A ring marks the papers discussed below. Pick chips under the search box to show only those papers; All shows everything, and FAST always stays. Click a paper to draw all its links to the others; for a citing paper the panel quotes the sentences it uses to cite FAST.</p>
     <div class="toolbar">
       <div role="group" aria-label="Which links to draw" style="display:flex;gap:6px">
         <button type="button" class="pill-link" id="mode-story" aria-pressed="true">Story links</button>
@@ -167,14 +167,16 @@ svg text { font-family: var(--font-sans); }
       </div>
       <input id="find" list="names" type="search" placeholder="Find a paper: OpenVLA, BEAST, π0.5" autocomplete="off" aria-label="Find a paper">
       <datalist id="names"></datalist>
-      <div class="legend" role="group" aria-label="Show or hide groups of papers">
-        <button type="button" class="filter" data-cat="before" aria-pressed="true"><i class="swatch" style="background:var(--viz-before)"></i>Cited by FAST <span class="count"></span></button>
-        <button type="button" class="filter" data-cat="fast" aria-pressed="true"><i class="swatch" style="background:var(--viz-fast)"></i>FAST</button>
-        <button type="button" class="filter" data-cat="after" aria-pressed="true"><i class="swatch" style="background:var(--viz-after)"></i>Cites FAST <span class="count"></span></button>
-        <button type="button" class="filter" data-cat="extends" aria-pressed="true"><i class="swatch swatch--ring" style="border-color:var(--viz-extends)"></i>Extends <span class="count"></span></button>
-        <button type="button" class="filter" data-cat="validates" aria-pressed="true"><i class="swatch swatch--ring" style="border-color:var(--viz-validates)"></i>Validates <span class="count"></span></button>
-        <button type="button" class="filter" data-cat="challenges" aria-pressed="true"><i class="swatch swatch--ring" style="border-color:var(--viz-challenges)"></i>Challenges <span class="count"></span></button>
-        <button type="button" class="filter-reset" id="show-all" hidden>Show all</button>
+      <div class="legend" role="group" aria-label="Show only these papers">
+        <button type="button" class="filter" id="filter-all" aria-pressed="true">All</button>
+        <span class="legend__sep" aria-hidden="true"></span>
+        <button type="button" class="filter" data-cat="before" aria-pressed="false"><i class="swatch" style="background:var(--viz-before)"></i>Cited by FAST <span class="count"></span></button>
+        <button type="button" class="filter" data-cat="shaped" aria-pressed="false"><i class="swatch swatch--ring" style="border-color:var(--ink-2)"></i>Shaped FAST <span class="count"></span></button>
+        <span class="legend__sep" aria-hidden="true"></span>
+        <button type="button" class="filter" data-cat="after" aria-pressed="false"><i class="swatch" style="background:var(--viz-after)"></i>Cites FAST <span class="count"></span></button>
+        <button type="button" class="filter" data-cat="extends" aria-pressed="false"><i class="swatch swatch--ring" style="border-color:var(--viz-extends)"></i>Extends <span class="count"></span></button>
+        <button type="button" class="filter" data-cat="validates" aria-pressed="false"><i class="swatch swatch--ring" style="border-color:var(--viz-validates)"></i>Validates <span class="count"></span></button>
+        <button type="button" class="filter" data-cat="challenges" aria-pressed="false"><i class="swatch swatch--ring" style="border-color:var(--viz-challenges)"></i>Challenges <span class="count"></span></button>
       </div>
     </div>
   </div>
@@ -193,48 +195,16 @@ svg text { font-family: var(--font-sans); }
 <section id="before">
   <div class="wrap">
     <div class="shead">
-      <h2>What shaped FAST</h2>
-      <p class="eyebrow">Prior work</p>
+      <h2>Prior works</h2>
+      <p class="eyebrow">Before FAST</p>
     </div>
     <ol class="rows">
       <li class="row">
-        <div class="row__when">Oct 2024</div>
+        <div class="row__when">1974–2016</div>
         <div class="row__main">
-          <div class="row__title"><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2410.24164">π0: a vision-language-action flow model</a></div>
-          <div class="row__sub"><span class="role role--shaped">Shaped FAST</span> · Physical Intelligence, the same lab · ref. [7], cited 28 times, more than any other</div>
-          <div class="row__body">The lab’s earlier model and FAST’s base. π0 is PaliGemma-3B with a flow-matching action expert; π0-FAST keeps the backbone, drops the expert and writes FAST tokens into the VLM’s vocabulary, and the paper compares the two decoders. π0-FAST matches π0’s success with 5× fewer GPU hours, but needs about 750 ms per one-second chunk against about 100 ms, because it decodes 30 to 60 tokens with the 2B backbone instead of 10 denoising steps in a 300M expert.</div>
-        </div>
-      </li>
-      <li class="row">
-        <div class="row__when">Jun 2024</div>
-        <div class="row__main">
-          <div class="row__title"><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2406.09246">OpenVLA</a></div>
-          <div class="row__sub"><span class="role role--shaped">Shaped FAST</span> · ref. [39], cited 18 times</div>
-          <div class="row__body">An open 7B VLA that kept RT-2’s binning, and FAST’s main baseline (“OpenVLA-style” in its Figure 2). FAST’s first author, Karl Pertsch, is a co-author of RT-2, OpenVLA, Octo and DROID, so FAST fixes a limit of his own earlier models.</div>
-        </div>
-      </li>
-      <li class="row">
-        <div class="row__when">Mar 2024</div>
-        <div class="row__main">
-          <div class="row__title"><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2403.12945">DROID</a></div>
-          <div class="row__sub"><span class="role role--shaped">Shaped FAST</span> · ref. [38], cited 11 times</div>
-          <div class="row__body">A large in-the-wild manipulation dataset that binning-based autoregressive VLAs could not train on well. FAST calls the π0-FAST policy trained on it the first language-conditioned generalist manipulation policy that works zero-shot in unseen environments.</div>
-        </div>
-      </li>
-      <li class="row">
-        <div class="row__when">Jul 2023</div>
-        <div class="row__main">
-          <div class="row__title"><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2307.15818">RT-2</a></div>
-          <div class="row__sub"><span class="role role--shaped">Shaped FAST</span> · Google DeepMind · ref. [10], cited 11 times</div>
-          <div class="row__body">The first VLA. It turns each action dimension at each time step into one of 256 bin tokens. FAST’s case study shows why this breaks at high control rates: consecutive tokens are almost identical, so the next-token loss is low when the model just copies the last token.</div>
-        </div>
-      </li>
-      <li class="row">
-        <div class="row__when">Apr 2023</div>
-        <div class="row__main">
-          <div class="row__title"><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2304.13705">ACT and ALOHA</a></div>
-          <div class="row__sub"><span class="role role--shaped">Shaped FAST</span> · ref. [69]</div>
-          <div class="row__body">Action chunking: predict a second of future actions at once. This makes long, high-frequency chunks the target that a tokenizer has to handle.</div>
+          <div class="row__title">The DCT, JPEG and byte-pair encoding</div>
+          <div class="row__sub"><span class="role role--shaped">Shaped FAST</span> · refs. [1], [61], [27], [57]</div>
+          <div class="row__body">The idea comes from outside robotics. Take the discrete cosine transform of each action dimension, scale and round so small high-frequency terms vanish, as JPEG does for image blocks, then merge frequent patterns with BPE, as language models do for text. A one-second shirt-folding chunk at 50 Hz goes from 700 binning tokens to 53 FAST tokens.</div>
         </div>
       </li>
       <li class="row">
@@ -246,11 +216,43 @@ svg text { font-family: var(--font-sans); }
         </div>
       </li>
       <li class="row">
-        <div class="row__when">1974–2016</div>
+        <div class="row__when">Apr 2023</div>
         <div class="row__main">
-          <div class="row__title">The DCT, JPEG and byte-pair encoding</div>
-          <div class="row__sub"><span class="role role--shaped">Shaped FAST</span> · refs. [1], [61], [27], [57]</div>
-          <div class="row__body">The idea comes from outside robotics. Take the discrete cosine transform of each action dimension, scale and round so small high-frequency terms vanish, as JPEG does for image blocks, then merge frequent patterns with BPE, as language models do for text. A one-second shirt-folding chunk at 50 Hz goes from 700 binning tokens to 53 FAST tokens.</div>
+          <div class="row__title"><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2304.13705">ACT and ALOHA</a></div>
+          <div class="row__sub"><span class="role role--shaped">Shaped FAST</span> · ref. [69]</div>
+          <div class="row__body">Action chunking: predict a second of future actions at once. This makes long, high-frequency chunks the target that a tokenizer has to handle.</div>
+        </div>
+      </li>
+      <li class="row">
+        <div class="row__when">Jul 2023</div>
+        <div class="row__main">
+          <div class="row__title"><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2307.15818">RT-2</a></div>
+          <div class="row__sub"><span class="role role--shaped">Shaped FAST</span> · Google DeepMind · ref. [10], cited 11 times</div>
+          <div class="row__body">The first VLA. It turns each action dimension at each time step into one of 256 bin tokens. FAST’s case study shows why this breaks at high control rates: consecutive tokens are almost identical, so the next-token loss is low when the model just copies the last token.</div>
+        </div>
+      </li>
+      <li class="row">
+        <div class="row__when">Mar 2024</div>
+        <div class="row__main">
+          <div class="row__title"><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2403.12945">DROID</a></div>
+          <div class="row__sub"><span class="role role--shaped">Shaped FAST</span> · ref. [38], cited 11 times</div>
+          <div class="row__body">A large in-the-wild manipulation dataset that binning-based autoregressive VLAs could not train on well. FAST calls the π0-FAST policy trained on it the first language-conditioned generalist manipulation policy that works zero-shot in unseen environments.</div>
+        </div>
+      </li>
+      <li class="row">
+        <div class="row__when">Jun 2024</div>
+        <div class="row__main">
+          <div class="row__title"><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2406.09246">OpenVLA</a></div>
+          <div class="row__sub"><span class="role role--shaped">Shaped FAST</span> · ref. [39], cited 18 times</div>
+          <div class="row__body">An open 7B VLA that kept RT-2’s binning, and FAST’s main baseline (“OpenVLA-style” in its Figure 2). FAST’s first author, Karl Pertsch, is a co-author of RT-2, OpenVLA, Octo and DROID, so FAST fixes a limit of his own earlier models.</div>
+        </div>
+      </li>
+      <li class="row">
+        <div class="row__when">Oct 2024</div>
+        <div class="row__main">
+          <div class="row__title"><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2410.24164">π0: a vision-language-action flow model</a></div>
+          <div class="row__sub"><span class="role role--shaped">Shaped FAST</span> · Physical Intelligence, the same lab · ref. [7], cited 28 times, more than any other</div>
+          <div class="row__body">The lab’s earlier model and FAST’s base. π0 is PaliGemma-3B with a flow-matching action expert; π0-FAST keeps the backbone, drops the expert and writes FAST tokens into the VLM’s vocabulary, and the paper compares the two decoders. π0-FAST matches π0’s success with 5× fewer GPU hours, but needs about 750 ms per one-second chunk against about 100 ms, because it decodes 30 to 60 tokens with the 2B backbone instead of 10 denoising steps in a 300M expert.</div>
         </div>
       </li>
     </ol>
@@ -474,6 +476,6 @@ svg text { font-family: var(--font-sans); }
 </footer>
 
 <!-- Bump ?v= on both the script here and DATA_URL in the script whenever either file changes: Pages lets browsers cache them for 10 minutes. -->
-<script src="/media/fast-lineage.js?v=4" defer></script>
+<script src="/media/fast-lineage.js?v=5" defer></script>
 </body>
 </html>

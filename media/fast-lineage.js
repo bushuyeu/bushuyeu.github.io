@@ -10,7 +10,7 @@
   const box = svg.parentElement;
   const panel = document.getElementById("panel");
 
-  const DATA_URL = "/media/fast-lineage.json?v=4";  // bump with the ?v= on the <script> tag in review-fast-lineage.html
+  const DATA_URL = "/media/fast-lineage.json?v=5";  // bump with the ?v= on the <script> tag in review-fast-lineage.html
   fetch(DATA_URL)
     .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(start)
@@ -31,11 +31,17 @@
     G.nodes.forEach(n => { outN.set(n.id, []); inN.set(n.id, []); });
     G.edges.forEach(([s, t]) => { outN.get(s).push(t); inN.get(t).push(s); });
 
-    // ---------- filters: the six legend groups, which do not overlap ----------
-    const ROLES = ["extends", "validates", "challenges"];
-    function catOf(n) { return n.id === FAST ? "fast" : n.kind === "ancestor" ? "before" : ROLES.includes(n.key) ? n.key : "after"; }
-    const show = { before: true, fast: true, after: true, extends: true, validates: true, challenges: true };
-    const on = id => show[catOf(byId.get(id))];
+    // ---------- filter: "show only" the picked groups; none picked = All; FAST always stays ----------
+    const GROUPS = {
+      before: n => n.kind === "ancestor",
+      shaped: n => n.key === "shaped",
+      after: n => n.kind === "descendant",
+      extends: n => n.key === "extends",
+      validates: n => n.key === "validates",
+      challenges: n => n.key === "challenges",
+    };
+    const picked = new Set();
+    const on = id => id === FAST || !picked.size || [...picked].some(g => GROUPS[g](byId.get(id)));
 
     // ---------- geometry (pixels; recomputed when the box changes width) ----------
     const TOP = 46, GAP = 8, LEFT = 10;
@@ -185,6 +191,8 @@
       nodeEls.forEach((g, id) => { g.classList.toggle("off", !on(id)); g.classList.toggle("dim", !!near && !near.has(id)); g.classList.toggle("sel", id === selected); });
       const keyIds = G.nodes.filter(n => n.key && on(n.id)).map(n => n.id);
       let lab = new Set(keyIds);
+      const shown = G.nodes.filter(n => n.id !== FAST && on(n.id));
+      if (picked.size && shown.length <= 30) lab = new Set(shown.map(n => n.id));
       if (selected) {
         const nb = [...near].filter(id => id !== selected).sort((a, b) => (byId.get(b).cites || 0) - (byId.get(a).cites || 0)).slice(0, 14);
         lab = new Set([selected, ...nb, ...keyIds.filter(id => near.has(id))]);
@@ -240,20 +248,27 @@
       const c = add(links, "button", "Clear", "pill-link pill-link--small"); c.type = "button"; c.addEventListener("click", () => select(null));
     }
 
-    const filterBtns = document.querySelectorAll(".legend .filter"), showAll = document.getElementById("show-all");
-    const counts = {};
-    G.nodes.forEach(n => { const c = catOf(n); counts[c] = (counts[c] || 0) + 1; });
+    const filterBtns = document.querySelectorAll(".legend .filter[data-cat]"), allBtn = document.getElementById("filter-all");
     function syncFilters() {
-      filterBtns.forEach(b => b.setAttribute("aria-pressed", String(show[b.dataset.cat])));
-      showAll.hidden = Object.values(show).every(Boolean);
+      filterBtns.forEach(b => b.setAttribute("aria-pressed", String(picked.has(b.dataset.cat))));
+      allBtn.setAttribute("aria-pressed", String(!picked.size));
     }
-    function reveal(id) { const c = catOf(byId.get(id)); if (!show[c]) { show[c] = true; syncFilters(); } }
+    // Finding or clicking a paper that is filtered out adds its group, the most specific one
+    function reveal(id) {
+      if (on(id)) return;
+      const n = byId.get(id);
+      picked.add(GROUPS[n.key] ? n.key : n.kind === "ancestor" ? "before" : "after");
+      syncFilters();
+    }
     filterBtns.forEach(b => {
-      const span = b.querySelector(".count");
-      if (span) span.textContent = counts[b.dataset.cat] || 0;
-      b.addEventListener("click", () => { show[b.dataset.cat] = !show[b.dataset.cat]; syncFilters(); render(); });
+      b.querySelector(".count").textContent = G.nodes.filter(GROUPS[b.dataset.cat]).length;
+      b.addEventListener("click", () => {
+        const g = b.dataset.cat;
+        if (picked.has(g)) picked.delete(g); else picked.add(g);
+        syncFilters(); render();
+      });
     });
-    showAll.addEventListener("click", () => { Object.keys(show).forEach(k => { show[k] = true; }); syncFilters(); render(); });
+    allBtn.addEventListener("click", () => { picked.clear(); syncFilters(); render(); });
 
     function select(id) { if (id) reveal(id); selected = id === selected ? null : id; render(); }
     function selectAndShow(id) {
