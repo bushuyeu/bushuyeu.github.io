@@ -1,10 +1,13 @@
 // Citation timeline for review-fast-lineage.html. Data: media/fast-lineage.json,
 // built in ~/projects/paper-review/FAST/archeologist by scripts/build_graph.py.
+// The SVG is drawn at the pixel width of its box (never scaled), so labels keep their CSS size.
 (function () {
   const NS = "http://www.w3.org/2000/svg";
   const ROLE_VAR = { shaped: "--ink-2", extends: "--viz-extends", validates: "--viz-validates", challenges: "--viz-challenges" };
   const ROLE_TEXT = { shaped: "Shaped FAST", extends: "Extends", validates: "Validates", challenges: "Challenges" };
+  const MIN_W = 720;
   const svg = document.getElementById("g");
+  const box = svg.parentElement;
   const panel = document.getElementById("panel");
 
   fetch("/media/fast-lineage.json")
@@ -15,6 +18,10 @@
   function el(tag, attrs, parent) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
   function add(parent, tag, text, cls) { const e = document.createElement(tag); if (text != null) e.textContent = text; if (cls) e.className = cls; parent.appendChild(e); return e; }
   function link(parent, text, href) { const a = add(parent, "a", text); a.href = href; a.target = "_blank"; a.rel = "noopener"; return a; }
+  function overlap(a, b) {
+    const w = Math.min(a[2], b[2]) - Math.max(a[0], b[0]), h = Math.min(a[3], b[3]) - Math.max(a[1], b[1]);
+    return w > 0 && h > 0 ? w * h : 0;
+  }
 
   function start(G) {
     const byId = new Map(G.nodes.map(n => [n.id, n]));
@@ -23,25 +30,23 @@
     G.nodes.forEach(n => { outN.set(n.id, []); inN.set(n.id, []); });
     G.edges.forEach(([s, t]) => { outN.get(s).push(t); inN.get(t).push(s); });
 
-    // ---------- geometry ----------
-    const W = 960, TOP = 40, GAP = 8, LEFT = 10;
+    // ---------- geometry (pixels; recomputed when the box changes width) ----------
+    const TOP = 46, GAP = 8, LEFT = 10;
     const LANES = [
-      { name: "Signal and text compression", h: 116 },
-      { name: "Action tokenizers and representations", h: 196 },
-      { name: "VLA models", h: 290 },
-      { name: "Data, benchmarks, hardware, surveys", h: 124 },
+      { name: "Signal and text compression", h: 128 },
+      { name: "Action tokenizers and representations", h: 212 },
+      { name: "VLA models", h: 300 },
+      { name: "Data, benchmarks, hardware, surveys", h: 132 },
     ];
-    let yy = TOP;
-    LANES.forEach(l => { l.y0 = yy; yy += l.h; l.y1 = yy; yy += GAP; });
-    const H = yy + 4;
-    const BREAKS = [[1950, 60], [2015, 150], [2023, 285], [2025.04, 480], [2026.85, W - 26]];
+    const X_AT = [[1950, 0.062], [2015, 0.155], [2023, 0.295], [2025.04, 0.5], [2026.85, 0.972]];
+    let W = MIN_W, H = 0, breaks = [];
     function xOf(fy) {
-      if (fy <= BREAKS[0][0]) return BREAKS[0][1];
-      for (let i = 1; i < BREAKS.length; i++) {
-        const [a, xa] = BREAKS[i - 1], [b, xb] = BREAKS[i];
+      if (fy <= breaks[0][0]) return breaks[0][1];
+      for (let i = 1; i < breaks.length; i++) {
+        const [a, xa] = breaks[i - 1], [b, xb] = breaks[i];
         if (fy <= b) return xa + (fy - a) / (b - a) * (xb - xa);
       }
-      return BREAKS[BREAKS.length - 1][1];
+      return breaks[breaks.length - 1][1];
     }
     function fracYear(n) {
       if (n.id === FAST) return 2025.04;
@@ -50,66 +55,95 @@
       return 2024.5;
     }
     function hash(s) { let h = 2166136261; for (const c of s) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return (h >>> 0) / 4294967295; }
-    G.nodes.forEach(n => {
-      const lane = LANES[n.lane];
-      const v = n.cites == null ? 0.25 : Math.log10(n.cites + 1) / 4.2;
-      n.x = xOf(fracYear(n));
-      n.y = lane.y1 - 12 - Math.min(1, v) * (lane.h - 42) + (hash(n.id) - 0.5) * 8;
-      n.r = n.id === FAST ? 9 : 2.4 + 1.05 * Math.log10((n.cites || 0) + 1);
-      if (n.id === FAST) n.y = LANES[1].y0 + 34;
-    });
-
-    svg.replaceChildren();
-    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
-    const gl = el("g", {}, svg);
-    LANES.forEach(l => {
-      el("rect", { x: LEFT, y: l.y0, width: W - LEFT - 6, height: l.h, rx: 8, class: "lane" }, gl);
-      el("text", { x: LEFT + 10, y: l.y0 + 16, class: "lane-name" }, gl).textContent = l.name;
-    });
-    const ga = el("g", { class: "axis" }, svg);
-    [[1960, "1960"], [1990, "1990"], [2015, "2015"], [2020, "2020"], [2023, "2023"], [2024, "2024"], [2025, ""], [2025.5, "Jul 2025"], [2026, "2026"], [2026.5, "Jul 2026"]].forEach(([y, lab]) => {
-      const x = xOf(y);
-      el("line", { x1: x, x2: x, y1: TOP - 6, y2: H - 4, "stroke-dasharray": "2 5" }, ga);
-      if (lab) el("text", { x, y: TOP - 12, "text-anchor": "middle" }, ga).textContent = lab;
-    });
-    const fx = xOf(2025.04);
-    el("line", { x1: fx, x2: fx, y1: TOP - 28, y2: H - 4, class: "fast-rule" }, svg);
-    el("text", { x: fx, y: TOP - 24, "text-anchor": "middle", class: "lbl fast" }, svg).textContent = "FAST · Jan 2025";
-
-    const gEdges = el("g", {}, svg), gNodes = el("g", {}, svg), gLabels = el("g", {}, svg);
-    function colorOf(n) { return n.id === FAST ? "var(--viz-fast)" : n.kind === "ancestor" ? "var(--viz-before)" : "var(--viz-after)"; }
-    const nodeEls = new Map();
-    [...G.nodes].sort((a, b) => (a.key ? 1 : 0) - (b.key ? 1 : 0) || (a.id === FAST) - (b.id === FAST) || a.r - b.r).forEach(n => {
-      const focusable = n.key || n.id === FAST;
-      const g = el("g", { class: "node" + (n.key ? " key" : ""), transform: `translate(${n.x.toFixed(1)},${n.y.toFixed(1)})`, tabindex: focusable ? "0" : "-1", role: "button", "aria-label": `${n.label}, ${n.year || ""}` }, gNodes);
-      if (n.key) el("circle", { r: n.r + 3.2, class: "halo", stroke: `var(${ROLE_VAR[n.key]})` }, g);
-      el("circle", { r: n.r, class: "core", fill: colorOf(n) }, g);
-      el("title", {}, g).textContent = `${n.label} (${n.year || "?"})${n.cites != null ? " · " + n.cites.toLocaleString() + " citations" : ""}\n${n.title || ""}`;
-      g.addEventListener("click", () => select(n.id));
-      g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(n.id); } });
-      nodeEls.set(n.id, g);
-    });
-
-    function drawLabels(ids) {
-      gLabels.replaceChildren();
-      const boxes = [];
-      const order = [...ids].sort((a, b) => (byId.get(b).key ? 1 : 0) - (byId.get(a).key ? 1 : 0) || (byId.get(b).cites || 0) - (byId.get(a).cites || 0));
-      order.forEach(id => {
-        if (id === FAST) return;
-        const n = byId.get(id), w = n.label.length * 6.3 + 4, h = 13;
-        const cands = [[n.r + 5, 4, "start"], [-(n.r + 5), 4, "end"], [n.r + 2, -n.r - 5, "start"], [n.r + 2, n.r + 13, "start"], [-(n.r + 2), -n.r - 5, "end"], [-(n.r + 2), n.r + 13, "end"]];
-        for (const [dx, dy, anchor] of cands) {
-          const x0 = anchor === "start" ? n.x + dx : n.x + dx - w, y0 = n.y + dy - 10;
-          const box = [x0, y0, x0 + w, y0 + h];
-          if (box[0] < LEFT || box[2] > W - 4) continue;
-          if (boxes.some(b => !(box[2] < b[0] || box[0] > b[2] || box[3] < b[1] || box[1] > b[3]))) continue;
-          boxes.push(box);
-          el("text", { x: (n.x + dx).toFixed(1), y: (n.y + dy).toFixed(1), "text-anchor": anchor, class: "lbl" + (n.key ? " key" : "") }, gLabels).textContent = n.label;
-          break;
-        }
+    function layout() {
+      W = Math.max(MIN_W, Math.floor(box.clientWidth) || MIN_W);
+      breaks = X_AT.map(([y, f]) => [y, f * W]);
+      let yy = TOP;
+      LANES.forEach(l => { l.y0 = yy; yy += l.h; l.y1 = yy; yy += GAP; });
+      H = yy + 4;
+      G.nodes.forEach(n => {
+        const lane = LANES[n.lane];
+        const v = n.cites == null ? 0.25 : Math.log10(n.cites + 1) / 4.2;
+        n.x = xOf(fracYear(n));
+        n.y = lane.y1 - 12 - Math.min(1, v) * (lane.h - 44) + (hash(n.id) - 0.5) * 8;
+        n.r = n.id === FAST ? 9 : 2.6 + 1.1 * Math.log10((n.cites || 0) + 1);
+        if (n.id === FAST) n.y = LANES[1].y0 + 36;
       });
+    }
+
+    // ---------- static frame: lanes, axis, nodes ----------
+    let gEdges, gNodes, gLabels, fixedBoxes = [];
+    const nodeEls = new Map();
+    function colorOf(n) { return n.id === FAST ? "var(--viz-fast)" : n.kind === "ancestor" ? "var(--viz-before)" : "var(--viz-after)"; }
+    function build() {
+      layout();
+      svg.replaceChildren();
+      svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+      svg.setAttribute("width", W);
+      svg.setAttribute("height", H);
+      const gl = el("g", {}, svg);
+      fixedBoxes = [];
+      LANES.forEach(l => {
+        el("rect", { x: LEFT, y: l.y0, width: W - LEFT - 6, height: l.h, rx: 8, class: "lane" }, gl);
+        const lt = el("text", { x: LEFT + 12, y: l.y0 + 19, class: "lane-name" }, gl);
+        lt.textContent = l.name;
+        fixedBoxes.push([LEFT + 8, l.y0 + 6, LEFT + 16 + lt.getComputedTextLength(), l.y0 + 24]);
+      });
+      const ga = el("g", { class: "axis" }, svg);
+      [[1960, "1960"], [2015, "2015"], [2020, "2020"], [2023, "2023"], [2024, "2024"], [2025, ""], [2025.5, "Jul 2025"], [2026, "2026"], [2026.5, "Jul 2026"]].forEach(([y, lab]) => {
+        const x = xOf(y);
+        el("line", { x1: x, x2: x, y1: TOP - 6, y2: H - 4, "stroke-dasharray": "2 5" }, ga);
+        if (lab) el("text", { x, y: TOP - 13, "text-anchor": "middle" }, ga).textContent = lab;
+      });
+      const fx = xOf(2025.04);
+      el("line", { x1: fx, x2: fx, y1: TOP - 30, y2: H - 4, class: "fast-rule" }, svg);
+      el("text", { x: fx, y: TOP - 30, "text-anchor": "middle", class: "lbl fast" }, svg).textContent = "FAST · Jan 2025";
+
+      gEdges = el("g", {}, svg); gNodes = el("g", {}, svg); gLabels = el("g", {}, svg);
+      nodeEls.clear();
+      [...G.nodes].sort((a, b) => (a.key ? 1 : 0) - (b.key ? 1 : 0) || (a.id === FAST) - (b.id === FAST) || a.r - b.r).forEach(n => {
+        const focusable = n.key || n.id === FAST;
+        const g = el("g", { class: "node" + (n.key ? " key" : ""), transform: `translate(${n.x.toFixed(1)},${n.y.toFixed(1)})`, tabindex: focusable ? "0" : "-1", role: "button", "aria-label": `${n.label}, ${n.year || ""}` }, gNodes);
+        if (n.key) el("circle", { r: n.r + 3.2, class: "halo", stroke: `var(${ROLE_VAR[n.key]})` }, g);
+        el("circle", { r: n.r, class: "core", fill: colorOf(n) }, g);
+        el("title", {}, g).textContent = `${n.label} (${n.year || "?"})${n.cites != null ? " · " + n.cites.toLocaleString() + " citations" : ""}\n${n.title || ""}`;
+        g.addEventListener("click", () => select(n.id));
+        g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(n.id); } });
+        nodeEls.set(n.id, g);
+      });
+    }
+
+    // ---------- labels: measured text, placed clear of other labels and of dots ----------
+    function drawLabels(ids, near) {
+      gLabels.replaceChildren();
+      const placed = fixedBoxes.slice();
+      const dots = G.nodes.filter(n => !near || near.has(n.id)).map(n => ({ id: n.id, b: [n.x - n.r - 2, n.y - n.r - 2, n.x + n.r + 2, n.y + n.r + 2] }));
       const f = byId.get(FAST);
-      el("text", { x: f.x + 14, y: f.y + 5, class: "lbl fast" }, gLabels).textContent = "FAST";
+      const ft = el("text", { x: f.x + 15, y: f.y + 5, class: "lbl fast" }, gLabels); ft.textContent = "FAST";
+      placed.push([f.x + 15, f.y - 8, f.x + 15 + ft.getComputedTextLength(), f.y + 9]);
+      const order = [...ids].filter(id => id !== FAST).sort((a, b) => (byId.get(b).key ? 1 : 0) - (byId.get(a).key ? 1 : 0) || (byId.get(b).cites || 0) - (byId.get(a).cites || 0));
+      order.forEach(id => {
+        const n = byId.get(id);
+        const t = el("text", { class: "lbl" + (n.key ? " key" : "") }, gLabels);
+        t.textContent = n.label;
+        const w = t.getComputedTextLength(), asc = 10, desc = 4;
+        const g = n.r + (n.key ? 6 : 4);
+        const cands = [[g, 4.5, "start"], [-g, 4.5, "end"], [g - 3, -g, "start"], [g - 3, g + 10, "start"], [-(g - 3), -g, "end"], [-(g - 3), g + 10, "end"], [0, -g - 3, "middle"], [0, g + 13, "middle"], [g + 14, 4.5, "start"], [-(g + 14), 4.5, "end"]];
+        let best = null;
+        cands.forEach(([dx, dy, anchor], i) => {
+          const x = n.x + dx, y = n.y + dy;
+          const x0 = anchor === "start" ? x : anchor === "end" ? x - w : x - w / 2;
+          const b = [x0 - 1, y - asc, x0 + w + 1, y + desc];
+          if (b[0] < LEFT + 2 || b[2] > W - 8 || b[1] < TOP - 4 || b[3] > H - 4) return;
+          const onLabels = placed.reduce((s, p) => s + overlap(b, p), 0);
+          const onDots = dots.reduce((s, d) => s + (d.id === id ? 0 : overlap(b, d.b)), 0);
+          const score = onLabels * 20 + onDots * 0.5 + i * 30;
+          if (!best || score < best.score) best = { score, onLabels, x, y, anchor, b };
+        });
+        if (!best || (!n.key && best.onLabels > 0)) { t.remove(); return; }
+        t.setAttribute("x", best.x.toFixed(1)); t.setAttribute("y", best.y.toFixed(1)); t.setAttribute("text-anchor", best.anchor);
+        placed.push(best.b);
+      });
     }
 
     function curve(a, b) {
@@ -139,12 +173,12 @@
       const near = selected ? new Set([selected, ...outN.get(selected), ...inN.get(selected)]) : null;
       nodeEls.forEach((g, id) => { g.classList.toggle("dim", !!near && !near.has(id)); g.classList.toggle("sel", id === selected); });
       const keyIds = G.nodes.filter(n => n.key).map(n => n.id);
-      let lab = new Set([FAST, ...keyIds]);
+      let lab = new Set(keyIds);
       if (selected) {
         const nb = [...near].filter(id => id !== selected).sort((a, b) => (byId.get(b).cites || 0) - (byId.get(a).cites || 0)).slice(0, 14);
-        lab = new Set([FAST, selected, ...nb, ...keyIds.filter(id => near.has(id))]);
+        lab = new Set([selected, ...nb, ...keyIds.filter(id => near.has(id))]);
       }
-      drawLabels(lab);
+      drawLabels(lab, near);
       renderPanel();
       btnStory.setAttribute("aria-pressed", String(mode === "story"));
       btnAll.setAttribute("aria-pressed", String(mode === "all"));
@@ -164,8 +198,8 @@
         add(panel, "h3", "Click any paper");
         add(panel, "p", "Grey dots are papers FAST cites, blue dots cite FAST. Rings mark the papers in the two lists below.");
         add(panel, "p", "A selected paper shows all its links to the other papers here: grey lines go to papers it cites, blue lines come from papers that cite it.");
-        const box = add(panel, "div", null, "chips");
-        ["ref-39", "ref-7", "2505.23705", "2502.19645", "2506.06072"].forEach(id => chip(box, id));
+        const b = add(panel, "div", null, "chips");
+        ["ref-39", "ref-7", "2505.23705", "2502.19645", "2506.06072"].forEach(id => chip(b, id));
         return;
       }
       const n = byId.get(selected);
@@ -188,7 +222,7 @@
       add(panel, "p", `Links here: cites ${outN.get(n.id).length}, cited by ${inN.get(n.id).length} of the papers shown.`, "eyebrow");
       const nb = [...new Set([...outN.get(n.id), ...inN.get(n.id)])].filter(id => id !== FAST)
         .sort((a, b) => (byId.get(b).key ? 1 : 0) - (byId.get(a).key ? 1 : 0) || (byId.get(b).cites || 0) - (byId.get(a).cites || 0)).slice(0, 12);
-      if (nb.length) { const box = add(panel, "div", null, "chips"); nb.forEach(id => chip(box, id)); }
+      if (nb.length) { const b = add(panel, "div", null, "chips"); nb.forEach(id => chip(b, id)); }
       const links = add(panel, "div", null, "meta");
       if (n.arxiv) link(links, "arXiv", "https://arxiv.org/abs/" + n.arxiv);
       if (n.s2) link(links, "Semantic Scholar", "https://www.semanticscholar.org/paper/" + n.s2);
@@ -236,6 +270,15 @@
     const filters = document.querySelectorAll("[data-f]");
     filters.forEach(b => b.addEventListener("click", () => { filters.forEach(x => x.setAttribute("aria-pressed", String(x === b))); fillCites(b.dataset.f); }));
     fillCites("all");
+
+    build();
     render();
+    // Redraw at the new pixel width when the box is resized (window resize, phone rotation).
+    let pending = 0;
+    new ResizeObserver(() => {
+      const w = Math.max(MIN_W, Math.floor(box.clientWidth) || MIN_W);
+      if (Math.abs(w - W) < 8 || pending) return;
+      pending = requestAnimationFrame(() => { pending = 0; build(); render(); });
+    }).observe(box);
   }
 })();
