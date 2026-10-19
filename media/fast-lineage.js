@@ -10,7 +10,8 @@
   const box = svg.parentElement;
   const panel = document.getElementById("panel");
 
-  fetch("/media/fast-lineage.json")
+  const DATA_URL = "/media/fast-lineage.json?v=4";  // bump with the ?v= on the <script> tag in review-fast-lineage.html
+  fetch(DATA_URL)
     .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(start)
     .catch(() => { svg.querySelector("text").textContent = "The citation graph could not load. Reload the page to try again."; });
