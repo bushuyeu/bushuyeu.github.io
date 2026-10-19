@@ -5,6 +5,7 @@
 <meta name="robots" content="noindex">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
+<script>/* Theme: apply a stored Light/Dark pick before the first paint (theme.js) */(function(){var r=document.documentElement;try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark"){r.setAttribute("data-theme",t);document.querySelector('meta[name="color-scheme"]').content=t}}catch(e){}r.classList.add("theme-js")})()</script>
 <title>Terms of service — Pavel Bushuyeu</title>
 <meta name="description" content="Terms of service for Personal-os, a personal Google API tool run by Pavel Bushuyeu.">
 <link rel="canonical" href="https://bushuyeu.com/tos">
@@ -25,23 +26,31 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="alternate" type="application/rss+xml" title="Pavel Bushuyeu — News" href="https://bushuyeu.com/feed.xml">
-<link rel="stylesheet" href="style.css?v=30">
+<link rel="stylesheet" href="style.css?v=31">
 <script type="application/ld+json">
 {"@context": "https://schema.org", "@type": "WebPage", "author": {"@type": "Person", "@id": "https://bushuyeu.com/#person", "name": "Pavel Bushuyeu", "url": "https://bushuyeu.com/"}}
 </script>
 <script src="faro.js" async></script>
+<script src="theme.js" defer></script>
 </head>
 <body>
 
 <header class="top">
   <div class="wrap">
-    <nav class="eyebrow eyebrow-nav" aria-label="Main">
-      <a href="/">Home</a>
-      <a href="/research">Research</a>
-      <a href="/teaching">Teaching</a>
-      <a href="/product-management">Product management</a>
-      <a href="/services">Services</a>
-    </nav>
+    <div class="topbar">
+      <nav class="eyebrow eyebrow-nav" aria-label="Main">
+        <a href="/">Home</a>
+        <a href="/research">Research</a>
+        <a href="/teaching">Teaching</a>
+        <a href="/product-management">Product management</a>
+        <a href="/services">Services</a>
+      </nav>
+      <div class="eyebrow theme-switch" role="group" aria-label="Theme">
+        <button type="button" value="system">System</button>
+        <button type="button" value="light">Light</button>
+        <button type="button" value="dark">Dark</button>
+      </div>
+    </div>
     <div class="sub-row">
       <h1>Terms of service</h1>
     </div>

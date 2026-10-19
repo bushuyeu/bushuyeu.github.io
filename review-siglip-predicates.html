@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
+<script>/* Theme: apply a stored Light/Dark pick before the first paint (theme.js) */(function(){var r=document.documentElement;try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark"){r.setAttribute("data-theme",t);document.querySelector('meta[name="color-scheme"]').content=t}}catch(e){}r.classList.add("theme-js")})()</script>
 <title>What closes SigLIP’s predicate gap on BEHAVIOR? — Pavel Bushuyeu</title>
 <meta name="description" content="A hypothesis and preliminary linear-probe results on whether frozen SigLIP encoders capture the spatial goal predicates that the BEHAVIOR Challenge actually scores.">
 <link rel="canonical" href="https://bushuyeu.com/review-siglip-predicates">
@@ -24,23 +25,31 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="alternate" type="application/rss+xml" title="Pavel Bushuyeu — News" href="https://bushuyeu.com/feed.xml">
-<link rel="stylesheet" href="style.css?v=30">
+<link rel="stylesheet" href="style.css?v=31">
 <script type="application/ld+json">
 {"@context": "https://schema.org", "@type": "WebPage", "author": {"@type": "Person", "@id": "https://bushuyeu.com/#person", "name": "Pavel Bushuyeu", "url": "https://bushuyeu.com/"}}
 </script>
 <script src="faro.js" async></script>
+<script src="theme.js" defer></script>
 </head>
 <body>
 
 <header class="top">
   <div class="wrap">
-    <nav class="eyebrow eyebrow-nav" aria-label="Main">
-      <a href="/">Home</a>
-      <a href="/research">Research</a>
-      <a href="/teaching">Teaching</a>
-      <a href="/product-management">Product management</a>
-      <a href="/services">Services</a>
-    </nav>
+    <div class="topbar">
+      <nav class="eyebrow eyebrow-nav" aria-label="Main">
+        <a href="/">Home</a>
+        <a href="/research">Research</a>
+        <a href="/teaching">Teaching</a>
+        <a href="/product-management">Product management</a>
+        <a href="/services">Services</a>
+      </nav>
+      <div class="eyebrow theme-switch" role="group" aria-label="Theme">
+        <button type="button" value="system">System</button>
+        <button type="button" value="light">Light</button>
+        <button type="button" value="dark">Dark</button>
+      </div>
+    </div>
     <h1>What closes SigLIP’s predicate gap on BEHAVIOR?</h1>
     <p class="sub">Every published BEHAVIOR baseline reads the world through a frozen SigLIP-family encoder, and the benchmark scores spatial relations, not object identity. A research note with a registered hypothesis, exact simulator labels, and first probe results that sit near chance.</p>
     <div class="meta">
