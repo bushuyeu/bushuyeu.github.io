@@ -30,6 +30,12 @@
     G.nodes.forEach(n => { outN.set(n.id, []); inN.set(n.id, []); });
     G.edges.forEach(([s, t]) => { outN.get(s).push(t); inN.get(t).push(s); });
 
+    // ---------- filters: the six legend groups, which do not overlap ----------
+    const ROLES = ["extends", "validates", "challenges"];
+    function catOf(n) { return n.id === FAST ? "fast" : n.kind === "ancestor" ? "before" : ROLES.includes(n.key) ? n.key : "after"; }
+    const show = { before: true, fast: true, after: true, extends: true, validates: true, challenges: true };
+    const on = id => show[catOf(byId.get(id))];
+
     // ---------- geometry (pixels; recomputed when the box changes width) ----------
     const TOP = 46, GAP = 8, LEFT = 10;
     const LANES = [
@@ -117,11 +123,13 @@
     function drawLabels(ids, near) {
       gLabels.replaceChildren();
       const placed = fixedBoxes.slice();
-      const dots = G.nodes.filter(n => !near || near.has(n.id)).map(n => ({ id: n.id, b: [n.x - n.r - 2, n.y - n.r - 2, n.x + n.r + 2, n.y + n.r + 2] }));
+      const dots = G.nodes.filter(n => on(n.id) && (!near || near.has(n.id))).map(n => ({ id: n.id, b: [n.x - n.r - 2, n.y - n.r - 2, n.x + n.r + 2, n.y + n.r + 2] }));
       const f = byId.get(FAST);
-      const ft = el("text", { x: f.x + 15, y: f.y + 5, class: "lbl fast" }, gLabels); ft.textContent = "FAST";
-      placed.push([f.x + 15, f.y - 8, f.x + 15 + ft.getComputedTextLength(), f.y + 9]);
-      const order = [...ids].filter(id => id !== FAST).sort((a, b) => (byId.get(b).key ? 1 : 0) - (byId.get(a).key ? 1 : 0) || (byId.get(b).cites || 0) - (byId.get(a).cites || 0));
+      if (on(FAST)) {
+        const ft = el("text", { x: f.x + 15, y: f.y + 5, class: "lbl fast" }, gLabels); ft.textContent = "FAST";
+        placed.push([f.x + 15, f.y - 8, f.x + 15 + ft.getComputedTextLength(), f.y + 9]);
+      }
+      const order = [...ids].filter(id => id !== FAST && on(id)).sort((a, b) => (byId.get(b).key ? 1 : 0) - (byId.get(a).key ? 1 : 0) || (byId.get(b).cites || 0) - (byId.get(a).cites || 0));
       order.forEach(id => {
         const n = byId.get(id);
         const t = el("text", { class: "lbl" + (n.key ? " key" : "") }, gLabels);
@@ -159,20 +167,22 @@
     let mode = "story", selected = null;
     const btnStory = document.getElementById("mode-story"), btnAll = document.getElementById("mode-all");
     function render() {
+      if (selected && !on(selected)) selected = null;
       gEdges.replaceChildren();
       const frag = document.createDocumentFragment();
+      const both = ([s, t]) => on(s) && on(t);
       if (selected) {
-        outN.get(selected).forEach(t => frag.appendChild(el("path", { d: curve(byId.get(selected), byId.get(t)), class: "edge out" })));
-        inN.get(selected).forEach(s => frag.appendChild(el("path", { d: curve(byId.get(s), byId.get(selected)), class: "edge in" })));
+        outN.get(selected).filter(on).forEach(t => frag.appendChild(el("path", { d: curve(byId.get(selected), byId.get(t)), class: "edge out" })));
+        inN.get(selected).filter(on).forEach(s => frag.appendChild(el("path", { d: curve(byId.get(s), byId.get(selected)), class: "edge in" })));
       } else if (mode === "all") {
-        G.edges.forEach(([s, t]) => frag.appendChild(el("path", { d: curve(byId.get(s), byId.get(t)), class: "edge faint" })));
+        G.edges.filter(both).forEach(([s, t]) => frag.appendChild(el("path", { d: curve(byId.get(s), byId.get(t)), class: "edge faint" })));
       } else {
-        G.story.forEach(([s, t]) => frag.appendChild(el("path", { d: curve(byId.get(s), byId.get(t)), class: "edge", stroke: edgeColor(s, t) })));
+        G.story.filter(both).forEach(([s, t]) => frag.appendChild(el("path", { d: curve(byId.get(s), byId.get(t)), class: "edge", stroke: edgeColor(s, t) })));
       }
       gEdges.appendChild(frag);
-      const near = selected ? new Set([selected, ...outN.get(selected), ...inN.get(selected)]) : null;
-      nodeEls.forEach((g, id) => { g.classList.toggle("dim", !!near && !near.has(id)); g.classList.toggle("sel", id === selected); });
-      const keyIds = G.nodes.filter(n => n.key).map(n => n.id);
+      const near = selected ? new Set([selected, ...outN.get(selected).filter(on), ...inN.get(selected).filter(on)]) : null;
+      nodeEls.forEach((g, id) => { g.classList.toggle("off", !on(id)); g.classList.toggle("dim", !!near && !near.has(id)); g.classList.toggle("sel", id === selected); });
+      const keyIds = G.nodes.filter(n => n.key && on(n.id)).map(n => n.id);
       let lab = new Set(keyIds);
       if (selected) {
         const nb = [...near].filter(id => id !== selected).sort((a, b) => (byId.get(b).cites || 0) - (byId.get(a).cites || 0)).slice(0, 14);
@@ -219,8 +229,8 @@
         add(panel, "p", "How it cites FAST", "eyebrow");
         n.contexts.forEach(c => add(panel, "blockquote", c));
       }
-      add(panel, "p", `Links here: cites ${outN.get(n.id).length}, cited by ${inN.get(n.id).length} of the papers shown.`, "eyebrow");
-      const nb = [...new Set([...outN.get(n.id), ...inN.get(n.id)])].filter(id => id !== FAST)
+      add(panel, "p", `Links here: cites ${outN.get(n.id).filter(on).length}, cited by ${inN.get(n.id).filter(on).length} of the papers shown.`, "eyebrow");
+      const nb = [...new Set([...outN.get(n.id), ...inN.get(n.id)])].filter(id => id !== FAST && on(id))
         .sort((a, b) => (byId.get(b).key ? 1 : 0) - (byId.get(a).key ? 1 : 0) || (byId.get(b).cites || 0) - (byId.get(a).cites || 0)).slice(0, 12);
       if (nb.length) { const b = add(panel, "div", null, "chips"); nb.forEach(id => chip(b, id)); }
       const links = add(panel, "div", null, "meta");
@@ -229,9 +239,24 @@
       const c = add(links, "button", "Clear", "pill-link pill-link--small"); c.type = "button"; c.addEventListener("click", () => select(null));
     }
 
-    function select(id) { selected = id === selected ? null : id; render(); }
+    const filterBtns = document.querySelectorAll(".legend .filter"), showAll = document.getElementById("show-all");
+    const counts = {};
+    G.nodes.forEach(n => { const c = catOf(n); counts[c] = (counts[c] || 0) + 1; });
+    function syncFilters() {
+      filterBtns.forEach(b => b.setAttribute("aria-pressed", String(show[b.dataset.cat])));
+      showAll.hidden = Object.values(show).every(Boolean);
+    }
+    function reveal(id) { const c = catOf(byId.get(id)); if (!show[c]) { show[c] = true; syncFilters(); } }
+    filterBtns.forEach(b => {
+      const span = b.querySelector(".count");
+      if (span) span.textContent = counts[b.dataset.cat] || 0;
+      b.addEventListener("click", () => { show[b.dataset.cat] = !show[b.dataset.cat]; syncFilters(); render(); });
+    });
+    showAll.addEventListener("click", () => { Object.keys(show).forEach(k => { show[k] = true; }); syncFilters(); render(); });
+
+    function select(id) { if (id) reveal(id); selected = id === selected ? null : id; render(); }
     function selectAndShow(id) {
-      selected = id; render();
+      reveal(id); selected = id; render();
       svg.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
     }
     btnStory.addEventListener("click", () => { mode = "story"; selected = null; render(); });
@@ -243,7 +268,7 @@
     find.addEventListener("change", () => {
       const v = find.value.trim().toLowerCase(); if (!v) return;
       const hit = labelToId.get(find.value) || (G.nodes.find(n => n.label.toLowerCase().includes(v)) || G.nodes.find(n => (n.title || "").toLowerCase().includes(v)) || {}).id;
-      if (hit) { selected = hit; render(); }
+      if (hit) { reveal(hit); selected = hit; render(); }
     });
 
     // ---------- full lists ----------
