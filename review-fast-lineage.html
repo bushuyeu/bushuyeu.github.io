@@ -52,13 +52,15 @@
   --viz-validates:  #bf5af2;
   --viz-challenges: #ff453a;
 }
-.lineage { max-width: 84rem; margin: 0 auto; padding-inline: var(--gutter); padding-bottom: 34px; display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 20px; align-items: start; }
-@media (max-width: 1080px) { .lineage { grid-template-columns: minmax(0, 1fr); } }
+/* Graph on top, details panel under it, at every width */
+.lineage { max-width: 84rem; margin: 0 auto; padding-inline: var(--gutter); padding-bottom: 34px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
 @media (max-width: 640px) { .lineage { padding-inline: 22px; } }
 .lineage__graph { border: 1px solid var(--hair-soft); border-radius: 12px; overflow-x: auto; background: var(--bg); }
 .lineage__graph svg { display: block; max-width: none; }  /* drawn at the box's pixel width by fast-lineage.js, never scaled */
 .lineage__hint { min-width: 720px; padding: 10px 14px; border-top: 1px solid var(--hair-soft); font-size: 0.8rem; color: var(--ink-3); }
-.lineage__panel { border: 1px solid var(--hair-soft); border-radius: 12px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; font-size: 0.92rem; min-width: 0; }
+.lineage__panel { border: 1px solid var(--hair-soft); border-radius: 12px; padding: 16px 20px; font-size: 0.92rem; min-width: 0; column-width: 24rem; column-gap: 40px; }
+.lineage__panel > * { break-inside: avoid; margin-bottom: 10px; }
+.lineage__panel > :last-child { margin-bottom: 0; }
 .lineage__panel h3 { font-size: 1.05rem; }
 .lineage__panel .meta { gap: 2px 14px; }
 .lineage__panel blockquote { margin: 0; padding-left: 0.9em; border-left: 2px solid var(--hair); color: var(--ink-2); font-size: 0.86rem; }
@@ -164,7 +166,7 @@ svg text { font-family: var(--font-sans); }
   <div class="lineage">
     <div class="lineage__graph">
       <svg id="g" role="img" aria-label="Citation timeline of FAST: references to the left of January 2025, citing papers to the right"><text x="24" y="40" style="fill:var(--ink-3);font-size:13px">Loading the citation graph…</text></svg>
-      <p class="lineage__hint">Left to right: publication date, stretched near 2025. Up: citations, log scale. Dot size: citations.</p>
+      <p class="lineage__hint">Left to right: publication date, stretched near 2025. Up: citations, log scale. Dot size: citations. Details for the selected paper appear below the graph.</p>
     </div>
     <aside class="lineage__panel" id="panel" aria-live="polite">
       <h3>Click any paper</h3>
