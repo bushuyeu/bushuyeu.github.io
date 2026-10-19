@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
+<script>/* Theme: apply a stored Light/Dark pick before the first paint (theme.js) */(function(){var r=document.documentElement;try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark"){r.setAttribute("data-theme",t);document.querySelector('meta[name="color-scheme"]').content=t}}catch(e){}r.classList.add("theme-js")})()</script>
 <title>Where FAST came from, and what it led to — Pavel Bushuyeu</title>
 <meta name="description" content="The citation lineage of Physical Intelligence’s FAST action tokenizer: the papers that shaped it, from per-dimension binning in RT-2 and OpenVLA to π0, and the later work that extends, validates or challenges it, from π0.5 and Knowledge Insulation to OpenVLA-OFT and BEAST.">
 <link rel="canonical" href="https://bushuyeu.com/review-fast-lineage">
@@ -24,7 +25,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="alternate" type="application/rss+xml" title="Pavel Bushuyeu — News" href="https://bushuyeu.com/feed.xml">
-<link rel="stylesheet" href="style.css?v=30">
+<link rel="stylesheet" href="style.css?v=31">
 <script type="application/ld+json">
 {"@context": "https://schema.org", "@type": "WebPage", "author": {"@type": "Person", "@id": "https://bushuyeu.com/#person", "name": "Pavel Bushuyeu", "url": "https://bushuyeu.com/"}}
 </script>
@@ -40,11 +41,16 @@
   --viz-challenges: #d70015;
 }
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --viz-extends:    #30d158;
     --viz-validates:  #bf5af2;
     --viz-challenges: #ff453a;
   }
+}
+:root[data-theme="dark"] {
+  --viz-extends:    #30d158;
+  --viz-validates:  #bf5af2;
+  --viz-challenges: #ff453a;
 }
 .lineage { max-width: 84rem; margin: 0 auto; padding-inline: var(--gutter); padding-bottom: 34px; display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 20px; align-items: start; }
 @media (max-width: 1080px) { .lineage { grid-template-columns: minmax(0, 1fr); } }
@@ -100,18 +106,26 @@ svg text { font-family: var(--font-sans); }
 @media (prefers-reduced-motion: reduce) { .node { transition: none; } }
 </style>
 <script src="faro.js" async></script>
+<script src="theme.js" defer></script>
 </head>
 <body>
 
 <header class="top">
   <div class="wrap">
-    <nav class="eyebrow eyebrow-nav" aria-label="Main">
-      <a href="/">Home</a>
-      <a href="/research">Research</a>
-      <a href="/teaching">Teaching</a>
-      <a href="/product-management">Product management</a>
-      <a href="/services">Services</a>
-    </nav>
+    <div class="topbar">
+      <nav class="eyebrow eyebrow-nav" aria-label="Main">
+        <a href="/">Home</a>
+        <a href="/research">Research</a>
+        <a href="/teaching">Teaching</a>
+        <a href="/product-management">Product management</a>
+        <a href="/services">Services</a>
+      </nav>
+      <div class="eyebrow theme-switch" role="group" aria-label="Theme">
+        <button type="button" value="system">System</button>
+        <button type="button" value="light">Light</button>
+        <button type="button" value="dark">Dark</button>
+      </div>
+    </div>
     <h1>Where FAST came from, and what it led to</h1>
     <p class="sub">FAST replaced the per-dimension binning of RT-2 and OpenVLA with JPEG-style compression of action chunks. Physical Intelligence’s later models, π0.5 and π*0.6, still train on FAST tokens but decode actions with flow matching, while other groups argue for fixed-length tokens, learned tokenizers or no tokenizer at all.</p>
     <div class="meta">

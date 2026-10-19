@@ -12,6 +12,10 @@ Pages from the root of `main`.
 - `other.html` is linked from nowhere, not even the footer, and is reachable only by
   its URL or through `sitemap.xml`. To bring it back, add its footer link to every page.
 - `style.css` — shared styles; colours and type are the variables at the top.
+- `theme.js` — the System / Light / Dark switch at the right end of the tab row on every page. System (the default) follows the
+  visitor's OS setting; a Light or Dark pick is kept in the browser (`localStorage`) and applied before the first paint by the
+  one-line script after the `color-scheme` meta in each page's `<head>`. The dark colours are in `style.css` twice: under
+  `prefers-color-scheme: dark` and under `[data-theme="dark"]`; change both.
 - `favicon-32.png`, `apple-touch-icon.png`, `icon-512.png`, `Pavel-Bushuyeu-CV.pdf`, `.nojekyll`, and `CNAME`, which binds
   the custom domain; DNS for bushuyeu.com is managed at GoDaddy.
 
@@ -28,4 +32,5 @@ Every list is the same shape. To add an entry, copy the first
 label and text. `paper-review.html` has a commented template to copy.
 
 The tab row at the top of the masthead is repeated in each page by hand, so a
-new tab goes into every file. Push to `main` to publish.
+new tab goes into every file. A new page copies the whole `<div class="topbar">`
+(tabs and theme switch), the theme line in `<head>` and the `theme.js` script tag from a similar page. Push to `main` to publish.

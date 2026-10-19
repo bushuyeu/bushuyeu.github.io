@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
+<script>/* Theme: apply a stored Light/Dark pick before the first paint (theme.js) */(function(){var r=document.documentElement;try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark"){r.setAttribute("data-theme",t);document.querySelector('meta[name="color-scheme"]').content=t}}catch(e){}r.classList.add("theme-js")})()</script>
 <title>Does the universal FAST+ tokenizer transfer to cable routing? — Pavel Bushuyeu</title>
 <meta name="description" content="An experiment with Physical Intelligence’s FAST action tokenizer on the Berkeley cable-routing dataset: how much of a custom-fit tokenizer’s compression the universal FAST+ tokenizer keeps.">
 <link rel="canonical" href="https://bushuyeu.com/review-fast">
@@ -24,23 +25,31 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="alternate" type="application/rss+xml" title="Pavel Bushuyeu — News" href="https://bushuyeu.com/feed.xml">
-<link rel="stylesheet" href="style.css?v=30">
+<link rel="stylesheet" href="style.css?v=31">
 <script type="application/ld+json">
 {"@context": "https://schema.org", "@type": "WebPage", "author": {"@type": "Person", "@id": "https://bushuyeu.com/#person", "name": "Pavel Bushuyeu", "url": "https://bushuyeu.com/"}}
 </script>
 <script src="faro.js" async></script>
+<script src="theme.js" defer></script>
 </head>
 <body>
 
 <header class="top">
   <div class="wrap">
-    <nav class="eyebrow eyebrow-nav" aria-label="Main">
-      <a href="/">Home</a>
-      <a href="/research">Research</a>
-      <a href="/teaching">Teaching</a>
-      <a href="/product-management">Product management</a>
-      <a href="/services">Services</a>
-    </nav>
+    <div class="topbar">
+      <nav class="eyebrow eyebrow-nav" aria-label="Main">
+        <a href="/">Home</a>
+        <a href="/research">Research</a>
+        <a href="/teaching">Teaching</a>
+        <a href="/product-management">Product management</a>
+        <a href="/services">Services</a>
+      </nav>
+      <div class="eyebrow theme-switch" role="group" aria-label="Theme">
+        <button type="button" value="system">System</button>
+        <button type="button" value="light">Light</button>
+        <button type="button" value="dark">Dark</button>
+      </div>
+    </div>
     <h1>Does the universal FAST+ tokenizer transfer to cable routing?</h1>
     <p class="sub">A small experiment with Physical Intelligence’s FAST action tokenizer on real cable-routing data. The universal FAST+ tokenizer keeps a median 81% of a custom-fit tokenizer’s compression, right at my 80% threshold, and the answer turns on how the custom tokenizer is tuned.</p>
     <div class="meta">
