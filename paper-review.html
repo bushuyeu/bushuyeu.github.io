@@ -25,7 +25,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="alternate" type="application/rss+xml" title="Pavel Bushuyeu — News" href="https://bushuyeu.com/feed.xml">
-<link rel="stylesheet" href="style.css?v=31">
+<link rel="stylesheet" href="style.css?v=32">
 <script type="application/ld+json">
 {"@context": "https://schema.org", "@type": "WebPage", "author": {"@type": "Person", "@id": "https://bushuyeu.com/#person", "name": "Pavel Bushuyeu", "url": "https://bushuyeu.com/"}}
 </script>
@@ -44,11 +44,10 @@
         <a href="/product-management">Product management</a>
         <a href="/services">Services</a>
       </nav>
-      <div class="eyebrow theme-switch" role="group" aria-label="Theme">
-        <button type="button" value="system">System</button>
-        <button type="button" value="light">Light</button>
-        <button type="button" value="dark">Dark</button>
-      </div>
+      <button type="button" class="eyebrow theme-switch" role="switch" aria-checked="false">
+        <span>Dark</span>
+        <span class="theme-switch__track" aria-hidden="true"><span class="theme-switch__knob"></span></span>
+      </button>
     </div>
     <h1>Paper review</h1>
     <p class="sub">Reviews and small experiments on papers in robot learning, written for a reading group. Each page ends with a note on how it was produced.</p>
