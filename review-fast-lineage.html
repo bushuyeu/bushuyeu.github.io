@@ -52,12 +52,12 @@
   --viz-validates:  #bf5af2;
   --viz-challenges: #ff453a;
 }
-.lineage { max-width: 84rem; margin: 0 auto; padding-inline: var(--gutter); padding-bottom: 34px; display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 20px; align-items: start; }
+.lineage { max-width: 84rem; margin: 0 auto; padding-inline: var(--gutter); padding-bottom: 34px; display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 20px; align-items: start; }
 @media (max-width: 1080px) { .lineage { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 640px) { .lineage { padding-inline: 22px; } }
 .lineage__graph { border: 1px solid var(--hair-soft); border-radius: 12px; overflow-x: auto; background: var(--bg); }
-.lineage__graph svg { display: block; width: 100%; min-width: 860px; height: auto; }
-.lineage__hint { min-width: 860px; padding: 10px 14px; border-top: 1px solid var(--hair-soft); font-size: 0.8rem; color: var(--ink-3); }
+.lineage__graph svg { display: block; max-width: none; }  /* drawn at the box's pixel width by fast-lineage.js, never scaled */
+.lineage__hint { min-width: 720px; padding: 10px 14px; border-top: 1px solid var(--hair-soft); font-size: 0.8rem; color: var(--ink-3); }
 .lineage__panel { border: 1px solid var(--hair-soft); border-radius: 12px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; font-size: 0.92rem; min-width: 0; }
 .lineage__panel h3 { font-size: 1.05rem; }
 .lineage__panel .meta { gap: 2px 14px; }
@@ -81,9 +81,9 @@ button.pill-link--small { padding: 3px 11px; font-size: 0.8rem; }
 .role--challenges { color: var(--viz-challenges); }
 svg text { font-family: var(--font-sans); }
 .lane { fill: var(--tint); }
-.lane-name { fill: var(--ink-3); font-size: 10.5px; font-weight: 500; letter-spacing: 0.02em; }
+.lane-name { fill: var(--ink-3); font-size: 12px; font-weight: 500; letter-spacing: 0.02em; }
 .axis line { stroke: var(--hair); }
-.axis text { fill: var(--ink-3); font: 10.5px var(--font-mono); }
+.axis text { fill: var(--ink-3); font: 11.5px var(--font-mono); }
 .fast-rule { stroke: var(--viz-fast); stroke-width: 1; stroke-dasharray: 3 4; }
 .node { cursor: pointer; transition: opacity 0.15s; }
 .node circle.core { stroke: var(--bg); stroke-width: 1; }
@@ -91,9 +91,9 @@ svg text { font-family: var(--font-sans); }
 .node:focus-visible { outline: none; }
 .node:focus-visible circle.core, .node.sel circle.core { stroke: var(--ink); stroke-width: 2.2; }
 .node.dim { opacity: 0.15; }
-.lbl { font-size: 11px; fill: var(--ink); paint-order: stroke; stroke: var(--tint); stroke-width: 3.5px; stroke-linejoin: round; pointer-events: none; }
+.lbl { font-size: 12.5px; fill: var(--ink); paint-order: stroke; stroke: var(--tint); stroke-width: 3.5px; stroke-linejoin: round; pointer-events: none; }
 .lbl.key { font-weight: 600; }
-.lbl.fast { font-size: 13px; font-weight: 600; }
+.lbl.fast { font-size: 14px; font-weight: 600; }
 .edge { fill: none; stroke-width: 1.3; opacity: 0.7; }
 .edge.faint { stroke: var(--ink-3); stroke-width: 0.6; opacity: 0.1; }
 .edge.out { stroke: var(--viz-before); opacity: 0.55; }
@@ -184,8 +184,8 @@ svg text { font-family: var(--font-sans); }
         <div class="row__when">Oct 2024</div>
         <div class="row__main">
           <div class="row__title"><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2410.24164">π0: a vision-language-action flow model</a></div>
-          <div class="row__sub"><span class="role role--shaped">Shaped FAST</span> · Physical Intelligence · ref. [7], cited 28 times, more than any other</div>
-          <div class="row__body">FAST’s backbone and its rival. π0 avoids action tokens with a flow-matching action expert. π0-FAST matches its success with 5× fewer GPU hours, but needs about 750 ms per one-second chunk against about 100 ms, because it decodes 30 to 60 tokens with the 2B backbone instead of 10 denoising steps in a 300M expert.</div>
+          <div class="row__sub"><span class="role role--shaped">Shaped FAST</span> · Physical Intelligence, the same lab · ref. [7], cited 28 times, more than any other</div>
+          <div class="row__body">The lab’s earlier model and FAST’s base. π0 is PaliGemma-3B with a flow-matching action expert; π0-FAST keeps the backbone, drops the expert and writes FAST tokens into the VLM’s vocabulary, and the paper compares the two decoders. π0-FAST matches π0’s success with 5× fewer GPU hours, but needs about 750 ms per one-second chunk against about 100 ms, because it decodes 30 to 60 tokens with the 2B backbone instead of 10 denoising steps in a 300M expert.</div>
         </div>
       </li>
       <li class="row">
