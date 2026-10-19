@@ -1,43 +1,56 @@
-// Theme switch in the masthead of every page: System (the default, follows the OS),
-// Light or Dark. A Light or Dark pick is kept in localStorage ("theme"); System clears it.
-// The inline script in each page's <head> applies a stored pick before the first paint,
-// so there is no flash; this file wires the buttons and keeps open tabs in step.
+// Theme toggle in the masthead of every page: a "Dark" on/off switch. By default the site
+// follows the OS setting (prefers-color-scheme) and the toggle shows it. Flipping the toggle
+// away from the OS setting keeps the pick in localStorage ("theme"); flipping it back clears
+// it, so the site follows the OS again. The inline script in each page's <head> applies a
+// stored pick before the first paint; this file wires the toggle and keeps open tabs in step.
 (function () {
   var KEY = "theme";
   var root = document.documentElement;
+  var osDark = window.matchMedia("(prefers-color-scheme: dark)");
+  var memo = null; // the pick, when localStorage is not available
 
   function stored() {
     try {
       var t = localStorage.getItem(KEY);
-      return t === "light" || t === "dark" ? t : "system";
+      return t === "light" || t === "dark" ? t : null;
     } catch (e) {
-      return "system";
+      return memo;
     }
   }
 
-  function apply(theme) {
-    if (theme === "system") root.removeAttribute("data-theme");
-    else root.setAttribute("data-theme", theme);
+  function system() {
+    return osDark.matches ? "dark" : "light";
+  }
+
+  function apply() {
+    var pick = stored();
+    if (pick) root.setAttribute("data-theme", pick);
+    else root.removeAttribute("data-theme");
     var meta = document.querySelector('meta[name="color-scheme"]');
-    if (meta) meta.content = theme === "system" ? "light dark" : theme;
-    document.querySelectorAll(".theme-switch button").forEach(function (b) {
-      b.setAttribute("aria-pressed", String(b.value === theme));
+    if (meta) meta.content = pick || "light dark";
+    var dark = (pick || system()) === "dark";
+    document.querySelectorAll(".theme-switch").forEach(function (b) {
+      b.setAttribute("aria-checked", String(dark));
     });
   }
 
-  function choose(theme) {
+  function toggle() {
+    var next = (stored() || system()) === "dark" ? "light" : "dark";
+    memo = next === system() ? null : next;
     try {
-      if (theme === "system") localStorage.removeItem(KEY);
-      else localStorage.setItem(KEY, theme);
+      if (memo) localStorage.setItem(KEY, memo);
+      else localStorage.removeItem(KEY);
     } catch (e) {}
-    apply(theme);
+    apply();
   }
 
-  document.querySelectorAll(".theme-switch button").forEach(function (b) {
-    b.addEventListener("click", function () { choose(b.value); });
+  document.querySelectorAll(".theme-switch").forEach(function (b) {
+    b.addEventListener("click", toggle);
   });
   window.addEventListener("storage", function (e) {
-    if (e.key === KEY || e.key === null) apply(stored());
+    if (e.key === KEY || e.key === null) apply();
   });
-  apply(stored());
+  if (osDark.addEventListener) osDark.addEventListener("change", apply);
+  else if (osDark.addListener) osDark.addListener(apply);
+  apply();
 })();

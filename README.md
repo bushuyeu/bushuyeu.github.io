@@ -12,10 +12,12 @@ Pages from the root of `main`.
 - `other.html` is linked from nowhere, not even the footer, and is reachable only by
   its URL or through `sitemap.xml`. To bring it back, add its footer link to every page.
 - `style.css` — shared styles; colours and type are the variables at the top.
-- `theme.js` — the System / Light / Dark switch at the right end of the tab row on every page. System (the default) follows the
-  visitor's OS setting; a Light or Dark pick is kept in the browser (`localStorage`) and applied before the first paint by the
-  one-line script after the `color-scheme` meta in each page's `<head>`. The dark colours are in `style.css` twice: under
-  `prefers-color-scheme: dark` and under `[data-theme="dark"]`; change both.
+- `theme.js` — the "Dark" toggle at the right end of the tab row on every page. By default the site follows the
+  visitor's OS setting (`prefers-color-scheme`) and the toggle shows it. Flipping it away from the OS setting keeps the
+  pick in the browser (`localStorage`); flipping it back clears it, so the site follows the OS again. A stored pick is
+  applied before the first paint by the one-line script after the `color-scheme` meta in each page's `<head>`. The dark
+  colours (and the toggle's on position) are in `style.css` twice: under `prefers-color-scheme: dark` and under
+  `[data-theme="dark"]`; change both.
 - `favicon-32.png`, `apple-touch-icon.png`, `icon-512.png`, `Pavel-Bushuyeu-CV.pdf`, `.nojekyll`, and `CNAME`, which binds
   the custom domain; DNS for bushuyeu.com is managed at GoDaddy.
 
@@ -33,4 +35,4 @@ label and text. `paper-review.html` has a commented template to copy.
 
 The tab row at the top of the masthead is repeated in each page by hand, so a
 new tab goes into every file. A new page copies the whole `<div class="topbar">`
-(tabs and theme switch), the theme line in `<head>` and the `theme.js` script tag from a similar page. Push to `main` to publish.
+(tabs and theme toggle), the theme line in `<head>` and the `theme.js` script tag from a similar page. Push to `main` to publish.
