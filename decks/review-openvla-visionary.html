@@ -25,11 +25,13 @@
 .loop .box.b { stroke: var(--extends); stroke-width: 1.5; }
 .loop .arrow { stroke: var(--ink-3); stroke-width: 1.4; fill: none; }
 .loop .head { fill: var(--ink-3); }
-.loop .small { fill: var(--ink-2); font-size: 12px; }
-.loop .tag { font: 500 11px var(--font-mono); }
+.loop .small { fill: var(--ink-2); font-size: 14px; }
+.loop .tag { font: 500 14px var(--font-mono); }
 .loop .tag.a { fill: var(--link); } .loop .tag.b { fill: var(--extends); }
-table.design th[scope="row"] { font-weight: 600; color: var(--ink); white-space: nowrap; vertical-align: top; padding: 10px 22px 10px 0; border-bottom: 1px solid var(--hair-soft); text-align: left; font-size: 18px; }
-table.design td { font-size: 18px; }
+table { font-size: 21px; }
+table.design th[scope="row"] { font-weight: 600; color: var(--ink); white-space: nowrap; vertical-align: top; padding: 10px 22px 10px 0; border-bottom: 1px solid var(--hair-soft); text-align: left; font-size: 21px; }
+table.design td { font-size: 21px; }
+.sources { font-size: 17px; }
 table.design tbody tr:last-child th { border-bottom: none; }
 </style>
 </head>
@@ -63,7 +65,7 @@ table.design tbody tr:last-child th { border-bottom: none; }
     </div>
     <div class="stack">
       <h3>LoRA makes language models overconfident</h3>
-      <p>Fine-tuning on small datasets does. A post-hoc Laplace posterior over the adapter (Laplace-LoRA) or an ensemble of adapters repairs much of it. For robot policies this is untested: the one VLA calibration study measured released checkpoints, all LoRA at rank 32.</p>
+      <p>Fine-tuning on small datasets does. A post-hoc Laplace posterior over the adapter (Laplace-LoRA) or an ensemble of adapters repairs much of it. For robot policies I found no controlled test: Zollo and Zemel measured released OpenVLA checkpoints, all LoRA at rank 32.</p>
     </div>
   </div>
 </section>
@@ -73,9 +75,9 @@ table.design tbody tr:last-child th { border-bottom: none; }
   <ol class="hyp">
     <li><i>H1</i><span>On 10% of the demonstrations, OpenVLA’s confidence exceeds its success by more than on 100%; LoRA more than full fine-tuning at similar success.</span></li>
     <li><i>H2</i><span>Bayesian LoRA confidence (Laplace-LoRA, 4 adapters) has lower calibration error than rescaling one adapter’s (temperature, action-wise Platt), on the same rollouts.</span></li>
-    <li><i>H3</i><span>The gap grows under LIBERO-Plus camera, lighting and layout changes, with calibrators fitted without them.</span></li>
+    <li><i>H3</i><span>Under LIBERO-Plus camera, lighting and layout changes, LoRA’s overconfidence over full fine-tuning grows, with calibrators kept frozen.</span></li>
   </ol>
-  <p class="note">If H1 holds, raw confidence misleads after a cheap fine-tune and monitors need new labelled rollouts. If H2 holds, the repair is cheap. If neither, post-hoc calibration is enough.</p>
+  <p class="note">If H1 holds, raw confidence misleads after a cheap fine-tune and monitors need new labelled rollouts. If H2 holds, the repair is cheap. Either way, H2 and a calibration-set learning curve show what rescaling achieves.</p>
 </section>
 
 <section class="slide">
@@ -86,8 +88,8 @@ table.design tbody tr:last-child th { border-bottom: none; }
       <tr><th scope="row">Fine-tuning</th><td>Full; LoRA rank 8; LoRA rank 32 (the default); same step budget.</td></tr>
       <tr><th scope="row">Data</th><td>10% (drawn per task) and 100% of each suite’s demonstrations.</td></tr>
       <tr><th scope="row">Confidence</th><td>Raw; temperature; action-wise Platt; Laplace-LoRA; 4-adapter ensemble. All scored on the same rollouts.</td></tr>
-      <tr><th scope="row">Tasks</th><td>LIBERO Spatial and Long first, then Object and Goal; LIBERO-Plus for H3.</td></tr>
-      <tr><th scope="row">Metrics</th><td>Success; confidence minus success; ECE, Brier, NLL (first step); failure AUROC.</td></tr>
+      <tr><th scope="row">Tasks</th><td>LIBERO Spatial and Long, then Object and Goal. H3: LIBERO-Plus, frozen calibrators.</td></tr>
+      <tr><th scope="row">Metrics</th><td>Success; confidence minus success; ECE, Brier, NLL (first step); failure AUROC (added).</td></tr>
       <tr><th scope="row">Trials</th><td>500 per configuration, one seed; 20% / 80% episode splits for fitting and testing.</td></tr>
     </tbody>
   </table>
@@ -99,12 +101,12 @@ table.design tbody tr:last-child th { border-bottom: none; }
     <div class="stack">
       <h3>Compute, estimated</h3>
       <p>Two suites: 24 runs, 4 of them full. LoRA 10–15 A100-h per run, full 40–120 (8 A100s × 5–15 h): about 360–780 A100-hours, before Laplace fitting and seeds. One LIBERO run is timed first.</p>
-      <p>Evaluation at 6 Hz (model only, RTX 4090): ~5 GPU-h per checkpoint on Spatial, ~12 on Long, plus simulator time.</p>
+      <p>Evaluation at 6 Hz (model only, RTX 4090): ~5 GPU-h per checkpoint on Spatial, ~12 on Long, plus simulator time; ~100 GPU-h for the grid, ~100 for H3.</p>
     </div>
     <div class="stack">
       <h3>Risks</h3>
       <p>Token-based success confidence is a proxy; the calibration study found it weakest late in failed episodes.</p>
-      <p>Failures to calibrate against: ~75 of 500 on Spatial, ~230 on Long. An acting ensemble costs 4× the inference.</p>
+      <p>Failures: ~75 of 500 on Spatial, ~230 on Long; a 20% calibration split holds only ~15 on Spatial. An acting ensemble costs 4× the inference.</p>
     </div>
   </div>
 </section>
@@ -135,7 +137,21 @@ table.design tbody tr:last-child th { border-bottom: none; }
       <h3>Existing pieces</h3>
       <p>SIMPLER and ReVeal: simulated and reconstructed success tracks real success. RialTo: twins from quick scans. This routine joins them and adds the calibration step.</p>
       <p>Gaps: RialTo needs a person to set objects and physics; ReVeal leaves mass and friction to future work.</p>
-      <p><b>Pilot gate:</b> one arm, 2–3 rigid tasks, 3 checkpoints × 30 trials in twin and real. Go only if the twin ranks them the same and is within ~15 points.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">Proposed application</p><h2>Pilot first, then the transfer test</h2></div>
+  <div class="cols">
+    <div class="stack">
+      <h3>Pilot gate</h3>
+      <p>One arm OpenVLA supports, 2–3 rigid-object tasks. 3 checkpoints × 30 trials in the twin and on the real robot. Go only if the twin ranks them the same and is within ~15 points.</p>
+    </div>
+    <div class="stack">
+      <h3>Transfer test</h3>
+      <p>Calibrators from (a) LIBERO, (b) the twin, (c) a few real rollouts, frozen with the twin’s threshold, then scored on untouched real rollouts.</p>
+      <p>Measures: calibration error; failures caught, false alarms and failures let through at a fixed help budget; steps of warning before the first unrecoverable error.</p>
     </div>
   </div>
 </section>
@@ -145,13 +161,13 @@ table.design tbody tr:last-child th { border-bottom: none; }
   <div class="fill">
     <figure class="flat loop"><svg viewBox="0 0 900 250" width="1120" role="img" aria-label="Fine-tune, rehearse in a twin, calibrate, deploy, correct, and back to fine-tune.">
       <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0 0 10 5 0 10z"/></marker></defs>
-      <rect class="box a" x="10" y="40" width="150" height="74" rx="10"/><text x="85" y="72" text-anchor="middle" font-size="15" font-weight="600">Fine-tune</text><text class="small" x="85" y="94" text-anchor="middle">LoRA or Bayesian LoRA</text>
-      <rect class="box b" x="190" y="40" width="150" height="74" rx="10"/><text x="265" y="72" text-anchor="middle" font-size="15" font-weight="600">Rehearse</text><text class="small" x="265" y="94" text-anchor="middle">twin from phone video</text>
-      <rect class="box a" x="370" y="40" width="150" height="74" rx="10"/><text x="445" y="72" text-anchor="middle" font-size="15" font-weight="600">Calibrate</text><text class="small" x="445" y="94" text-anchor="middle">set the help threshold</text>
-      <rect class="box b" x="550" y="40" width="150" height="74" rx="10"/><text x="625" y="72" text-anchor="middle" font-size="15" font-weight="600">Deploy</text><text class="small" x="625" y="94" text-anchor="middle">act, or ask for help</text>
-      <rect class="box" x="730" y="40" width="160" height="74" rx="10"/><text x="810" y="72" text-anchor="middle" font-size="15" font-weight="600">Correct</text><text class="small" x="810" y="94" text-anchor="middle">human takes over</text>
+      <rect class="box a" x="10" y="40" width="150" height="74" rx="10"/><text x="85" y="72" text-anchor="middle" font-size="17" font-weight="600">Fine-tune</text><text class="small" x="85" y="96" text-anchor="middle">LoRA, Bayesian LoRA</text>
+      <rect class="box b" x="190" y="40" width="150" height="74" rx="10"/><text x="265" y="72" text-anchor="middle" font-size="17" font-weight="600">Rehearse</text><text class="small" x="265" y="96" text-anchor="middle">phone-video twin</text>
+      <rect class="box a" x="370" y="40" width="150" height="74" rx="10"/><text x="445" y="72" text-anchor="middle" font-size="17" font-weight="600">Calibrate</text><text class="small" x="445" y="96" text-anchor="middle">help threshold</text>
+      <rect class="box b" x="550" y="40" width="150" height="74" rx="10"/><text x="625" y="72" text-anchor="middle" font-size="17" font-weight="600">Deploy</text><text class="small" x="625" y="96" text-anchor="middle">act or ask</text>
+      <rect class="box" x="730" y="40" width="160" height="74" rx="10"/><text x="810" y="72" text-anchor="middle" font-size="17" font-weight="600">Correct</text><text class="small" x="810" y="96" text-anchor="middle">a person takes over</text>
       <path class="arrow" d="M160 77h28" marker-end="url(#ah)"/><path class="arrow" d="M340 77h28" marker-end="url(#ah)"/><path class="arrow" d="M520 77h28" marker-end="url(#ah)"/><path class="arrow" d="M700 77h28" marker-end="url(#ah)"/>
-      <path class="arrow" d="M810 116v50H85v-50" marker-end="url(#ah)"/><text class="small" x="447" y="186" text-anchor="middle">corrections become new fine-tuning data</text>
+      <path class="arrow" d="M810 116v50H85v-50" marker-end="url(#ah)"/><text class="small" x="447" y="188" text-anchor="middle">corrections become new fine-tuning data</text>
       <text class="tag a" x="10" y="226">■ research project: fine-tuning and calibration</text><text class="tag b" x="450" y="226">■ application: twin and deployment</text>
     </svg></figure>
   </div>
@@ -162,10 +178,10 @@ table.design tbody tr:last-child th { border-bottom: none; }
   <table>
     <thead><tr><th style="width:24%">Work</th><th style="width:44%">What it does</th><th>What this proposal adds</th></tr></thead>
     <tbody>
-      <tr><td>Zollo and Zemel, 2025</td><td>Calibration of released fine-tuned VLAs on LIBERO; Platt scaling.</td><td>Varying the fine-tuning.</td></tr>
+      <tr><td>Zollo and Zemel, 2025</td><td>Calibration of released fine-tuned VLAs on LIBERO; action-wise Platt scaling.</td><td>Varying the fine-tuning.</td></tr>
       <tr><td>INSIGHT, RECALL</td><td>Help triggers and recovery data from token uncertainty.</td><td>Calibration of that uncertainty.</td></tr>
       <tr><td>ReconVLA, VLAConf</td><td>Conformal and representation-level confidence.</td><td>Labelled rollouts from a twin.</td></tr>
-      <tr><td>Laplace-LoRA, LoRA ensembles</td><td>Fix overconfidence of fine-tuned LLMs.</td><td>A test on a robot policy.</td></tr>
+      <tr><td>Laplace-LoRA, LoRA ensembles</td><td>Post-hoc posterior or adapter ensembles; less overconfident LLMs.</td><td>A test on a robot policy.</td></tr>
       <tr><td>SIMPLER, ReVeal, RialTo</td><td>Sim and twin evaluation; twins from scans.</td><td>Calibration per room.</td></tr>
     </tbody>
   </table>
