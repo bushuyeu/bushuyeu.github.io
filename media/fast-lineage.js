@@ -10,7 +10,7 @@
   const box = svg.parentElement;
   const panel = document.getElementById("panel");
 
-  const DATA_URL = "/media/fast-lineage.json?v=5";  // bump with the ?v= on the <script> tag in review-fast-lineage.html
+  const DATA_URL = "/media/fast-lineage.json?v=6";  // bump with the ?v= on the <script> tag in review-fast-lineage.html
   fetch(DATA_URL)
     .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(start)
@@ -116,7 +116,7 @@
       nodeEls.clear();
       [...G.nodes].sort((a, b) => (a.key ? 1 : 0) - (b.key ? 1 : 0) || (a.id === FAST) - (b.id === FAST) || a.r - b.r).forEach(n => {
         const focusable = n.key || n.id === FAST;
-        const g = el("g", { class: "node" + (n.key ? " key" : ""), transform: `translate(${n.x.toFixed(1)},${n.y.toFixed(1)})`, tabindex: focusable ? "0" : "-1", role: "button", "aria-label": `${n.label}, ${n.year || ""}` }, gNodes);
+        const g = el("g", { class: "node" + (n.key ? " key" : ""), transform: `translate(${n.x.toFixed(1)},${n.y.toFixed(1)})`, tabindex: focusable ? "0" : "-1", role: "button", "data-id": n.id, "aria-label": `${n.label}, ${n.year || ""}` }, gNodes);
         if (n.key) el("circle", { r: n.r + 3.2, class: "halo", stroke: `var(${ROLE_VAR[n.key]})` }, g);
         el("circle", { r: n.r, class: "core", fill: colorOf(n) }, g);
         el("title", {}, g).textContent = `${n.label} (${n.year || "?"})${n.cites != null ? " · " + n.cites.toLocaleString() + " citations" : ""}\n${n.title || ""}`;
@@ -209,7 +209,15 @@
     }
     function chip(parent, id) {
       const b = add(parent, "button", byId.get(id).label, "pill-link pill-link--small"); b.type = "button";
-      b.addEventListener("click", () => select(id));
+      b.addEventListener("click", () => { select(id); requestAnimationFrame(focusPanel); revealInGraph(id); });
+    }
+    // After a control in the panel is used, the panel is rebuilt: put focus on its heading
+    function focusPanel() { const h = panel.querySelector("h3"); if (h) h.focus({ preventScroll: true }); }
+    // Scroll the graph sideways so a paper's dot is in view (the graph is wider than a phone)
+    function revealInGraph(id) {
+      const n = byId.get(id); if (!n) return;
+      const left = Math.max(0, n.x - box.clientWidth / 2);
+      if (Math.abs(box.scrollLeft - left) > 40) box.scrollTo({ left, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
     }
     function renderPanel() {
       panel.replaceChildren();
@@ -225,10 +233,10 @@
       const eb = add(panel, "p", null, "eyebrow");
       eb.textContent = n.id === FAST ? "This paper" : n.kind === "ancestor" ? "Before FAST" : "After FAST";
       if (n.key) { eb.append(" · "); add(eb, "span", ROLE_TEXT[n.key], "role role--" + n.key); }
-      add(panel, "h3", n.label);
+      const heading = add(panel, "h3", n.label); heading.tabIndex = -1;
       if (n.title && n.title !== n.label) add(panel, "p", n.title);
       const meta = add(panel, "div", null, "meta");
-      if (n.authors && n.authors.length) add(meta, "span", n.authors.join(", ") + (n.authors.length >= 3 ? " et al." : ""));
+      if (n.authors && n.authors.length) add(meta, "span", n.authors.join(", ") + ((n.n_authors || 0) > n.authors.length ? " et al." : ""));
       add(meta, "span", fmtDate(n));
       if (n.cites != null) add(meta, "span", n.cites.toLocaleString() + " citations");
       if (n.kind === "ancestor") add(meta, "span", `ref. [${n.ref}], cited ${n.in_text}× in FAST`);
@@ -245,7 +253,7 @@
       const links = add(panel, "div", null, "meta");
       if (n.arxiv) link(links, "arXiv", "https://arxiv.org/abs/" + n.arxiv);
       if (n.s2) link(links, "Semantic Scholar", "https://www.semanticscholar.org/paper/" + n.s2);
-      const c = add(links, "button", "Clear", "pill-link pill-link--small"); c.type = "button"; c.addEventListener("click", () => select(null));
+      const c = add(links, "button", "Clear", "pill-link pill-link--small"); c.type = "button"; c.addEventListener("click", () => { select(null); requestAnimationFrame(focusPanel); });
     }
 
     const filterBtns = document.querySelectorAll(".legend .filter[data-cat]"), allBtn = document.getElementById("filter-all");
@@ -272,28 +280,43 @@
 
     function select(id) { if (id) reveal(id); selected = id === selected ? null : id; render(); }
     function selectAndShow(id) {
-      reveal(id); selected = id; render();
+      reveal(id); selected = id; render(); revealInGraph(id);
       svg.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
     }
     btnStory.addEventListener("click", () => { mode = "story"; selected = null; render(); });
     btnAll.addEventListener("click", () => { mode = "all"; selected = null; render(); });
 
-    const dl = document.getElementById("names"), labelToId = new Map();
-    G.nodes.forEach(n => { if (!labelToId.has(n.label)) { labelToId.set(n.label, n.id); const o = document.createElement("option"); o.value = n.label; dl.appendChild(o); } });
+    const dl = document.getElementById("names"), labelToId = new Map(), status = document.getElementById("find-status");
+    G.nodes.forEach(n => {
+      let v = n.year ? `${n.label} (${n.year})` : n.label;
+      if (labelToId.has(v)) v = `${v} · ${(n.title || "").split(" ").slice(0, 5).join(" ")}`;
+      labelToId.set(v, n.id);
+      const o = document.createElement("option"); o.value = v; dl.appendChild(o);
+    });
     const find = document.getElementById("find");
     find.addEventListener("change", () => {
-      const v = find.value.trim().toLowerCase(); if (!v) return;
-      const hit = labelToId.get(find.value) || (G.nodes.find(n => n.label.toLowerCase().includes(v)) || G.nodes.find(n => (n.title || "").toLowerCase().includes(v)) || {}).id;
-      if (hit) { reveal(hit); selected = hit; render(); }
+      const v = find.value.trim().toLowerCase();
+      if (!v) { status.textContent = ""; return; }
+      const hit = labelToId.get(find.value.trim()) || (G.nodes.find(n => n.label.toLowerCase().includes(v)) || G.nodes.find(n => (n.title || "").toLowerCase().includes(v)) || {}).id;
+      if (!hit) { status.textContent = `No paper matches “${find.value.trim()}”.`; return; }
+      status.textContent = "";
+      if (hit === selected) return;  // change also fires when focus leaves the box: do not rebuild the panel under the user
+      reveal(hit); selected = hit; render(); revealInGraph(hit);
     });
 
     // ---------- full lists ----------
+    function rowButton(td, n) {
+      const b = add(td, "button", n.label, "rowbtn"); b.type = "button";
+      b.setAttribute("aria-label", `${n.label}: show in the timeline`);
+      b.addEventListener("click", e => { e.stopPropagation(); selectAndShow(n.id); });
+      return td;
+    }
     function roleCell(td, n) { if (n.key) { td.append(" · "); add(td, "span", ROLE_TEXT[n.key], "role role--" + n.key); } }
     const rb = document.getElementById("refs-body");
     G.nodes.filter(n => n.kind === "ancestor").sort((a, b) => b.in_text - a.in_text || (b.cites || 0) - (a.cites || 0)).forEach(n => {
       const tr = add(rb, "tr"); tr.dataset.id = n.id;
       add(tr, "td", `[${n.ref}]`, "mono");
-      roleCell(add(tr, "td", n.label), n);
+      roleCell(rowButton(add(tr, "td"), n), n);
       add(tr, "td", n.year || "", "num"); add(tr, "td", n.in_text + "×", "num"); add(tr, "td", n.cites != null ? n.cites.toLocaleString() : "–", "num");
       tr.addEventListener("click", () => selectAndShow(n.id));
     });
@@ -303,7 +326,7 @@
       cb.replaceChildren();
       descs.filter(n => f === "all" || (f === "key" && n.key) || (f === "influential" && n.influential) || n.group === f).forEach(n => {
         const tr = add(cb, "tr"); tr.dataset.id = n.id; tr.title = n.title;
-        roleCell(add(tr, "td", n.label), n);
+        roleCell(rowButton(add(tr, "td"), n), n);
         add(tr, "td", fmtDate(n), "num"); add(tr, "td", (n.cites || 0).toLocaleString(), "num"); add(tr, "td", n.influential ? "yes" : "");
         tr.addEventListener("click", () => selectAndShow(n.id));
       });
@@ -319,7 +342,12 @@
     new ResizeObserver(() => {
       const w = Math.max(MIN_W, Math.floor(box.clientWidth) || MIN_W);
       if (Math.abs(w - W) < 8 || pending) return;
-      pending = requestAnimationFrame(() => { pending = 0; build(); render(); });
+      pending = requestAnimationFrame(() => {
+        pending = 0;
+        const focused = document.activeElement && document.activeElement.getAttribute && document.activeElement.getAttribute("data-id");
+        build(); render();
+        if (focused && nodeEls.get(focused)) nodeEls.get(focused).focus({ preventScroll: true });
+      });
     }).observe(box);
   }
 })();

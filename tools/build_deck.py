@@ -9,7 +9,8 @@ Run from the repo root:  uv run tools/build_deck.py decks/review-fast-lineage.ht
 The script serves the repo on a local port, opens the deck in Chrome (light theme),
 replaces each <img data-capture-url=... data-capture-selector=...> with a screenshot
 of that element from the live page (for interactive figures such as a timeline;
-optional: data-capture-wait, data-capture-width, data-capture-css to restyle it for slides),
+optional: data-capture-wait, data-capture-width, data-capture-css to restyle it for slides,
+data-capture-click with "|"-separated selectors to click first),
 waits for fonts and images, and prints one PDF page of 1280 x 720 px per slide.
 faro.js is blocked, so a build does not count as a visit.
 """
@@ -48,6 +49,7 @@ def capture(ctx, base: str, img) -> None:
     wait = img.get_attribute("data-capture-wait") or selector
     width = int(img.get_attribute("data-capture-width") or 1200)
     css = img.get_attribute("data-capture-css")
+    clicks = [c.strip() for c in (img.get_attribute("data-capture-click") or "").split("|") if c.strip()]
     page = ctx.new_page()
     block_faro(page)
     if css:  # applied before the page's own scripts draw anything that measures text
@@ -58,6 +60,8 @@ def capture(ctx, base: str, img) -> None:
     page.set_viewport_size({"width": width, "height": 900})
     page.goto(base + url, wait_until="networkidle")
     page.wait_for_selector(wait)
+    for sel in clicks:  # e.g. filter chips, so the capture shows one state of an interactive figure
+        page.click(sel)
     page.evaluate("document.fonts.ready")
     png = page.locator(selector).first.screenshot()
     page.close()
@@ -93,11 +97,13 @@ def main() -> None:
                 return [i + 1, Math.round(Math.max(0, ...bottoms) - limit)];
             }).filter(([, over]) => over > 0)"""):
                 print(f"warning: slide {n} overflows by {over} px")
-            page.pdf(path=str(out), width="1280px", height="720px", print_background=True, prefer_css_page_size=True)
+            page.pdf(path=str(out), width="1280px", height="720px", print_background=True, prefer_css_page_size=True,
+                     tagged=True, outline=True)  # tagged: reading order and alt text for screen readers
             browser.close()
     finally:
         httpd.shutdown()
-    print(f"{out.relative_to(ROOT)}: {slides} slides, {out.stat().st_size // 1024} KB")
+    shown = out.relative_to(ROOT) if out.is_relative_to(ROOT) else out
+    print(f"{shown}: {slides} slides, {out.stat().st_size // 1024} KB")
 
 
 if __name__ == "__main__":
