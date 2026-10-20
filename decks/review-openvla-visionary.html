@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<title>When should a fine-tuned OpenVLA ask for help? — slides</title>
+<!-- Deck source for /review-openvla-visionary. Build: uv run tools/build_deck.py decks/review-openvla-visionary.html -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="deck.css">
+<style>
+/* deck-only: facts grid, hypotheses and the loop diagram */
+.facts { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 22px 48px; }
+.facts li { border-top: 1px solid var(--hair-soft); padding-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.facts b { font-size: 34px; letter-spacing: -0.025em; font-variant-numeric: tabular-nums; }
+.facts span { font-size: 19px; color: var(--ink-2); line-height: 1.4; }
+.hyp { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 18px; }
+.hyp li { display: grid; grid-template-columns: 56px 1fr; gap: 12px; align-items: baseline; font-size: 23px; line-height: 1.4; }
+.hyp li i { font: 500 18px var(--font-mono); color: var(--link); font-style: normal; }
+.steps { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 12px; font-size: 21px; line-height: 1.4; }
+.loop text { font-family: var(--font-sans); fill: var(--ink); }
+.loop .box { fill: var(--tint); stroke: var(--hair); }
+.loop .box.a { stroke: var(--link); stroke-width: 1.5; }
+.loop .box.b { stroke: var(--extends); stroke-width: 1.5; }
+.loop .arrow { stroke: var(--ink-3); stroke-width: 1.4; fill: none; }
+.loop .head { fill: var(--ink-3); }
+.loop .small { fill: var(--ink-2); font-size: 12px; }
+.loop .tag { font: 500 11px var(--font-mono); }
+.loop .tag.a { fill: var(--link); } .loop .tag.b { fill: var(--extends); }
+table.design th[scope="row"] { font-weight: 600; color: var(--ink); white-space: nowrap; vertical-align: top; padding: 10px 22px 10px 0; border-bottom: 1px solid var(--hair-soft); text-align: left; font-size: 18px; }
+table.design td { font-size: 18px; }
+table.design tbody tr:last-child th { border-bottom: none; }
+</style>
+</head>
+<body style='--deck: "OpenVLA, visionary · bushuyeu.com/review-openvla-visionary"'>
+
+<section class="slide slide--title">
+  <p class="eyebrow">Paper review · Visionary</p>
+  <h1>When should a fine-tuned OpenVLA ask for help?</h1>
+  <p class="sub">A follow-up research project and an application for OpenVLA: An Open-Source Vision-Language-Action Model. Kim, Pertsch, Karamcheti et al., Stanford, UC Berkeley, Toyota Research Institute, Google DeepMind, Physical Intelligence and MIT.</p>
+  <div class="rule"></div>
+  <div class="meta"><span>arXiv:2406.09246 · June 2024</span><span>Pavel Bushuyeu · October 2026</span><span>bushuyeu.com/review-openvla-visionary</span></div>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">The paper</p><h2>What OpenVLA makes possible</h2></div>
+  <ul class="facts">
+    <li><b>+16.5 points</b><span>absolute success over the closed 55B RT-2-X across 29 tasks on two robots, with 7× fewer parameters.</span></li>
+    <li><b>1.4% of the weights</b><span>LoRA at rank 32 matches full fine-tuning (68.2% vs 69.7%), in 10–15 hours on one A100.</span></li>
+    <li><b>4-bit</b><span>inference matches bfloat16 in real tasks with less than half the memory.</span></li>
+    <li><b>256 bins per dimension</b><span>every action dimension is one token, so every action comes with a probability.</span></li>
+  </ul>
+  <p class="note">7B: SigLIP and DINOv2 into Llama 2 (Prismatic-7B); 970k Open X-Embodiment episodes; 21,500 A100-hours. Limits it names: one image, ~6 Hz on an RTX 4090, reliability below 90%.</p>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">Proposed research</p><h2>Does cheap fine-tuning break a VLA’s confidence?</h2></div>
+  <div class="cols">
+    <div class="stack">
+      <h3>Confidence drives help requests</h3>
+      <p>Recent monitors turn token-based VLAs’ action confidence into help requests (INSIGHT, ReconVLA, VLAConf). They assume it is calibrated: 90% sure means about 90% success.</p>
+    </div>
+    <div class="stack">
+      <h3>LoRA makes language models overconfident</h3>
+      <p>Fine-tuning on small datasets does, and Bayesian LoRA repairs much of it (Laplace-LoRA, LoRA ensembles). For robot policies this is untested: the one VLA calibration study measured released checkpoints, all LoRA at rank 32.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">Proposed research</p><h2>Hypotheses</h2></div>
+  <ol class="hyp">
+    <li><i>H1</i><span>OpenVLA becomes more overconfident the fewer demonstrations it is fine-tuned on, and LoRA more than full fine-tuning at equal success.</span></li>
+    <li><i>H2</i><span>Bayesian LoRA lowers calibration error more than post-hoc fixes (temperature, action-wise Platt scaling) and keeps success the same.</span></li>
+    <li><i>H3</i><span>The gap grows under LIBERO-Plus camera, lighting and layout changes, where a robot most needs to ask for help.</span></li>
+  </ol>
+  <p class="note">If H1 holds, every confidence monitor on a LoRA-tuned VLA inherits the error, and the fix is cheap. If not, post-hoc calibration on a small labelled set is enough.</p>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">Proposed research</p><h2>Design</h2></div>
+  <table class="design">
+    <tbody>
+      <tr><th scope="row">Model</th><td>OpenVLA-7B from its released pretrained weights.</td></tr>
+      <tr><th scope="row">Fine-tuning</th><td>Full; LoRA rank 8; LoRA rank 32 (the default).</td></tr>
+      <tr><th scope="row">Data</th><td>10% and 100% of each LIBERO suite’s demonstrations.</td></tr>
+      <tr><th scope="row">Fixes</th><td>None; temperature; action-wise Platt; Laplace-LoRA; 4 LoRA adapters as an ensemble.</td></tr>
+      <tr><th scope="row">Tasks</th><td>LIBERO Spatial, Object, Goal, Long; LIBERO-Plus perturbations for H3.</td></tr>
+      <tr><th scope="row">Metrics</th><td>Success; calibration error, Brier score and failure-prediction AUROC of episode-success confidence.</td></tr>
+      <tr><th scope="row">Trials</th><td>500 per configuration (10 tasks × 50).</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">Proposed research</p><h2>Compute and risks</h2></div>
+  <div class="cols">
+    <div class="stack">
+      <h3>Compute, estimated</h3>
+      <p>LoRA: 10–15 A100-hours per run, ~60 GB at batch 16. A first pass on two suites is 18 runs: roughly 180–270 A100-hours.</p>
+      <p>Evaluation: ~6 actions per second, episodes capped at 220–520 steps: at most ~5 GPU-hours per configuration on Spatial, 12 on Long.</p>
+    </div>
+    <div class="stack">
+      <h3>Risks</h3>
+      <p>Token-based success confidence is a proxy; the calibration study found it weakest late in failed episodes.</p>
+      <p>OpenVLA still fails about a quarter of LIBERO episodes (76.5% average): enough failures to calibrate against. An ensemble costs 4× the inference.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">Proposed application</p><h2>Rehearse in a digital twin before the robot works</h2></div>
+  <ol class="steps">
+    <li><b>Scan</b> a few minutes of phone video of the workspace and its objects.</li>
+    <li><b>Rebuild</b> it as a reconstruction with object meshes and the robot in a simulator.</li>
+    <li><b>Rehearse</b> each candidate checkpoint 200–300 times on the target tasks.</li>
+    <li><b>Calibrate</b> confidence and choose the room’s ask-for-help threshold.</li>
+    <li><b>Deploy and check</b> whether the real robot’s caught failures match the twin’s prediction.</li>
+  </ol>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">Proposed application</p><h2>What a user gets, and what it builds on</h2></div>
+  <div class="cols">
+    <div class="stack">
+      <h3>Before the first real trial</h3>
+      <ul class="points">
+        <li>Which fine-tuned checkpoint to run in this room.</li>
+        <li>The failures to expect, as rollout videos.</li>
+        <li>The confidence threshold for asking for help.</li>
+      </ul>
+    </div>
+    <div class="stack">
+      <h3>Existing pieces</h3>
+      <p>SIMPLER and ReVeal: simulated and reconstructed success tracks real success. RialTo: twins from quick scans. This routine joins them and adds the calibration step.</p>
+      <p>Risk: lower reconstruction fidelity weakens sim-to-real agreement (ReVeal), so the transfer is what gets measured.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">One loop</p><h2>How the two fit together</h2></div>
+  <div class="fill">
+    <figure class="flat loop"><svg viewBox="0 0 900 250" width="1120" role="img" aria-label="Fine-tune, rehearse in a twin, calibrate, deploy, correct, and back to fine-tune.">
+      <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0 0 10 5 0 10z"/></marker></defs>
+      <rect class="box a" x="10" y="40" width="150" height="74" rx="10"/><text x="85" y="72" text-anchor="middle" font-size="15" font-weight="600">Fine-tune</text><text class="small" x="85" y="94" text-anchor="middle">LoRA or Bayesian LoRA</text>
+      <rect class="box b" x="190" y="40" width="150" height="74" rx="10"/><text x="265" y="72" text-anchor="middle" font-size="15" font-weight="600">Rehearse</text><text class="small" x="265" y="94" text-anchor="middle">twin from phone video</text>
+      <rect class="box a" x="370" y="40" width="150" height="74" rx="10"/><text x="445" y="72" text-anchor="middle" font-size="15" font-weight="600">Calibrate</text><text class="small" x="445" y="94" text-anchor="middle">set the help threshold</text>
+      <rect class="box b" x="550" y="40" width="150" height="74" rx="10"/><text x="625" y="72" text-anchor="middle" font-size="15" font-weight="600">Deploy</text><text class="small" x="625" y="94" text-anchor="middle">act, or ask for help</text>
+      <rect class="box" x="730" y="40" width="160" height="74" rx="10"/><text x="810" y="72" text-anchor="middle" font-size="15" font-weight="600">Correct</text><text class="small" x="810" y="94" text-anchor="middle">human takes over</text>
+      <path class="arrow" d="M160 77h28" marker-end="url(#ah)"/><path class="arrow" d="M340 77h28" marker-end="url(#ah)"/><path class="arrow" d="M520 77h28" marker-end="url(#ah)"/><path class="arrow" d="M700 77h28" marker-end="url(#ah)"/>
+      <path class="arrow" d="M810 116v50H85v-50" marker-end="url(#ah)"/><text class="small" x="447" y="186" text-anchor="middle">corrections become new fine-tuning data</text>
+      <text class="tag a" x="10" y="226">■ research project: fine-tuning and calibration</text><text class="tag b" x="450" y="226">■ application: twin and deployment</text>
+    </svg></figure>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">Related work</p><h2>What this builds on</h2></div>
+  <table>
+    <thead><tr><th style="width:24%">Work</th><th style="width:44%">What it does</th><th>What this proposal adds</th></tr></thead>
+    <tbody>
+      <tr><td>Zollo and Zemel, 2025</td><td>Calibration of released fine-tuned VLAs on LIBERO; Platt scaling.</td><td>Varying the fine-tuning.</td></tr>
+      <tr><td>INSIGHT, RECALL</td><td>Help triggers and recovery data from token uncertainty.</td><td>Calibration of that uncertainty.</td></tr>
+      <tr><td>ReconVLA, VLAConf</td><td>Conformal and representation-level confidence.</td><td>Labelled rollouts from a twin.</td></tr>
+      <tr><td>Laplace-LoRA, LoRA ensembles</td><td>Fix overconfidence of fine-tuned LLMs.</td><td>A test on a robot policy.</td></tr>
+      <tr><td>SIMPLER, ReVeal, RialTo</td><td>Sim and twin evaluation; twins from scans.</td><td>Calibration per room.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">Timeline</p><h2>Plan for one semester</h2></div>
+  <ol class="rows">
+    <li class="row"><span class="row__when">Weeks 1–3</span><div class="row__main"><span class="row__title">Reproduce the baseline</span><span class="row__body">Calibration of the released OpenVLA LIBERO checkpoints.</span></div></li>
+    <li class="row"><span class="row__when">Weeks 4–8</span><div class="row__main"><span class="row__title">Fine-tuning grid (H1, H2)</span><span class="row__body">Full and LoRA, two data sizes, Bayesian LoRA and post-hoc fixes; Spatial and Long.</span></div></li>
+    <li class="row"><span class="row__when">Weeks 9–10</span><div class="row__main"><span class="row__title">Shift (H3)</span><span class="row__body">The same checkpoints under LIBERO-Plus perturbations.</span></div></li>
+    <li class="row"><span class="row__when">Weeks 11–14</span><div class="row__main"><span class="row__title">One room, end to end</span><span class="row__body">Phone-video twin, rehearsal, calibration, real-robot check.</span></div></li>
+    <li class="row"><span class="row__when">Week 15</span><div class="row__main"><span class="row__title">Write-up</span><span class="row__body">H1–H3 and the twin-to-real transfer of calibration.</span></div></li>
+  </ol>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">Sources</p><h2>Sources</h2></div>
+  <ol class="sources">
+    <li>Kim et al. <a href="https://arxiv.org/abs/2406.09246">OpenVLA</a>, arXiv:2406.09246: §3.5, §5.3 and Table 1, §5.4, §6, Appendix E (LIBERO).</li>
+    <li>Zollo and Zemel. <a href="https://arxiv.org/abs/2507.17383">Confidence Calibration in VLA Models</a>, 2025.</li>
+    <li>Karli et al. <a href="https://arxiv.org/abs/2510.01389">INSIGHT</a>, 2025; Karli and Fitzgerald. <a href="https://arxiv.org/abs/2606.23617">RECALL</a>, 2026.</li>
+    <li>Chen et al. <a href="https://arxiv.org/abs/2604.16677">ReconVLA</a>, 2026; Huang et al. <a href="https://arxiv.org/abs/2605.29605">VLAConf</a>, 2026.</li>
+    <li>Yang et al. <a href="https://arxiv.org/abs/2308.13111">Laplace-LoRA</a>, 2023; Wang et al. <a href="https://arxiv.org/abs/2310.00035">LoRA ensembles</a>, 2023.</li>
+    <li>Liu et al. LIBERO, 2023; <a href="https://arxiv.org/abs/2510.13626">LIBERO-Plus</a>, 2025.</li>
+    <li>Li et al. <a href="https://arxiv.org/abs/2405.05941">SIMPLER</a>, 2024; Wang et al. <a href="https://arxiv.org/abs/2609.23910">ReVeal</a>, 2026.</li>
+    <li>Torne et al. <a href="https://arxiv.org/abs/2403.03949">RialTo</a>, 2024.</li>
+    <li>This page: <a href="https://bushuyeu.com/review-openvla-visionary">bushuyeu.com/review-openvla-visionary</a>.</li>
+  </ol>
+</section>
+
+</body>
+</html>
