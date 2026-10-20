@@ -62,6 +62,28 @@
 .prose table.design tbody tr:last-child th { border-bottom: none; }
 .prose table.prior td:first-child { font-weight: 500; white-space: nowrap; }
 @media (max-width: 640px) { .prose table.prior td:first-child, .prose table.design th[scope="row"] { white-space: normal; } }
+.facts--4 { grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); }
+.charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; margin: 24px 0 18px; }
+.charts figure { margin: 0; border: 1px solid var(--hair-soft); border-radius: 12px; padding: 12px 12px 10px; background: var(--bg); }
+.charts figcaption { margin-top: 8px; font-size: 0.86rem; line-height: 1.45; color: var(--ink-2); }
+.chart { display: block; width: 100%; height: auto; }
+.chart text { font-family: var(--font-sans); }
+.chart .ch-tick { fill: var(--ink-3); font-size: 13px; font-variant-numeric: tabular-nums; }
+.chart .ch-lab, .chart .ch-note { fill: var(--ink-2); font-size: 13px; }
+.chart .ch-val { fill: var(--ink); font-size: 13px; font-weight: 600; }
+.chart .ch-grid { stroke: var(--hair-soft); stroke-width: 1; }
+.chart .ch-axis { stroke: var(--hair); stroke-width: 1; }
+.chart .ch-ref, .chart .ch-mean { stroke: var(--ink-3); stroke-width: 1; }
+.chart .ch-line { fill: none; stroke: var(--link); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.chart .ch-band { fill: var(--link); opacity: 0.12; }
+.chart .ch-dot { fill: var(--link); stroke: var(--bg); stroke-width: 2; }
+.chart .ch-hit { fill: transparent; }
+.chart .ch-pt:hover .ch-dot { stroke: var(--ink); }
+.prose details.fig-toggle summary { display: inline-flex; align-items: center; gap: 6px; font-size: 0.86rem; font-weight: 500; color: var(--link); list-style: none; cursor: pointer; }
+.prose details.fig-toggle summary::-webkit-details-marker { display: none; }
+.prose details.fig-toggle summary::before { content: ""; width: 6px; height: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(-45deg); transition: transform 0.15s; }
+.prose details.fig-toggle[open] summary::before { transform: rotate(45deg); }
+.prose table.nums { margin-top: 14px; font-variant-numeric: tabular-nums; }
 </style>
 <script src="faro.js" async></script>
 <script src="theme.js" defer></script>
@@ -144,6 +166,164 @@
       </table></div>
       <p class="note"><b>Compute, estimated.</b> The first pass covers two suites (Spatial and Long), three fine-tuning methods and two data sizes: 12 runs. The ensembles add three rank-32 adapters per suite and data size: 12 more, 24 runs in all, 4 of them full fine-tuning. OpenVLA reports, on its own Franka datasets, 10–15 A100-hours for a LoRA run (one GPU, about 60 GB at batch size 16) and 8 A100s for 5–15 hours for a full fine-tune (163 GB at batch size 16, sharded across two GPUs; §5.3, Table 1). At those rates the 20 LoRA runs take about 200–300 A100-hours and the 4 full runs 160–480: 360–780 in all, before Laplace fitting and repeat seeds. The first weeks time one LIBERO run before the grid is fixed. Evaluation: at OpenVLA’s 6 actions per second (model only, on an RTX 4090), 500 episodes capped at 220 steps (Spatial) or 520 (Long) take up to about 5 or 12 GPU-hours per checkpoint, plus simulator time; the 12 checkpoints need about 100 GPU-hours, and the H3 shift runs (3 changes × 2 checkpoints × 2 suites) about 100 more. Full fine-tuning needs 80 GB GPUs; adding Object and Goal roughly doubles everything.</p>
       <p class="note"><b>Risks.</b> Episode-success confidence built from token probabilities is a proxy, and the calibration study found it weakest late in failed episodes. LIBERO is near saturation for newer models, but OpenVLA still fails often enough to calibrate against: about 75 of 500 Spatial episodes and 230 of 500 Long episodes at its published 84.7% and 53.7%. An ensemble costs four times the inference when it acts.</p>
+    </div>
+  </div>
+</section>
+
+<section id="baseline">
+  <div class="wrap">
+    <div class="shead">
+      <h2>First result: calibrated on average, weak at spotting failures</h2>
+      <p class="eyebrow">Preliminary result</p>
+    </div>
+    <div class="prose">
+      <p>The plan starts by reproducing the calibration study’s baseline, and the first suite is done. I ran the released OpenVLA checkpoint fine-tuned on LIBERO-Spatial for 500 episodes (10 tasks × 50 initial states, one seed) with OpenVLA’s own evaluation settings, on one RTX 5090: about 7 actions per second with the simulator, 2 hours 40 minutes in all. The confidence is the calibration study’s first-step score: the mean over the 7 action dimensions of the highest action-token probability, before the robot moves.</p>
+    </div>
+    <ul class="facts facts--4">
+      <li><b>85.2%</b><span>success (standard error 1.6 points), against 84.7% in the OpenVLA paper: the evaluation reproduces.</span></li>
+      <li><b>ECE 0.061</b><span>calibration error; the calibration study reported 0.088, inside this run’s 95% interval (0.048–0.100).</span></li>
+      <li><b>+4.7 points</b><span>mean confidence 0.899 against 85.2% success: slightly overconfident.</span></li>
+      <li><b>AUROC 0.57</b><span>95% interval 0.50–0.65: the confidence barely tells which episodes will fail.</span></li>
+    </ul>
+    <div class="charts">
+      <figure>
+        <svg class="chart" viewBox="0 0 420 300" role="img" aria-label="Reliability diagram: success rate against first-step confidence in 12 bins. The points stay near the overall 85% success rate instead of following the diagonal.">
+          <line class="ch-grid" x1="50" x2="404" y1="246.0" y2="246.0"/>
+          <text class="ch-tick" x="42" y="250.0" text-anchor="end">60%</text>
+          <line class="ch-grid" x1="50" x2="404" y1="193.0" y2="193.0"/>
+          <text class="ch-tick" x="42" y="197.0" text-anchor="end">70%</text>
+          <line class="ch-grid" x1="50" x2="404" y1="140.0" y2="140.0"/>
+          <text class="ch-tick" x="42" y="144.0" text-anchor="end">80%</text>
+          <line class="ch-grid" x1="50" x2="404" y1="87.0" y2="87.0"/>
+          <text class="ch-tick" x="42" y="91.0" text-anchor="end">90%</text>
+          <line class="ch-grid" x1="50" x2="404" y1="34.0" y2="34.0"/>
+          <text class="ch-tick" x="42" y="38.0" text-anchor="end">100%</text>
+          <text class="ch-tick" x="50.0" y="264" text-anchor="middle">0.7</text>
+          <text class="ch-tick" x="168.0" y="264" text-anchor="middle">0.8</text>
+          <text class="ch-tick" x="286.0" y="264" text-anchor="middle">0.9</text>
+          <text class="ch-tick" x="404.0" y="264" text-anchor="middle">1.0</text>
+          <line class="ch-axis" x1="50" x2="404" y1="246" y2="246"/>
+          <text class="ch-lab" x="227" y="292" text-anchor="middle">First-step confidence (mean of each bin)</text>
+          <text class="ch-lab" x="10" y="18">Success rate</text>
+          <line class="ch-ref" x1="50.0" y1="193.0" x2="404.0" y2="34.0"/>
+          <text class="ch-note" x="144.5" y="169.2" transform="rotate(-24.2 144.5 169.2)">calibrated</text>
+          <line class="ch-mean" x1="50" x2="404" y1="112.4" y2="112.4"/>
+          <text class="ch-note" x="56" y="105.4">all episodes: 85.2% success</text>
+          <g class="ch-pt"><title>Bin 1 of 12: mean confidence 0.759, success 76.2% (42 episodes)</title><circle class="ch-hit" cx="119.7" cy="160.2" r="11"/><circle class="ch-dot" cx="119.7" cy="160.2" r="5"/></g>
+          <g class="ch-pt"><title>Bin 2 of 12: mean confidence 0.822, success 90.5% (42 episodes)</title><circle class="ch-hit" cx="194.0" cy="84.5" r="11"/><circle class="ch-dot" cx="194.0" cy="84.5" r="5"/></g>
+          <g class="ch-pt"><title>Bin 3 of 12: mean confidence 0.846, success 73.8% (42 episodes)</title><circle class="ch-hit" cx="222.0" cy="172.8" r="11"/><circle class="ch-dot" cx="222.0" cy="172.8" r="5"/></g>
+          <g class="ch-pt"><title>Bin 4 of 12: mean confidence 0.866, success 85.7% (42 episodes)</title><circle class="ch-hit" cx="246.3" cy="109.7" r="11"/><circle class="ch-dot" cx="246.3" cy="109.7" r="5"/></g>
+          <g class="ch-pt"><title>Bin 5 of 12: mean confidence 0.887, success 83.3% (42 episodes)</title><circle class="ch-hit" cx="270.1" cy="122.3" r="11"/><circle class="ch-dot" cx="270.1" cy="122.3" r="5"/></g>
+          <g class="ch-pt"><title>Bin 6 of 12: mean confidence 0.903, success 83.3% (42 episodes)</title><circle class="ch-hit" cx="289.0" cy="122.3" r="11"/><circle class="ch-dot" cx="289.0" cy="122.3" r="5"/></g>
+          <g class="ch-pt"><title>Bin 7 of 12: mean confidence 0.917, success 88.1% (42 episodes)</title><circle class="ch-hit" cx="305.6" cy="97.1" r="11"/><circle class="ch-dot" cx="305.6" cy="97.1" r="5"/></g>
+          <g class="ch-pt"><title>Bin 8 of 12: mean confidence 0.929, success 92.9% (42 episodes)</title><circle class="ch-hit" cx="320.2" cy="71.9" r="11"/><circle class="ch-dot" cx="320.2" cy="71.9" r="5"/></g>
+          <g class="ch-pt"><title>Bin 9 of 12: mean confidence 0.939, success 82.9% (41 episodes)</title><circle class="ch-hit" cx="332.3" cy="124.5" r="11"/><circle class="ch-dot" cx="332.3" cy="124.5" r="5"/></g>
+          <g class="ch-pt"><title>Bin 10 of 12: mean confidence 0.954, success 92.7% (41 episodes)</title><circle class="ch-hit" cx="349.9" cy="72.8" r="11"/><circle class="ch-dot" cx="349.9" cy="72.8" r="5"/></g>
+          <g class="ch-pt"><title>Bin 11 of 12: mean confidence 0.975, success 85.4% (41 episodes)</title><circle class="ch-hit" cx="374.9" cy="111.6" r="11"/><circle class="ch-dot" cx="374.9" cy="111.6" r="5"/></g>
+          <g class="ch-pt"><title>Bin 12 of 12: mean confidence 0.993, success 87.8% (41 episodes)</title><circle class="ch-hit" cx="395.3" cy="98.6" r="11"/><circle class="ch-dot" cx="395.3" cy="98.6" r="5"/></g>
+        </svg>
+        <figcaption>Reliability of the first-step confidence, in 12 equal-mass bins of about 42 episodes. A calibrated model sits on the diagonal. Here the success rate stays near 85% whatever the confidence: right on average, but with little to tell the failures apart.</figcaption>
+      </figure>
+      <figure>
+        <svg class="chart" viewBox="0 0 420 300" role="img" aria-label="Failure AUROC of the mean confidence over the first k steps, k from 1 to 60: from 0.57 to 0.61, close to the 0.5 of chance.">
+          <line class="ch-grid" x1="50" x2="404" y1="246.0" y2="246.0"/>
+          <text class="ch-tick" x="42" y="250.0" text-anchor="end">0.4</text>
+          <line class="ch-grid" x1="50" x2="404" y1="210.7" y2="210.7"/>
+          <text class="ch-tick" x="42" y="214.7" text-anchor="end">0.5</text>
+          <line class="ch-grid" x1="50" x2="404" y1="175.3" y2="175.3"/>
+          <text class="ch-tick" x="42" y="179.3" text-anchor="end">0.6</text>
+          <line class="ch-grid" x1="50" x2="404" y1="140.0" y2="140.0"/>
+          <text class="ch-tick" x="42" y="144.0" text-anchor="end">0.7</text>
+          <line class="ch-grid" x1="50" x2="404" y1="104.7" y2="104.7"/>
+          <text class="ch-tick" x="42" y="108.7" text-anchor="end">0.8</text>
+          <line class="ch-grid" x1="50" x2="404" y1="69.3" y2="69.3"/>
+          <text class="ch-tick" x="42" y="73.3" text-anchor="end">0.9</text>
+          <line class="ch-grid" x1="50" x2="404" y1="34.0" y2="34.0"/>
+          <text class="ch-tick" x="42" y="38.0" text-anchor="end">1.0</text>
+          <text class="ch-tick" x="55.9" y="264" text-anchor="middle">1</text>
+          <text class="ch-tick" x="109.0" y="264" text-anchor="middle">10</text>
+          <text class="ch-tick" x="168.0" y="264" text-anchor="middle">20</text>
+          <text class="ch-tick" x="227.0" y="264" text-anchor="middle">30</text>
+          <text class="ch-tick" x="286.0" y="264" text-anchor="middle">40</text>
+          <text class="ch-tick" x="345.0" y="264" text-anchor="middle">50</text>
+          <text class="ch-tick" x="404.0" y="264" text-anchor="middle">60</text>
+          <line class="ch-axis" x1="50" x2="404" y1="246" y2="246"/>
+          <text class="ch-lab" x="227" y="292" text-anchor="middle">First k steps of the episode</text>
+          <text class="ch-lab" x="10" y="18">Failure AUROC</text>
+          <line class="ch-mean" x1="50" x2="404" y1="210.7" y2="210.7"/>
+          <text class="ch-note" x="400" y="226.7" text-anchor="end">chance</text>
+          <polygon class="ch-band" points="55.9,159.5 61.8,148.2 67.7,154.4 79.5,158.0 97.2,156.6 109.0,151.6 138.5,142.8 168.0,141.4 197.5,142.1 227.0,144.9 286.0,143.5 345.0,143.7 404.0,145.6 404.0,201.9 345.0,201.8 286.0,199.1 227.0,201.4 197.5,197.8 168.0,196.2 138.5,197.3 109.0,207.4 97.2,207.8 79.5,209.7 67.7,204.2 61.8,196.8 55.9,211.3"/>
+          <polyline class="ch-line" points="55.9,185.0 61.8,172.0 67.7,179.8 79.5,182.6 97.2,182.0 109.0,178.0 138.5,171.1 168.0,168.0 197.5,167.9 227.0,171.6 286.0,171.8 345.0,172.3 404.0,172.7"/>
+          <g class="ch-pt"><title>First 1 step: AUROC 0.57 (95% interval 0.50–0.64)</title><circle class="ch-hit" cx="55.9" cy="185.0" r="11"/><circle class="ch-dot" cx="55.9" cy="185.0" r="4.5"/></g>
+          <g class="ch-pt"><title>First 2 steps: AUROC 0.61 (95% interval 0.54–0.68)</title><circle class="ch-hit" cx="61.8" cy="172.0" r="11"/><circle class="ch-dot" cx="61.8" cy="172.0" r="4.5"/></g>
+          <g class="ch-pt"><title>First 3 steps: AUROC 0.59 (95% interval 0.52–0.66)</title><circle class="ch-hit" cx="67.7" cy="179.8" r="11"/><circle class="ch-dot" cx="67.7" cy="179.8" r="4.5"/></g>
+          <g class="ch-pt"><title>First 5 steps: AUROC 0.58 (95% interval 0.50–0.65)</title><circle class="ch-hit" cx="79.5" cy="182.6" r="11"/><circle class="ch-dot" cx="79.5" cy="182.6" r="4.5"/></g>
+          <g class="ch-pt"><title>First 8 steps: AUROC 0.58 (95% interval 0.51–0.65)</title><circle class="ch-hit" cx="97.2" cy="182.0" r="11"/><circle class="ch-dot" cx="97.2" cy="182.0" r="4.5"/></g>
+          <g class="ch-pt"><title>First 10 steps: AUROC 0.59 (95% interval 0.51–0.67)</title><circle class="ch-hit" cx="109.0" cy="178.0" r="11"/><circle class="ch-dot" cx="109.0" cy="178.0" r="4.5"/></g>
+          <g class="ch-pt"><title>First 15 steps: AUROC 0.61 (95% interval 0.54–0.69)</title><circle class="ch-hit" cx="138.5" cy="171.1" r="11"/><circle class="ch-dot" cx="138.5" cy="171.1" r="4.5"/></g>
+          <g class="ch-pt"><title>First 20 steps: AUROC 0.62 (95% interval 0.54–0.70)</title><circle class="ch-hit" cx="168.0" cy="168.0" r="11"/><circle class="ch-dot" cx="168.0" cy="168.0" r="4.5"/></g>
+          <g class="ch-pt"><title>First 25 steps: AUROC 0.62 (95% interval 0.54–0.69)</title><circle class="ch-hit" cx="197.5" cy="167.9" r="11"/><circle class="ch-dot" cx="197.5" cy="167.9" r="4.5"/></g>
+          <g class="ch-pt"><title>First 30 steps: AUROC 0.61 (95% interval 0.53–0.69)</title><circle class="ch-hit" cx="227.0" cy="171.6" r="11"/><circle class="ch-dot" cx="227.0" cy="171.6" r="4.5"/></g>
+          <g class="ch-pt"><title>First 40 steps: AUROC 0.61 (95% interval 0.53–0.69)</title><circle class="ch-hit" cx="286.0" cy="171.8" r="11"/><circle class="ch-dot" cx="286.0" cy="171.8" r="4.5"/></g>
+          <g class="ch-pt"><title>First 50 steps: AUROC 0.61 (95% interval 0.53–0.69)</title><circle class="ch-hit" cx="345.0" cy="172.3" r="11"/><circle class="ch-dot" cx="345.0" cy="172.3" r="4.5"/></g>
+          <g class="ch-pt"><title>First 60 steps: AUROC 0.61 (95% interval 0.52–0.68)</title><circle class="ch-hit" cx="404.0" cy="172.7" r="11"/><circle class="ch-dot" cx="404.0" cy="172.7" r="4.5"/></g>
+          <text class="ch-val" x="402.0" y="160.7" text-anchor="end">0.61</text>
+          <text class="ch-val" x="57.9" y="207.0">0.57</text>
+        </svg>
+        <figcaption>How well the mean confidence over the first k steps separates failures from successes (AUROC: 1 is perfect, 0.5 is chance), with 95% bootstrap intervals. Every success takes at least 66 steps, and all 74 failures run to the 220-step limit, so these are the steps in which a help request still comes in time.</figcaption>
+      </figure>
+    </div>
+    <div class="prose">
+      <p><b>What it means.</b> On this suite the released checkpoint’s confidence is calibrated on average but ranks episodes little better than chance, from the first step through the first 60. Calibration error alone would call it fine; the signed gap, AUROC and warning time in the design are what show the problem, and the fine-tuning grid tests whether less data or LoRA makes it worse. Averaged over the whole episode the AUROC reaches 0.83, but only because failed episodes keep running after the successful ones have ended, too late for a help request. For the application, a threshold on the raw first-step confidence would catch few failures here, so the per-step score and the learned monitors are the ones to test in the twin.</p>
+      <p class="note"><b>Limits.</b> One suite, one seed, one released checkpoint; success per task ranges from 68% to 98% (1: 88%; 2: 92%; 3: 90%; 4: 92%; 5: 70%; 6: 88%; 7: 98%; 8: 82%; 9: 84%; 10: 68%). LIBERO-Long, where the calibration study found a calibration error of 0.381, is next.</p>
+      <details class="fig-toggle"><summary>The numbers behind the charts</summary>
+        <div class="scroll"><table class="nums">
+          <thead><tr><th>Measure</th><th>This run (95% interval)</th><th>Zollo and Zemel</th><th>OpenVLA paper</th></tr></thead>
+          <tbody>
+            <tr><td>Success rate</td><td>85.2% (s.e. 1.6 points)</td><td>82.8%</td><td>84.7% (3 seeds)</td></tr>
+            <tr><td>Mean first-step confidence</td><td>0.899</td><td>–</td><td>–</td></tr>
+            <tr><td>Calibration error (ECE, 12 bins)</td><td>0.061 (0.048–0.100)</td><td>0.088</td><td>–</td></tr>
+            <tr><td>Brier score</td><td>0.127 (0.103–0.153)</td><td>0.150</td><td>–</td></tr>
+            <tr><td>Negative log-likelihood</td><td>0.449</td><td>0.533</td><td>–</td></tr>
+            <tr><td>Failure AUROC</td><td>0.57 (0.50–0.65)</td><td>not reported</td><td>–</td></tr>
+          </tbody>
+        </table></div>
+        <div class="scroll"><table class="nums">
+          <thead><tr><th>Bin</th><th>Mean confidence</th><th>Success</th><th>Episodes</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>0.759</td><td>76.2%</td><td>42</td></tr>
+            <tr><td>2</td><td>0.822</td><td>90.5%</td><td>42</td></tr>
+            <tr><td>3</td><td>0.846</td><td>73.8%</td><td>42</td></tr>
+            <tr><td>4</td><td>0.866</td><td>85.7%</td><td>42</td></tr>
+            <tr><td>5</td><td>0.887</td><td>83.3%</td><td>42</td></tr>
+            <tr><td>6</td><td>0.903</td><td>83.3%</td><td>42</td></tr>
+            <tr><td>7</td><td>0.917</td><td>88.1%</td><td>42</td></tr>
+            <tr><td>8</td><td>0.929</td><td>92.9%</td><td>42</td></tr>
+            <tr><td>9</td><td>0.939</td><td>82.9%</td><td>41</td></tr>
+            <tr><td>10</td><td>0.954</td><td>92.7%</td><td>41</td></tr>
+            <tr><td>11</td><td>0.975</td><td>85.4%</td><td>41</td></tr>
+            <tr><td>12</td><td>0.993</td><td>87.8%</td><td>41</td></tr>
+          </tbody>
+        </table></div>
+        <div class="scroll"><table class="nums">
+          <thead><tr><th>First k steps</th><th>Failure AUROC</th><th>95% interval</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>0.57</td><td>0.50–0.64</td></tr>
+            <tr><td>2</td><td>0.61</td><td>0.54–0.68</td></tr>
+            <tr><td>3</td><td>0.59</td><td>0.52–0.66</td></tr>
+            <tr><td>5</td><td>0.58</td><td>0.50–0.65</td></tr>
+            <tr><td>8</td><td>0.58</td><td>0.51–0.65</td></tr>
+            <tr><td>10</td><td>0.59</td><td>0.51–0.67</td></tr>
+            <tr><td>15</td><td>0.61</td><td>0.54–0.69</td></tr>
+            <tr><td>20</td><td>0.62</td><td>0.54–0.70</td></tr>
+            <tr><td>25</td><td>0.62</td><td>0.54–0.69</td></tr>
+            <tr><td>30</td><td>0.61</td><td>0.53–0.69</td></tr>
+            <tr><td>40</td><td>0.61</td><td>0.53–0.69</td></tr>
+            <tr><td>50</td><td>0.61</td><td>0.53–0.69</td></tr>
+            <tr><td>60</td><td>0.61</td><td>0.52–0.68</td></tr>
+          </tbody>
+        </table></div>
+      </details>
     </div>
   </div>
 </section>
@@ -238,7 +418,7 @@
       <p class="eyebrow">Timeline</p>
     </div>
     <ol class="rows">
-      <li class="row"><div class="row__when">Weeks 1–3</div><div class="row__main"><div class="row__title">Reproduce the baseline</div><div class="row__body">Calibration of the released OpenVLA LIBERO checkpoints, matching the calibration study’s numbers; time one LIBERO fine-tuning run to fix the compute budget.</div></div></li>
+      <li class="row"><div class="row__when">Weeks 1–3</div><div class="row__main"><div class="row__title">Reproduce the baseline</div><div class="row__body">Calibration of the released OpenVLA LIBERO checkpoints, matching the calibration study’s numbers; time one LIBERO fine-tuning run to fix the compute budget. The Spatial suite is done: see the first result above.</div></div></li>
       <li class="row"><div class="row__when">Weeks 4–8</div><div class="row__main"><div class="row__title">Fine-tuning grid (H1, H2)</div><div class="row__body">Full and LoRA fine-tuning, two data sizes, Bayesian LoRA and post-hoc fixes, on LIBERO Spatial and Long.</div></div></li>
       <li class="row"><div class="row__when">Weeks 9–10</div><div class="row__main"><div class="row__title">Shift (H3)</div><div class="row__body">The same checkpoints under LIBERO-Plus perturbations.</div></div></li>
       <li class="row"><div class="row__when">Weeks 11–14</div><div class="row__main"><div class="row__title">One room, end to end</div><div class="row__body">The pilot gate first, then a phone-video twin of one tabletop workspace, rehearsal, calibration, and a real-robot check of the help threshold.</div></div></li>
@@ -250,7 +430,7 @@
 <section id="sources">
   <div class="wrap">
     <div class="prose">
-      <p class="note"><b>Sources.</b> OpenVLA (arXiv:2406.09246v3): §3.5 for training compute and inference speed, §5.3, Table 1 and Table 8 for parameter-efficient fine-tuning, §5.4 and Table 2 for quantization (footnote 4: both use a smaller SigLIP-only variant), §6 for limitations, Appendix E for LIBERO (LoRA at rank 32, 500 trials per suite for each of three seeds, 76.5% average). LIBERO episode limits from OpenVLA’s evaluation script. The related work was read on arXiv on 19 October 2026; the gaps named here are the ones I found, and I may have missed work. The compute figures are estimates from OpenVLA’s reported numbers, not measurements. Calibration protocol (first-step confidence, 12 equal-mass bins, 20% / 80% splits) from Zollo and Zemel §3–4 and Appendix C.</p>
+      <p class="note"><b>Sources.</b> OpenVLA (arXiv:2406.09246v3): §3.5 for training compute and inference speed, §5.3, Table 1 and Table 8 for parameter-efficient fine-tuning, §5.4 and Table 2 for quantization (footnote 4: both use a smaller SigLIP-only variant), §6 for limitations, Appendix E for LIBERO (LoRA at rank 32, 500 trials per suite for each of three seeds, 76.5% average). LIBERO episode limits from OpenVLA’s evaluation script. The related work was read on arXiv on 19 October 2026; the gaps named here are the ones I found, and I may have missed work. The compute figures are estimates from OpenVLA’s reported numbers, not measurements. Calibration protocol (first-step confidence, 12 equal-mass bins, 20% / 80% splits) from Zollo and Zemel §3–4 and Appendix C. The first result is my own run, in October 2026, of the released checkpoint openvla/openvla-7b-finetuned-libero-spatial with the settings of OpenVLA’s LIBERO evaluation script (seed 7, the first 50 initial states per task); intervals are from 1,000 bootstrap resamples of episodes.</p>
     </div>
   </div>
 </section>
