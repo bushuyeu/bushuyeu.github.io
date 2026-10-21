@@ -34,7 +34,6 @@
 :root { --ink-3: #707075; --viz-a: var(--link); --viz-b: #1f7a35; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ink-3: #86868b; --viz-b: #30d158; } }
 :root[data-theme="dark"] { --ink-3: #86868b; --viz-b: #30d158; }
-.intro { max-width: 70ch; color: var(--ink-2); margin-bottom: 18px; }
 .facts { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 14px 28px; }
 .facts li { border-top: 1px solid var(--hair-soft); padding-top: 12px; display: flex; flex-direction: column; gap: 4px; }
 .facts b { font-size: 1.35rem; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
@@ -106,7 +105,7 @@
       </button>
     </div>
     <h1>When should a fine-tuned OpenVLA ask for help?</h1>
-    <p class="sub">OpenVLA made it cheap to adapt a 7B robot policy: LoRA on one GPU matches full fine-tuning. Because OpenVLA writes actions as tokens, it also reports how sure it is of each one. I propose to test whether that cheap fine-tuning keeps the confidence honest, and to set each robot’s ask-for-help threshold in a digital twin of the room where it will work.</p>
+    <p class="sub">A research project and an application for OpenVLA. The project tests whether the fine-tuning method changes how well the action-token confidence predicts success. The application sets the help threshold of a robot from rollouts in a digital twin of its workspace.</p>
     <div class="meta">
       <span>Paper: <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2406.09246">OpenVLA, arXiv:2406.09246</a></span>
       <span>Role: visionary</span>
@@ -116,56 +115,37 @@
   </div>
 </header>
 
-<section id="paper">
-  <div class="wrap">
-    <div class="shead">
-      <h2>What OpenVLA makes possible</h2>
-      <p class="eyebrow">The paper</p>
-    </div>
-    <p class="intro">OpenVLA (Kim, Pertsch, Karamcheti et al., 2024) is a 7B vision-language-action model built on Prismatic-7B: SigLIP and DINOv2 image features feeding a Llama 2 language model. It was trained on 970k robot episodes from Open X-Embodiment, in 21,500 A100-hours.</p>
-    <ul class="facts">
-      <li><b>+16.5 points</b><span>absolute success over the closed 55B RT-2-X, across 29 tasks on two robots, with 7× fewer parameters.</span></li>
-      <li><b>1.4% of the weights</b><span>LoRA at rank 32 came within 1.5 points of full fine-tuning (68.2% against 69.7%, 33 rollouts on two Franka tasks), in 10–15 hours on one A100 instead of 8 A100s for 5–15 hours.</span></li>
-      <li><b>4-bit</b><span>quantized inference scored like bfloat16 (71.9% against 71.3%, 80 rollouts on eight BridgeData tasks) with less than half the GPU memory.</span></li>
-      <li><b>256 bins per dimension</b><span>each of the 7 action dimensions is written as one token, so every action comes with a probability.</span></li>
-    </ul>
-    <p class="intro" style="margin-top:22px">The paper names its own limits: one camera image and no history, about 6 actions per second on an RTX 4090, and reliability below 90%. Its LoRA and 4-bit results come from a smaller OpenVLA variant (a SigLIP-only vision encoder and a smaller data mix, footnote 4 of the paper), on a few tasks, so they show the method works rather than measure the released model. Two of its strengths meet in this proposal. Fine-tuning is cheap enough that LoRA is the standard way to adapt OpenVLA to a new robot, and its token probabilities are the signal that recent work uses to decide when a robot should ask a person for help.</p>
-  </div>
-</section>
-
 <section id="research">
   <div class="wrap">
     <div class="shead">
-      <h2>Research project: does cheap fine-tuning break a VLA’s confidence?</h2>
+      <h2>Research project: does fine-tuning change calibration?</h2>
       <p class="eyebrow">Proposed research</p>
     </div>
     <div class="prose">
-      <p>A robot that asks for help must know when it is likely to fail. Token-based VLAs give a probability for every action token, and recent monitors build on it in different ways. The simplest reads it directly as the chance of success (<a rel="noopener" target="_blank" href="https://arxiv.org/abs/2507.17383">Zollo and Zemel</a>). Others train a classifier on token uncertainty (<a rel="noopener" target="_blank" href="https://arxiv.org/abs/2510.01389">INSIGHT</a>), wrap it in conformal prediction (<a rel="noopener" target="_blank" href="https://arxiv.org/abs/2604.16677">ReconVLA</a>), or fit a separate calibrator on labelled rollouts (<a rel="noopener" target="_blank" href="https://arxiv.org/abs/2605.29605">VLAConf</a>). Each is fitted to the rollouts of one fine-tuned model. If the way a model is fine-tuned changes how its confidence relates to success, the raw confidence misleads, and the learned monitors must be refitted after every new fine-tune.</p>
-      <p>In language models, LoRA fine-tuning on small datasets makes models overconfident. Two Bayesian treatments of LoRA repair much of it: <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2308.13111">Laplace-LoRA</a>, a post-hoc Laplace approximation over the trained adapter’s weights, and <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2310.00035">ensembles of separately trained adapters</a>. I found no controlled comparison of fine-tuning method and data size for the calibration of a robot policy. <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2507.17383">Zollo and Zemel’s calibration study</a> measured released OpenVLA checkpoints, all fine-tuned the same way (LoRA at rank 32), and did not vary the fine-tuning.</p>
+      <p>Token-based VLAs such as OpenVLA give a probability for each action token. Help-request monitors use this signal directly (<a rel="noopener" target="_blank" href="https://arxiv.org/abs/2507.17383">Zollo and Zemel</a>), through a learned classifier (<a rel="noopener" target="_blank" href="https://arxiv.org/abs/2510.01389">INSIGHT</a>), with conformal prediction (<a rel="noopener" target="_blank" href="https://arxiv.org/abs/2604.16677">ReconVLA</a>) or through a separate calibrator (<a rel="noopener" target="_blank" href="https://arxiv.org/abs/2605.29605">VLAConf</a>). Each monitor is fitted to one fine-tuned model. In language models, LoRA fine-tuning on small datasets causes overconfidence, and Bayesian LoRA reduces it (<a rel="noopener" target="_blank" href="https://arxiv.org/abs/2308.13111">Laplace-LoRA</a>, <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2310.00035">LoRA ensembles</a>). I found no controlled test of the fine-tuning method or the data size for VLA calibration. Zollo and Zemel measured only released OpenVLA checkpoints, all trained with LoRA at rank 32.</p>
       <h3>Hypotheses</h3>
       <ol class="hyp">
-        <li><span>Fine-tuned on 10% of the demonstrations, OpenVLA is more overconfident than on all of them: its mean confidence exceeds its success rate by more. LoRA is more overconfident than full fine-tuning when the two reach similar success.</span></li>
-        <li><span>Bayesian LoRA confidence (Laplace-LoRA, an ensemble of four adapters) has lower calibration error than rescaling one adapter’s confidence (temperature scaling, the action-wise Platt scaling of the calibration study), scored on the same rollouts.</span></li>
-        <li><span>Under the camera, lighting and layout changes of <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2510.13626">LIBERO-Plus</a>, where a robot most needs to ask for help, LoRA’s overconfidence relative to full fine-tuning grows, with calibrators fitted without those changes and kept frozen.</span></li>
+        <li><span>Fine-tuning on 10% of the demonstrations gives a larger gap between mean confidence and success than fine-tuning on 100%. At similar success, LoRA gives a larger gap than full fine-tuning.</span></li>
+        <li><span>Bayesian LoRA (Laplace-LoRA, an ensemble of four adapters) gives a lower calibration error than temperature or action-wise Platt scaling of one adapter.</span></li>
+        <li><span>Under the camera, lighting and layout changes of <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2510.13626">LIBERO-Plus</a>, the gap between LoRA and full fine-tuning increases when the calibrators stay frozen.</span></li>
       </ol>
-      <p><b>Why it matters.</b> If H1 holds, raw confidence misleads after a cheap fine-tune, and a monitor fitted to one fine-tune needs new labelled rollouts for the next. If H2 holds, the repair is cheap: a posterior over the adapter or a few more adapters, not a new model. Whatever H1 shows, H2 tests whether simple rescaling is as good, and a learning curve over the calibration set shows how many labelled rollouts it needs.</p>
+      <p><b>Why it matters.</b> If H1 holds, a monitor fitted to one fine-tuned model needs new labeled rollouts after each new fine-tune. If H2 holds, a posterior over the adapter or a few more adapters repairs the confidence without a new model.</p>
       <h3>Design</h3>
       <div class="scroll"><table class="design">
         <tbody>
-          <tr><th scope="row">Model</th><td>OpenVLA-7B from its released pretrained weights.</td></tr>
-          <tr><th scope="row">Fine-tuning</th><td>Full; LoRA at rank 8; LoRA at rank 32, OpenVLA’s default. The same step budget and tuning effort for each.</td></tr>
-          <tr><th scope="row">Data</th><td>10% and 100% of each LIBERO suite’s demonstrations; the 10% subset is drawn per task. Two sizes test a contrast, not a trend; a 30% point is added if the budget allows.</td></tr>
-          <tr><th scope="row">Confidence</th><td>Raw token confidence; temperature scaling; action-wise Platt scaling; Laplace-LoRA on the rank-32 adapter; an ensemble of four rank-32 adapters. All are scored on the same rollouts of one acting adapter, so success stays fixed. Running the ensemble as the policy is a separate comparison with its own rollouts.</td></tr>
-          <tr><th scope="row">Matching</th><td>For “similar success” in H1, LoRA and full fine-tuning checkpoints are matched on success measured with a different simulator seed, never on the test rollouts.</td></tr>
-          <tr><th scope="row">Tasks</th><td>LIBERO Spatial and Long first, then Object and Goal (OpenVLA’s own fine-tuning benchmark).</td></tr>
-          <tr><th scope="row">Shift (H3)</th><td>LIBERO-Plus camera, lighting and layout changes, one severity, from the same initial states, on the rank-32 LoRA and full fine-tuning checkpoints trained on all demonstrations. The primary contrast: LoRA’s confidence-minus-success gap over full fine-tuning’s, with and without the changes. Calibrators stay frozen; refitting them is a reference.</td></tr>
-          <tr><th scope="row">Metrics</th><td>Success rate; mean confidence minus success (the direction of the error); expected calibration error, Brier score and NLL of the first-step confidence, as in the calibration study; failure-prediction AUROC with failure as the positive class, added here; reliability diagrams; confidence over the course of an episode.</td></tr>
-          <tr><th scope="row">Trials</th><td>500 rollouts per configuration (10 tasks × 50 initial states, one seed), as in the calibration study; OpenVLA’s paper averages three seeds, 1,500 rollouts. 95% bootstrap intervals.</td></tr>
-          <tr><th scope="row">Splits</th><td>Fitted fixes and thresholds use episode-level 20% / 80% calibration and test splits, repeated 1,000 times, as in the calibration study. Test episodes are never used for fitting or for choosing a method. A 20% split of 500 Spatial rollouts holds only about 15 failures, so a learning curve over the calibration-set size checks whether that is enough.</td></tr>
+          <tr><th scope="row">Model</th><td>OpenVLA-7B, released pretrained weights.</td></tr>
+          <tr><th scope="row">Fine-tuning</th><td>Full, LoRA at rank 8, LoRA at rank 32 (the default). Each has the same step budget and tuning effort.</td></tr>
+          <tr><th scope="row">Data</th><td>10% (sampled per task) and 100% of the demonstrations of each suite.</td></tr>
+          <tr><th scope="row">Confidence</th><td>Raw, temperature scaling, action-wise Platt scaling, Laplace-LoRA, an ensemble of four rank-32 adapters. All are scored on the rollouts of one acting adapter.</td></tr>
+          <tr><th scope="row">Tasks</th><td>LIBERO Spatial and Long, then Object and Goal. H3 uses LIBERO-Plus at one severity on the rank-32 LoRA and full checkpoints.</td></tr>
+          <tr><th scope="row">Matching</th><td>H1 compares LoRA and full checkpoints at success matched on a different simulator seed.</td></tr>
+          <tr><th scope="row">Metrics</th><td>Success, mean confidence minus success, and the ECE, Brier score and NLL of the first-step confidence, as in Zollo and Zemel. The design adds failure AUROC and reliability diagrams.</td></tr>
+          <tr><th scope="row">Trials</th><td>500 rollouts per configuration (10 tasks × 50 initial states, one seed). OpenVLA reports the mean of three seeds.</td></tr>
+          <tr><th scope="row">Splits</th><td>Episode-level 20% / 80% calibration and test splits, repeated 1,000 times, as in Zollo and Zemel. A 20% Spatial split holds about 15 failures, so a learning curve over the calibration-set size tests whether this is enough.</td></tr>
         </tbody>
       </table></div>
-      <p class="note"><b>Compute, estimated.</b> The first pass covers two suites (Spatial and Long), three fine-tuning methods and two data sizes: 12 runs. The ensembles add three rank-32 adapters per suite and data size: 12 more, 24 runs in all, 4 of them full fine-tuning. OpenVLA reports, on its own Franka datasets, 10–15 A100-hours for a LoRA run (one GPU, about 60 GB at batch size 16) and 8 A100s for 5–15 hours for a full fine-tune (163 GB at batch size 16, sharded across two GPUs; §5.3, Table 1). At those rates the 20 LoRA runs take about 200–300 A100-hours and the 4 full runs 160–480: 360–780 in all, before Laplace fitting and repeat seeds. The first weeks time one LIBERO run before the grid is fixed. Evaluation: at OpenVLA’s 6 actions per second (model only, on an RTX 4090), 500 episodes capped at 220 steps (Spatial) or 520 (Long) take up to about 5 or 12 GPU-hours per checkpoint, plus simulator time; the 12 checkpoints need about 100 GPU-hours, and the H3 shift runs (3 changes × 2 checkpoints × 2 suites) about 100 more. Full fine-tuning needs 80 GB GPUs; adding Object and Goal roughly doubles everything.</p>
-      <p class="note"><b>Risks.</b> Episode-success confidence built from token probabilities is a proxy, and the calibration study found it weakest late in failed episodes. LIBERO is near saturation for newer models, but OpenVLA still fails often enough to calibrate against: about 75 of 500 Spatial episodes and 230 of 500 Long episodes at its published 84.7% and 53.7%. An ensemble costs four times the inference when it acts.</p>
+      <p class="note"><b>Compute (estimate).</b> The first pass has 24 runs on Spatial and Long. Of these, 12 form the grid and 12 are extra ensemble adapters, and 4 are full fine-tuning. OpenVLA reports 10–15 A100-hours per LoRA run and 40–120 per full run on Franka data (§5.2–5.3). At these rates, the first pass needs 360–780 A100-hours before Laplace fitting and repeat seeds. Full fine-tuning needs GPUs with 80 GB or more. Evaluation needs about 200 GPU-hours, and the first result below gives the measured rate.</p>
+      <p class="note"><b>Risks.</b> Token-based success confidence is a proxy, and Zollo and Zemel found it weakest late in failed episodes. OpenVLA fails about 75 of 500 Spatial episodes and 230 of 500 Long episodes, which is enough to calibrate against. An acting ensemble costs four times the inference.</p>
     </div>
   </div>
 </section>
@@ -173,17 +153,17 @@
 <section id="baseline">
   <div class="wrap">
     <div class="shead">
-      <h2>First result: calibrated on average, weak at spotting failures</h2>
+      <h2>First result: calibrated on average, weak at predicting failure</h2>
       <p class="eyebrow">Preliminary result</p>
     </div>
     <div class="prose">
-      <p>The plan starts by reproducing the calibration study’s baseline, and the first suite is done. I ran the released OpenVLA checkpoint fine-tuned on LIBERO-Spatial for 500 episodes (10 tasks × 50 initial states, one seed) with OpenVLA’s own evaluation settings, on one RTX 5090: about 7 actions per second with the simulator, 2 hours 40 minutes in all. The confidence is the calibration study’s first-step score: the mean over the 7 action dimensions of the highest action-token probability, before the robot moves.</p>
+      <p>I reproduced the baseline of Zollo and Zemel on the released LIBERO-Spatial checkpoint. The run used 500 episodes (10 tasks × 50 initial states, one seed) and the settings of the OpenVLA evaluation script. It ran on one RTX 5090 at 7 steps per second, in 2 h 40 min. The confidence is the first-step score of Zollo and Zemel, the mean over the 7 action dimensions of the highest action-token probability.</p>
     </div>
     <ul class="facts facts--4">
-      <li><b>85.2%</b><span>success (standard error 1.6 points), against 84.7% in the OpenVLA paper: the evaluation reproduces.</span></li>
-      <li><b>ECE 0.061</b><span>calibration error; the calibration study reported 0.088, inside this run’s 95% interval (0.048–0.100).</span></li>
-      <li><b>+4.7 points</b><span>mean confidence 0.899 against 85.2% success: slightly overconfident.</span></li>
-      <li><b>AUROC 0.57</b><span>95% interval 0.50–0.65: the confidence barely tells which episodes will fail.</span></li>
+      <li><b>85.2%</b><span>success (s.e. 1.6 points). OpenVLA reports 84.7%.</span></li>
+      <li><b>ECE 0.061</b><span>95% interval 0.048–0.100. Zollo and Zemel report 0.088.</span></li>
+      <li><b>+4.7 points</b><span>mean confidence (0.899) minus success.</span></li>
+      <li><b>AUROC 0.57</b><span>failure prediction, 95% interval 0.50–0.65.</span></li>
     </ul>
     <div class="charts">
       <figure>
@@ -222,7 +202,7 @@
           <g class="ch-pt"><title>Bin 11 of 12: mean confidence 0.975, success 85.4% (41 episodes)</title><circle class="ch-hit" cx="374.9" cy="111.6" r="11"/><circle class="ch-dot" cx="374.9" cy="111.6" r="5"/></g>
           <g class="ch-pt"><title>Bin 12 of 12: mean confidence 0.993, success 87.8% (41 episodes)</title><circle class="ch-hit" cx="395.3" cy="98.6" r="11"/><circle class="ch-dot" cx="395.3" cy="98.6" r="5"/></g>
         </svg>
-        <figcaption>Reliability of the first-step confidence, in 12 equal-mass bins of about 42 episodes. A calibrated model sits on the diagonal. Here the success rate stays near 85% whatever the confidence: right on average, but with little to tell the failures apart.</figcaption>
+        <figcaption>First-step confidence in 12 equal-mass bins of about 42 episodes. Success stays near 85% at all confidence levels.</figcaption>
       </figure>
       <figure>
         <svg class="chart" viewBox="0 0 420 300" role="img" aria-label="Failure AUROC of the mean confidence over the first k steps, k from 1 to 60: from 0.57 to 0.61, close to the 0.5 of chance.">
@@ -270,12 +250,12 @@
           <text class="ch-val" x="402.0" y="160.7" text-anchor="end">0.61</text>
           <text class="ch-val" x="57.9" y="207.0">0.57</text>
         </svg>
-        <figcaption>How well the mean confidence over the first k steps separates failures from successes (AUROC: 1 is perfect, 0.5 is chance), with 95% bootstrap intervals. Every success takes at least 66 steps, and all 74 failures run to the 220-step limit, so these are the steps in which a help request still comes in time.</figcaption>
+        <figcaption>Failure AUROC of the mean confidence over the first k steps, with 95% bootstrap intervals. All successes take at least 66 steps, and all 74 failures reach the 220-step limit.</figcaption>
       </figure>
     </div>
     <div class="prose">
-      <p><b>What it means.</b> On this suite the released checkpoint’s confidence is calibrated on average but ranks episodes little better than chance, from the first step through the first 60. Calibration error alone would call it fine; the signed gap, AUROC and warning time in the design are what show the problem, and the fine-tuning grid tests whether less data or LoRA makes it worse. Averaged over the whole episode the AUROC reaches 0.83, but only because failed episodes keep running after the successful ones have ended, too late for a help request. For the application, a threshold on the raw first-step confidence would catch few failures here, so the per-step score and the learned monitors are the ones to test in the twin.</p>
-      <p class="note"><b>Limits.</b> One suite, one seed, one released checkpoint; success per task ranges from 68% to 98% (1: 88%; 2: 92%; 3: 90%; 4: 92%; 5: 70%; 6: 88%; 7: 98%; 8: 82%; 9: 84%; 10: 68%). LIBERO-Long, where the calibration study found a calibration error of 0.381, is next.</p>
+      <p><b>Interpretation.</b> The confidence is calibrated on average, but in the first 60 steps it ranks episodes only slightly better than chance. Thus the ECE alone does not show the problem, and the design adds the signed gap, the AUROC and the warning time. Over the whole episode the AUROC is 0.83, but only because failed episodes continue after the successful ones end. For the application, a threshold on the raw first-step confidence catches few failures on this suite.</p>
+      <p class="note"><b>Limits.</b> One suite, one seed and one checkpoint. Success per task is 68–98%. LIBERO-Long, where Zollo and Zemel report an ECE of 0.381, is next.</p>
       <details class="fig-toggle"><summary>The numbers behind the charts</summary>
         <div class="scroll"><table class="nums">
           <thead><tr><th>Measure</th><th>This run (95% interval)</th><th>Zollo and Zemel</th><th>OpenVLA paper</th></tr></thead>
@@ -323,6 +303,21 @@
             <tr><td>60</td><td>0.61</td><td>0.52–0.68</td></tr>
           </tbody>
         </table></div>
+        <div class="scroll"><table class="nums">
+          <thead><tr><th>Task</th><th>Instruction</th><th>Success</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>pick up the black bowl between the plate and the ramekin and place it on the plate</td><td>88%</td></tr>
+            <tr><td>2</td><td>pick up the black bowl next to the ramekin and place it on the plate</td><td>92%</td></tr>
+            <tr><td>3</td><td>pick up the black bowl from table center and place it on the plate</td><td>90%</td></tr>
+            <tr><td>4</td><td>pick up the black bowl on the cookie box and place it on the plate</td><td>92%</td></tr>
+            <tr><td>5</td><td>pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate</td><td>70%</td></tr>
+            <tr><td>6</td><td>pick up the black bowl on the ramekin and place it on the plate</td><td>88%</td></tr>
+            <tr><td>7</td><td>pick up the black bowl next to the cookie box and place it on the plate</td><td>98%</td></tr>
+            <tr><td>8</td><td>pick up the black bowl on the stove and place it on the plate</td><td>82%</td></tr>
+            <tr><td>9</td><td>pick up the black bowl next to the plate and place it on the plate</td><td>84%</td></tr>
+            <tr><td>10</td><td>pick up the black bowl on the wooden cabinet and place it on the plate</td><td>68%</td></tr>
+          </tbody>
+        </table></div>
       </details>
     </div>
   </div>
@@ -331,30 +326,24 @@
 <section id="application">
   <div class="wrap">
     <div class="shead">
-      <h2>Application: rehearse in a digital twin before the robot works</h2>
+      <h2>Application: rehearsal in a digital twin</h2>
       <p class="eyebrow">Proposed application</p>
     </div>
     <div class="prose">
-      <p>Calibration needs rollouts with known outcomes from the place where the robot will work, and collecting them on a real robot is slow and sometimes unsafe. A digital twin can supply them. Scan the room with a phone, rebuild it in a physics simulator, and run the fine-tuned OpenVLA there hundreds of times before its first real trial. The outcomes set the room’s ask-for-help threshold and show which failures to fix first.</p>
+      <p>Calibration needs labeled rollouts from the workspace where the robot will operate. Real rollouts are slow to collect and can be unsafe. A digital twin of the workspace can supply them before the first real trial. The aim is fewer failures for a given number of help requests.</p>
       <ol>
-        <li><b>Scan</b> one to three minutes of phone video of the workspace and its objects.</li>
-        <li><b>Rebuild</b> it: a Gaussian-splat or mesh reconstruction with object meshes, the robot model and a camera where the real one is. Collision shapes, masses and friction are set by hand and varied at random, since today’s reconstructions do not recover them.</li>
-        <li><b>Rehearse</b>: run each candidate fine-tuned checkpoint 200–300 times on the target tasks.</li>
-        <li><b>Calibrate</b>: fit the confidence calibrator and choose the room’s ask-for-help threshold.</li>
-        <li><b>Deploy and check</b>: on the real robot, compare the share of failures the threshold catches with what the twin predicted.</li>
+        <li><b>Scan</b> the workspace and its objects with one to three minutes of phone video.</li>
+        <li><b>Rebuild</b> the scene in a simulator with object meshes, the robot model and a matched camera. Set collision shapes, masses and friction by hand, and randomize them.</li>
+        <li><b>Rehearse</b> each candidate checkpoint 200–300 times on the target tasks.</li>
+        <li><b>Calibrate</b> the confidence and set the help threshold.</li>
+        <li><b>Deploy</b> on the real robot, and compare the failures caught with the prediction of the twin.</li>
       </ol>
-      <p><b>What a user gets</b>, before the robot’s first real trial in a room:</p>
-      <ul>
-        <li>which fine-tuned checkpoint to run there;</li>
-        <li>the failures to expect, as rollout videos to look at;</li>
-        <li>the confidence threshold below which the robot stops and asks for help.</li>
-      </ul>
-      <p><b>What it builds on.</b> The pieces exist. <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2405.05941">SIMPLER</a> and <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2609.23910">ReVeal</a> show that success in simulated and reconstructed scenes tracks real success well enough to rank policies, and <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2403.03949">RialTo</a> builds twins from quick scans to train policies with reinforcement learning. This application puts them into one routine for deploying a fine-tuned OpenVLA, and adds the step it needs from the research project: setting the room’s ask-for-help threshold from the twin rollouts.</p>
-      <p><b>Why it is feasible, and what is still missing.</b> OpenVLA already runs in simulators (LIBERO, SIMPLER) and in 4-bit on one GPU. ReVeal rebuilds workspaces from one to three minutes of phone video. RialTo builds a twin from a quick scan, but a person separates the objects and sets joints and physical parameters, and its policies use point clouds, not OpenVLA’s camera images. ReVeal leaves object-level fidelity, mass and friction to future work. So the twin is engineering with known gaps, and a pilot comes first.</p>
-      <p><b>The pilot, a go/no-go gate.</b> One arm OpenVLA already supports (for example the WidowX of BridgeData, which SIMPLER also simulates), one tabletop and two or three rigid-object tasks with clear success checks. Three checkpoints run 30 times each in the twin and on the real robot, from matched start positions. The routine continues only if the twin ranks the checkpoints in the same order as the real robot and its success rates are within about 15 points of the real ones.</p>
-      <p><b>The aim.</b> In a home, a lab or a classroom, a robot that asks for help earlier and fails less often for a given number of help requests. The threshold from the twin is a starting point; the first real trials test how well it transfers.</p>
-      <p class="note"><b>The test.</b> Two scores: the first-step confidence, to decide before acting, and the per-step confidence, to stop during the task. Calibrators fitted on (a) LIBERO, (b) twin rollouts and (c) a few real rollouts, and the twin’s threshold, are frozen before any real test rollout. They are then compared on an untouched set of real rollouts from matched start positions: calibration error and the confidence-minus-success gap; at a fixed number of help requests, the share of failures caught, the false alarms and the failures among the episodes allowed to continue; and how many steps before the first unrecoverable error the request comes. The robot only logs when it would have asked and is not stopped, so a request does not change the outcome it predicts. A monotone rescaling changes the probabilities but not which episodes are flagged at a fixed budget, so the ranking measures compare raw scores and the calibration measures compare calibrators.</p>
-      <p class="note"><b>The risk.</b> ReVeal finds that lower reconstruction fidelity weakens sim-to-real agreement, and it measures agreement in success rates, not in confidence, so the twin calibrator may transfer imperfectly; that transfer is what the experiment measures. Deformable objects and fine contact are out of scope for a first version.</p>
+      <p>The user gets a checkpoint choice, videos of the expected failures and a help threshold for the workspace.</p>
+      <p><b>Prior work and gaps.</b> <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2405.05941">SIMPLER</a> and <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2609.23910">ReVeal</a> show that success rates in simulated and reconstructed scenes rank policies as real ones do. ReVeal rebuilds workspaces from phone video but does not recover object fidelity, mass or friction. <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2403.03949">RialTo</a> needs a person to separate the objects and set the physical parameters, and its policies use point clouds, not camera images. The twin is thus engineering with known gaps.</p>
+      <p><b>Pilot (go/no-go).</b> One arm that OpenVLA supports (for example the WidowX of BridgeData), one tabletop and two or three rigid-object tasks. Three checkpoints run 30 times each in the twin and on the robot from matched start positions. The work continues only if the twin ranks the checkpoints in the real order. Its success rates must also be within about 15 points of the real ones.</p>
+      <p class="note"><b>Transfer test.</b> Calibrators fitted on (a) LIBERO, (b) twin rollouts and (c) a few real rollouts are frozen together with the twin threshold. They are then scored on unseen real rollouts from matched start positions. The measures are the calibration error and the signed gap. At a fixed number of help requests, it also counts caught failures, false alarms, missed failures and the warning time before an unrecoverable error.</p>
+      <p class="note">The test uses the first-step confidence (before the task) and the per-step confidence (during the task). The robot logs each help request but does not stop, so a request does not change the outcome. A monotone rescaling does not change which episodes are flagged, so the ranking measures use raw scores.</p>
+      <p class="note"><b>Risk.</b> ReVeal finds that lower reconstruction fidelity weakens sim-to-real agreement, and it measures success rates, not confidence. The transfer of the twin calibrator is what the test measures. Deformable objects and fine contact are out of scope.</p>
     </div>
   </div>
 </section>
@@ -362,7 +351,7 @@
 <section id="loop">
   <div class="wrap">
     <div class="shead">
-      <h2>How the two fit together</h2>
+      <h2>How the two parts connect</h2>
       <p class="eyebrow">One loop</p>
     </div>
     <figure class="loop" role="img" aria-label="A loop of five steps: fine-tune OpenVLA with LoRA, rehearse in a digital twin of the room, calibrate its confidence, deploy so it acts or asks for help, and use the human corrections to fine-tune again. The research project covers fine-tuning and calibration; the application covers the twin and deployment.">
@@ -379,11 +368,11 @@
       </svg>
     </figure>
     <ol class="loop-list">
-      <li><b class="a">Fine-tune</b>: LoRA or Bayesian LoRA (research project).</li>
+      <li><b class="a">Fine-tune</b> with LoRA or Bayesian LoRA (research project).</li>
       <li><b class="b">Rehearse</b> in a twin rebuilt from phone video (application).</li>
       <li><b class="a">Calibrate</b> and set the help threshold (research project).</li>
-      <li><b class="b">Deploy</b>: act, or ask for help (application).</li>
-      <li><b>Correct</b>: a person takes over, and the corrections become new fine-tuning data for step 1.</li>
+      <li><b class="b">Deploy</b>, then act or ask for help (application).</li>
+      <li><b>Correct</b>. A person takes over, and the corrections become new fine-tuning data for step 1.</li>
     </ol>
   </div>
 </section>
@@ -398,13 +387,13 @@
       <div class="scroll"><table class="prior">
         <thead><tr><th>Work</th><th>What it does</th><th>What this proposal adds</th></tr></thead>
         <tbody>
-          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2507.17383">Zollo and Zemel</a>, 2025</td><td>First calibration study of VLAs: released fine-tuned OpenVLA, MolmoAct, UniVLA and NORA on LIBERO, plus 8- and 4-bit OpenVLA; prompt ensembles and action-wise Platt scaling.</td><td>How the fine-tuning method and data size change calibration.</td></tr>
-          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2510.01389">INSIGHT</a>, 2025</td><td>Trains classifiers that turn π0-FAST’s token uncertainty into help triggers.</td><td>How the fine-tuning method shifts the uncertainty such classifiers learn from; thresholds for a given room.</td></tr>
-          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2606.23617">RECALL</a>, 2026</td><td>Uncertainty-guided recovery data for continual fine-tuning of autoregressive VLAs.</td><td>Calibration of the uncertainty it relies on.</td></tr>
-          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2604.16677">ReconVLA</a>, <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2605.29605">VLAConf</a>, 2026</td><td>Conformal prediction on action tokens; a representation-level success confidence with confidence-triggered handoffs.</td><td>Where the labelled rollouts for calibration come from in a new room.</td></tr>
-          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2308.13111">Laplace-LoRA</a>, <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2310.00035">LoRA ensembles</a>, 2023</td><td>A post-hoc Laplace posterior over LoRA weights, or an ensemble of adapters, reduces the overconfidence of fine-tuned language models.</td><td>A test on a robot policy.</td></tr>
-          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2405.05941">SIMPLER</a>, 2024; <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2609.23910">ReVeal</a>, 2026</td><td>Simulated and reconstructed scenes whose success rates track real ones.</td><td>Calibrating confidence, rather than ranking policies.</td></tr>
-          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2403.03949">RialTo</a>, 2024</td><td>Digital twins from quick scans of a real scene, with objects and physical parameters set by a person, used to train point-cloud policies with reinforcement learning.</td><td>Using the twin to evaluate and calibrate before deployment.</td></tr>
+          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2507.17383">Zollo and Zemel</a>, 2025</td><td>Calibration of released VLAs (OpenVLA, MolmoAct, UniVLA, NORA) on LIBERO, with 8- and 4-bit OpenVLA, prompt ensembles and action-wise Platt scaling.</td><td>The effect of fine-tuning method and data size.</td></tr>
+          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2510.01389">INSIGHT</a>, 2025</td><td>Classifiers that map the token uncertainty of π0-FAST to help triggers.</td><td>The shift of that uncertainty with fine-tuning. Thresholds per workspace.</td></tr>
+          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2606.23617">RECALL</a>, 2026</td><td>Uncertainty-guided recovery data for continual fine-tuning.</td><td>Calibration of that uncertainty.</td></tr>
+          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2604.16677">ReconVLA</a>, <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2605.29605">VLAConf</a>, 2026</td><td>Conformal prediction on action tokens. Representation-level success confidence with handoffs.</td><td>Labeled rollouts for a new workspace.</td></tr>
+          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2308.13111">Laplace-LoRA</a>, <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2310.00035">LoRA ensembles</a>, 2023</td><td>A post-hoc posterior over LoRA weights, or an adapter ensemble, reduces overconfidence in language models.</td><td>A test on a robot policy.</td></tr>
+          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2405.05941">SIMPLER</a>, <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2609.23910">ReVeal</a>, 2024–2026</td><td>Simulated and reconstructed scenes whose success rates track real ones.</td><td>Calibration, not only policy ranking.</td></tr>
+          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2403.03949">RialTo</a>, 2024</td><td>Twins from quick scans, with manual objects and physics, for reinforcement learning of point-cloud policies.</td><td>Evaluation and calibration before deployment.</td></tr>
         </tbody>
       </table></div>
     </div>
@@ -418,11 +407,11 @@
       <p class="eyebrow">Timeline</p>
     </div>
     <ol class="rows">
-      <li class="row"><div class="row__when">Weeks 1–3</div><div class="row__main"><div class="row__title">Reproduce the baseline</div><div class="row__body">Calibration of the released OpenVLA LIBERO checkpoints, matching the calibration study’s numbers; time one LIBERO fine-tuning run to fix the compute budget. The Spatial suite is done: see the first result above.</div></div></li>
-      <li class="row"><div class="row__when">Weeks 4–8</div><div class="row__main"><div class="row__title">Fine-tuning grid (H1, H2)</div><div class="row__body">Full and LoRA fine-tuning, two data sizes, Bayesian LoRA and post-hoc fixes, on LIBERO Spatial and Long.</div></div></li>
-      <li class="row"><div class="row__when">Weeks 9–10</div><div class="row__main"><div class="row__title">Shift (H3)</div><div class="row__body">The same checkpoints under LIBERO-Plus perturbations.</div></div></li>
-      <li class="row"><div class="row__when">Weeks 11–14</div><div class="row__main"><div class="row__title">One room, end to end</div><div class="row__body">The pilot gate first, then a phone-video twin of one tabletop workspace, rehearsal, calibration, and a real-robot check of the help threshold.</div></div></li>
-      <li class="row"><div class="row__when">Week 15</div><div class="row__main"><div class="row__title">Write-up</div><div class="row__body">Results for H1–H3 and the twin-to-real transfer of calibration.</div></div></li>
+      <li class="row"><div class="row__when">Weeks 1–3</div><div class="row__main"><div class="row__title">Reproduce the baseline</div><div class="row__body">Calibration of the released LIBERO checkpoints, and the time of one fine-tuning run. Spatial is done.</div></div></li>
+      <li class="row"><div class="row__when">Weeks 4–8</div><div class="row__main"><div class="row__title">Fine-tuning grid (H1, H2)</div><div class="row__body">Full and LoRA, two data sizes, Bayesian LoRA and rescaling, on Spatial and Long.</div></div></li>
+      <li class="row"><div class="row__when">Weeks 9–10</div><div class="row__main"><div class="row__title">Shift (H3)</div><div class="row__body">The same checkpoints under LIBERO-Plus changes.</div></div></li>
+      <li class="row"><div class="row__when">Weeks 11–14</div><div class="row__main"><div class="row__title">One workspace, end to end</div><div class="row__body">The pilot, then a twin of one tabletop, rehearsal, calibration and the transfer test.</div></div></li>
+      <li class="row"><div class="row__when">Week 15</div><div class="row__main"><div class="row__title">Write-up</div><div class="row__body">H1–H3 and the twin-to-real transfer of calibration.</div></div></li>
     </ol>
   </div>
 </section>
@@ -430,7 +419,7 @@
 <section id="sources">
   <div class="wrap">
     <div class="prose">
-      <p class="note"><b>Sources.</b> OpenVLA (arXiv:2406.09246v3): §3.5 for training compute and inference speed, §5.3, Table 1 and Table 8 for parameter-efficient fine-tuning, §5.4 and Table 2 for quantization (footnote 4: both use a smaller SigLIP-only variant), §6 for limitations, Appendix E for LIBERO (LoRA at rank 32, 500 trials per suite for each of three seeds, 76.5% average). LIBERO episode limits from OpenVLA’s evaluation script. The related work was read on arXiv on 19 October 2026; the gaps named here are the ones I found, and I may have missed work. The compute figures are estimates from OpenVLA’s reported numbers, not measurements. Calibration protocol (first-step confidence, 12 equal-mass bins, 20% / 80% splits) from Zollo and Zemel §3–4 and Appendix C. The first result is my own run, in October 2026, of the released checkpoint openvla/openvla-7b-finetuned-libero-spatial with the settings of OpenVLA’s LIBERO evaluation script (seed 7, the first 50 initial states per task); intervals are from 1,000 bootstrap resamples of episodes.</p>
+      <p class="note"><b>Sources.</b> OpenVLA (arXiv:2406.09246v3), §5.2–5.3 and Table 1 for fine-tuning cost (the LoRA rates come from a smaller SigLIP-only variant, footnote 4), Appendix E for LIBERO. LIBERO step limits come from the OpenVLA evaluation script. The calibration protocol comes from Zollo and Zemel, §3–4 and Appendix C. I read the related work on arXiv on 19 October 2026, and the list can be incomplete. The first result is my run of openvla/openvla-7b-finetuned-libero-spatial with seed 7 and the first 50 initial states per task. The intervals come from 1,000 bootstrap resamples of episodes.</p>
     </div>
   </div>
 </section>
