@@ -33,6 +33,24 @@ table.design th[scope="row"] { font-weight: 600; color: var(--ink); white-space:
 table.design td { font-size: 21px; }
 .sources { font-size: 17px; }
 table.design tbody tr:last-child th { border-bottom: none; }
+.chart { display: block; width: 100%; height: auto; }
+.chart text { font-family: var(--font-sans); }
+.chart .ch-tick { fill: var(--ink-3); font-size: 13px; }
+.chart .ch-lab, .chart .ch-note { fill: var(--ink-2); font-size: 13px; }
+.chart .ch-val { fill: var(--ink); font-size: 13px; font-weight: 600; }
+.chart .ch-grid { stroke: var(--hair-soft); stroke-width: 1; }
+.chart .ch-axis { stroke: var(--hair); stroke-width: 1; }
+.chart .ch-ref, .chart .ch-mean { stroke: var(--ink-3); stroke-width: 1; }
+.chart .ch-line { fill: none; stroke: var(--link); stroke-width: 2; stroke-linejoin: round; }
+.chart .ch-band { fill: var(--link); opacity: 0.12; }
+.chart .ch-dot { fill: var(--link); stroke: var(--bg); stroke-width: 2; }
+.chart .ch-hit { fill: transparent; }
+.charts2 { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; }
+.charts2 figure { margin: 0; }
+.charts2 .chart { max-width: 450px; }
+.charts2 figcaption { font-size: 17px; line-height: 1.4; color: var(--ink-2); margin-top: 4px; }
+.stats { display: flex; gap: 40px; font-size: 20px; color: var(--ink-2); margin: 0 0 14px; }
+.stats b { color: var(--ink); font-size: 26px; letter-spacing: -0.02em; margin-right: 6px; }
 </style>
 </head>
 <body style='--deck: "OpenVLA, visionary · bushuyeu.com/review-openvla-visionary"'>
@@ -109,6 +127,100 @@ table.design tbody tr:last-child th { border-bottom: none; }
       <p>Failures: ~75 of 500 on Spatial, ~230 on Long; a 20% calibration split holds only ~15 on Spatial. An acting ensemble costs 4× the inference.</p>
     </div>
   </div>
+</section>
+
+<section class="slide">
+  <div class="head"><p class="eyebrow">Preliminary result</p><h2>First result: right on average, weak on failures</h2></div>
+  <p class="stats"><span><b>85.2%</b>success (paper 84.7%)</span><span><b>0.061</b>ECE (study 0.088)</span><span><b>+4.7</b>points overconfident</span><span><b>0.57</b>failure AUROC</span></p>
+  <div class="charts2">
+    <figure>
+<svg class="chart" viewBox="0 0 420 300" role="img" aria-label="Reliability diagram: success rate against first-step confidence in 12 bins. The points stay near the overall 85% success rate instead of following the diagonal.">
+  <line class="ch-grid" x1="50" x2="404" y1="246.0" y2="246.0"/>
+  <text class="ch-tick" x="42" y="250.0" text-anchor="end">60%</text>
+  <line class="ch-grid" x1="50" x2="404" y1="193.0" y2="193.0"/>
+  <text class="ch-tick" x="42" y="197.0" text-anchor="end">70%</text>
+  <line class="ch-grid" x1="50" x2="404" y1="140.0" y2="140.0"/>
+  <text class="ch-tick" x="42" y="144.0" text-anchor="end">80%</text>
+  <line class="ch-grid" x1="50" x2="404" y1="87.0" y2="87.0"/>
+  <text class="ch-tick" x="42" y="91.0" text-anchor="end">90%</text>
+  <line class="ch-grid" x1="50" x2="404" y1="34.0" y2="34.0"/>
+  <text class="ch-tick" x="42" y="38.0" text-anchor="end">100%</text>
+  <text class="ch-tick" x="50.0" y="264" text-anchor="middle">0.7</text>
+  <text class="ch-tick" x="168.0" y="264" text-anchor="middle">0.8</text>
+  <text class="ch-tick" x="286.0" y="264" text-anchor="middle">0.9</text>
+  <text class="ch-tick" x="404.0" y="264" text-anchor="middle">1.0</text>
+  <line class="ch-axis" x1="50" x2="404" y1="246" y2="246"/>
+  <text class="ch-lab" x="227" y="292" text-anchor="middle">First-step confidence (mean of each bin)</text>
+  <text class="ch-lab" x="10" y="18">Success rate</text>
+  <line class="ch-ref" x1="50.0" y1="193.0" x2="404.0" y2="34.0"/>
+  <text class="ch-note" x="144.5" y="169.2" transform="rotate(-24.2 144.5 169.2)">calibrated</text>
+  <line class="ch-mean" x1="50" x2="404" y1="112.4" y2="112.4"/>
+  <text class="ch-note" x="56" y="105.4">all episodes: 85.2% success</text>
+  <g class="ch-pt"><title>Bin 1 of 12: mean confidence 0.759, success 76.2% (42 episodes)</title><circle class="ch-hit" cx="119.7" cy="160.2" r="11"/><circle class="ch-dot" cx="119.7" cy="160.2" r="5"/></g>
+  <g class="ch-pt"><title>Bin 2 of 12: mean confidence 0.822, success 90.5% (42 episodes)</title><circle class="ch-hit" cx="194.0" cy="84.5" r="11"/><circle class="ch-dot" cx="194.0" cy="84.5" r="5"/></g>
+  <g class="ch-pt"><title>Bin 3 of 12: mean confidence 0.846, success 73.8% (42 episodes)</title><circle class="ch-hit" cx="222.0" cy="172.8" r="11"/><circle class="ch-dot" cx="222.0" cy="172.8" r="5"/></g>
+  <g class="ch-pt"><title>Bin 4 of 12: mean confidence 0.866, success 85.7% (42 episodes)</title><circle class="ch-hit" cx="246.3" cy="109.7" r="11"/><circle class="ch-dot" cx="246.3" cy="109.7" r="5"/></g>
+  <g class="ch-pt"><title>Bin 5 of 12: mean confidence 0.887, success 83.3% (42 episodes)</title><circle class="ch-hit" cx="270.1" cy="122.3" r="11"/><circle class="ch-dot" cx="270.1" cy="122.3" r="5"/></g>
+  <g class="ch-pt"><title>Bin 6 of 12: mean confidence 0.903, success 83.3% (42 episodes)</title><circle class="ch-hit" cx="289.0" cy="122.3" r="11"/><circle class="ch-dot" cx="289.0" cy="122.3" r="5"/></g>
+  <g class="ch-pt"><title>Bin 7 of 12: mean confidence 0.917, success 88.1% (42 episodes)</title><circle class="ch-hit" cx="305.6" cy="97.1" r="11"/><circle class="ch-dot" cx="305.6" cy="97.1" r="5"/></g>
+  <g class="ch-pt"><title>Bin 8 of 12: mean confidence 0.929, success 92.9% (42 episodes)</title><circle class="ch-hit" cx="320.2" cy="71.9" r="11"/><circle class="ch-dot" cx="320.2" cy="71.9" r="5"/></g>
+  <g class="ch-pt"><title>Bin 9 of 12: mean confidence 0.939, success 82.9% (41 episodes)</title><circle class="ch-hit" cx="332.3" cy="124.5" r="11"/><circle class="ch-dot" cx="332.3" cy="124.5" r="5"/></g>
+  <g class="ch-pt"><title>Bin 10 of 12: mean confidence 0.954, success 92.7% (41 episodes)</title><circle class="ch-hit" cx="349.9" cy="72.8" r="11"/><circle class="ch-dot" cx="349.9" cy="72.8" r="5"/></g>
+  <g class="ch-pt"><title>Bin 11 of 12: mean confidence 0.975, success 85.4% (41 episodes)</title><circle class="ch-hit" cx="374.9" cy="111.6" r="11"/><circle class="ch-dot" cx="374.9" cy="111.6" r="5"/></g>
+  <g class="ch-pt"><title>Bin 12 of 12: mean confidence 0.993, success 87.8% (41 episodes)</title><circle class="ch-hit" cx="395.3" cy="98.6" r="11"/><circle class="ch-dot" cx="395.3" cy="98.6" r="5"/></g>
+</svg>
+      <figcaption>Success stays near 85% whatever the first-step confidence.</figcaption>
+    </figure>
+    <figure>
+<svg class="chart" viewBox="0 0 420 300" role="img" aria-label="Failure AUROC of the mean confidence over the first k steps, k from 1 to 60: from 0.57 to 0.61, close to the 0.5 of chance.">
+  <line class="ch-grid" x1="50" x2="404" y1="246.0" y2="246.0"/>
+  <text class="ch-tick" x="42" y="250.0" text-anchor="end">0.4</text>
+  <line class="ch-grid" x1="50" x2="404" y1="210.7" y2="210.7"/>
+  <text class="ch-tick" x="42" y="214.7" text-anchor="end">0.5</text>
+  <line class="ch-grid" x1="50" x2="404" y1="175.3" y2="175.3"/>
+  <text class="ch-tick" x="42" y="179.3" text-anchor="end">0.6</text>
+  <line class="ch-grid" x1="50" x2="404" y1="140.0" y2="140.0"/>
+  <text class="ch-tick" x="42" y="144.0" text-anchor="end">0.7</text>
+  <line class="ch-grid" x1="50" x2="404" y1="104.7" y2="104.7"/>
+  <text class="ch-tick" x="42" y="108.7" text-anchor="end">0.8</text>
+  <line class="ch-grid" x1="50" x2="404" y1="69.3" y2="69.3"/>
+  <text class="ch-tick" x="42" y="73.3" text-anchor="end">0.9</text>
+  <line class="ch-grid" x1="50" x2="404" y1="34.0" y2="34.0"/>
+  <text class="ch-tick" x="42" y="38.0" text-anchor="end">1.0</text>
+  <text class="ch-tick" x="55.9" y="264" text-anchor="middle">1</text>
+  <text class="ch-tick" x="109.0" y="264" text-anchor="middle">10</text>
+  <text class="ch-tick" x="168.0" y="264" text-anchor="middle">20</text>
+  <text class="ch-tick" x="227.0" y="264" text-anchor="middle">30</text>
+  <text class="ch-tick" x="286.0" y="264" text-anchor="middle">40</text>
+  <text class="ch-tick" x="345.0" y="264" text-anchor="middle">50</text>
+  <text class="ch-tick" x="404.0" y="264" text-anchor="middle">60</text>
+  <line class="ch-axis" x1="50" x2="404" y1="246" y2="246"/>
+  <text class="ch-lab" x="227" y="292" text-anchor="middle">First k steps of the episode</text>
+  <text class="ch-lab" x="10" y="18">Failure AUROC</text>
+  <line class="ch-mean" x1="50" x2="404" y1="210.7" y2="210.7"/>
+  <text class="ch-note" x="400" y="226.7" text-anchor="end">chance</text>
+  <polygon class="ch-band" points="55.9,159.5 61.8,148.2 67.7,154.4 79.5,158.0 97.2,156.6 109.0,151.6 138.5,142.8 168.0,141.4 197.5,142.1 227.0,144.9 286.0,143.5 345.0,143.7 404.0,145.6 404.0,201.9 345.0,201.8 286.0,199.1 227.0,201.4 197.5,197.8 168.0,196.2 138.5,197.3 109.0,207.4 97.2,207.8 79.5,209.7 67.7,204.2 61.8,196.8 55.9,211.3"/>
+  <polyline class="ch-line" points="55.9,185.0 61.8,172.0 67.7,179.8 79.5,182.6 97.2,182.0 109.0,178.0 138.5,171.1 168.0,168.0 197.5,167.9 227.0,171.6 286.0,171.8 345.0,172.3 404.0,172.7"/>
+  <g class="ch-pt"><title>First 1 step: AUROC 0.57 (95% interval 0.50–0.64)</title><circle class="ch-hit" cx="55.9" cy="185.0" r="11"/><circle class="ch-dot" cx="55.9" cy="185.0" r="4.5"/></g>
+  <g class="ch-pt"><title>First 2 steps: AUROC 0.61 (95% interval 0.54–0.68)</title><circle class="ch-hit" cx="61.8" cy="172.0" r="11"/><circle class="ch-dot" cx="61.8" cy="172.0" r="4.5"/></g>
+  <g class="ch-pt"><title>First 3 steps: AUROC 0.59 (95% interval 0.52–0.66)</title><circle class="ch-hit" cx="67.7" cy="179.8" r="11"/><circle class="ch-dot" cx="67.7" cy="179.8" r="4.5"/></g>
+  <g class="ch-pt"><title>First 5 steps: AUROC 0.58 (95% interval 0.50–0.65)</title><circle class="ch-hit" cx="79.5" cy="182.6" r="11"/><circle class="ch-dot" cx="79.5" cy="182.6" r="4.5"/></g>
+  <g class="ch-pt"><title>First 8 steps: AUROC 0.58 (95% interval 0.51–0.65)</title><circle class="ch-hit" cx="97.2" cy="182.0" r="11"/><circle class="ch-dot" cx="97.2" cy="182.0" r="4.5"/></g>
+  <g class="ch-pt"><title>First 10 steps: AUROC 0.59 (95% interval 0.51–0.67)</title><circle class="ch-hit" cx="109.0" cy="178.0" r="11"/><circle class="ch-dot" cx="109.0" cy="178.0" r="4.5"/></g>
+  <g class="ch-pt"><title>First 15 steps: AUROC 0.61 (95% interval 0.54–0.69)</title><circle class="ch-hit" cx="138.5" cy="171.1" r="11"/><circle class="ch-dot" cx="138.5" cy="171.1" r="4.5"/></g>
+  <g class="ch-pt"><title>First 20 steps: AUROC 0.62 (95% interval 0.54–0.70)</title><circle class="ch-hit" cx="168.0" cy="168.0" r="11"/><circle class="ch-dot" cx="168.0" cy="168.0" r="4.5"/></g>
+  <g class="ch-pt"><title>First 25 steps: AUROC 0.62 (95% interval 0.54–0.69)</title><circle class="ch-hit" cx="197.5" cy="167.9" r="11"/><circle class="ch-dot" cx="197.5" cy="167.9" r="4.5"/></g>
+  <g class="ch-pt"><title>First 30 steps: AUROC 0.61 (95% interval 0.53–0.69)</title><circle class="ch-hit" cx="227.0" cy="171.6" r="11"/><circle class="ch-dot" cx="227.0" cy="171.6" r="4.5"/></g>
+  <g class="ch-pt"><title>First 40 steps: AUROC 0.61 (95% interval 0.53–0.69)</title><circle class="ch-hit" cx="286.0" cy="171.8" r="11"/><circle class="ch-dot" cx="286.0" cy="171.8" r="4.5"/></g>
+  <g class="ch-pt"><title>First 50 steps: AUROC 0.61 (95% interval 0.53–0.69)</title><circle class="ch-hit" cx="345.0" cy="172.3" r="11"/><circle class="ch-dot" cx="345.0" cy="172.3" r="4.5"/></g>
+  <g class="ch-pt"><title>First 60 steps: AUROC 0.61 (95% interval 0.52–0.68)</title><circle class="ch-hit" cx="404.0" cy="172.7" r="11"/><circle class="ch-dot" cx="404.0" cy="172.7" r="4.5"/></g>
+  <text class="ch-val" x="402.0" y="160.7" text-anchor="end">0.61</text>
+  <text class="ch-val" x="57.9" y="207.0">0.57</text>
+</svg>
+      <figcaption>Over the first 60 steps the AUROC stays near 0.6, little better than chance.</figcaption>
+    </figure>
+  </div>
+  <p class="note">Released LIBERO-Spatial checkpoint, 500 episodes, one seed, RTX 5090. Whole-episode AUROC 0.83 comes only after the successes have ended.</p>
 </section>
 
 <section class="slide">
@@ -190,7 +302,7 @@ table.design tbody tr:last-child th { border-bottom: none; }
 <section class="slide">
   <div class="head"><p class="eyebrow">Timeline</p><h2>Plan for one semester</h2></div>
   <ol class="rows">
-    <li class="row"><span class="row__when">Weeks 1–3</span><div class="row__main"><span class="row__title">Reproduce the baseline</span><span class="row__body">Released OpenVLA LIBERO checkpoints; time one fine-tuning run.</span></div></li>
+    <li class="row"><span class="row__when">Weeks 1–3</span><div class="row__main"><span class="row__title">Reproduce the baseline</span><span class="row__body">Released OpenVLA LIBERO checkpoints (Spatial done); time one fine-tuning run.</span></div></li>
     <li class="row"><span class="row__when">Weeks 4–8</span><div class="row__main"><span class="row__title">Fine-tuning grid (H1, H2)</span><span class="row__body">Full and LoRA, two data sizes, Bayesian LoRA and post-hoc fixes; Spatial and Long.</span></div></li>
     <li class="row"><span class="row__when">Weeks 9–10</span><div class="row__main"><span class="row__title">Shift (H3)</span><span class="row__body">The same checkpoints under LIBERO-Plus perturbations.</span></div></li>
     <li class="row"><span class="row__when">Weeks 11–14</span><div class="row__main"><span class="row__title">One room, end to end</span><span class="row__body">Pilot gate, then twin, rehearsal, calibration, real-robot check.</span></div></li>
