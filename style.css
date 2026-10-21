@@ -91,24 +91,27 @@ header.top .wrap {
 .eyebrow-nav a:hover { color: var(--link); text-decoration: none; }
 .eyebrow-nav a[aria-current="page"] { color: var(--ink); font-weight: 500; }
 /* Tab row and theme toggle share the eyebrow line: tabs on the left, toggle on the right;
-   on a narrow screen the toggle wraps under the tabs. The toggle is a "Dark" on/off switch
-   that shows the OS setting until the visitor flips it (theme.js). It appears only when the
-   inline <head> script ran (class theme-js), since it needs JS. The knob position comes from
-   the same rules as the dark colours, so it is right before theme.js runs. */
+   on a narrow screen the toggle wraps under the tabs. The toggle is a "Dark mode" switch drawn
+   as a moon (light) or sun (dark) icon. It shows the OS setting until the visitor flips it
+   (theme.js). It appears only when the inline <head> script ran (class theme-js), since it
+   needs JS. The icon comes from the same rules as the dark colours, so it is right before
+   theme.js runs. */
 .topbar { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 18px; margin-bottom: 14px; }
 .topbar .eyebrow-nav { margin-bottom: 0; }
-.theme-switch { display: none; align-items: center; gap: 7px; font: 500 0.8rem/1.4 var(--font-sans); letter-spacing: 0.01em; color: var(--ink-3); background: none; border: 0; padding: 0; margin: 0; cursor: pointer; }
+.theme-switch { display: none; align-items: center; justify-content: center; align-self: center; color: var(--ink-3); background: none; border: 0; padding: 4px; margin: -4px; cursor: pointer; border-radius: 6px; }
 .theme-js .theme-switch { display: inline-flex; }
 .theme-switch:hover { color: var(--link); }
-.theme-switch:focus-visible { outline: 2px solid var(--link); outline-offset: 3px; border-radius: 6px; }
-.theme-switch__track { position: relative; width: 24px; height: 14px; border-radius: 999px; background: var(--hair); transition: background-color 0.2s; }
-.theme-switch__knob { position: absolute; top: 2px; left: 2px; width: 10px; height: 10px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); transition: transform 0.2s; }
-/* On = dark: a Dark pick, or a dark OS without a Light pick. */
-:root[data-theme="dark"] .theme-switch__track { background: var(--link); }
-:root[data-theme="dark"] .theme-switch__knob { transform: translateX(10px); }
+.theme-switch:focus-visible { outline: 2px solid var(--link); outline-offset: 1px; }
+.theme-switch__moon { display: block; }
+.theme-switch__sun { display: none; }
+/* Light shows the moon (switch to dark), dark shows the sun (switch to light): a Dark pick,
+   or a dark OS without a Light pick. */
+:root[data-theme="dark"] .theme-switch__moon { display: none; }
+:root[data-theme="dark"] .theme-switch__sun { display: block; }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .theme-switch__track { background: var(--link); }
-  :root:not([data-theme="light"]) .theme-switch__knob { transform: translateX(10px); }
+  :root:not([data-theme="light"]) .theme-switch__moon { display: none; }
+  :root:not([data-theme="light"]) .theme-switch__sun { display: block; }
+}
 }
 .sub {
   color: var(--ink-2);
@@ -300,7 +303,7 @@ a.pill-link--accent { color: var(--bg); }
   .pill-link { padding: 9px 18px; font-size: 0.9rem; }
   .meta .pill-link { margin-top: 6px; }
   .eyebrow-nav a { display: inline-block; padding: 6px 0; }
-  .theme-switch { padding: 6px 0; }
+  .theme-switch { padding: 8px; margin: -8px; }
   .eyebrow-nav { gap: 0 18px; }
   .gallery .wide { width: 88%; height: auto; aspect-ratio: 16 / 9; align-self: center; }
   .gallery .wide video { height: 100%; }

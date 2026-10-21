@@ -12,11 +12,11 @@ Pages from the root of `main`.
 - `other.html` is linked from nowhere, not even the footer, and is reachable only by
   its URL or through `sitemap.xml`. To bring it back, add its footer link to every page.
 - `style.css` — shared styles; colours and type are the variables at the top.
-- `theme.js` — the "Dark" toggle at the right end of the tab row on every page. By default the site follows the
+- `theme.js` — the theme toggle (a moon in light mode, a sun in dark mode) at the right end of the tab row on every page. By default the site follows the
   visitor's OS setting (`prefers-color-scheme`) and the toggle shows it. Flipping it away from the OS setting keeps the
   pick in the browser (`localStorage`); flipping it back clears it, so the site follows the OS again. A stored pick is
   applied before the first paint by the one-line script after the `color-scheme` meta in each page's `<head>`. The dark
-  colours (and the toggle's on position) are in `style.css` twice: under `prefers-color-scheme: dark` and under
+  colours (and the toggle's icon) are in `style.css` twice: under `prefers-color-scheme: dark` and under
   `[data-theme="dark"]`; change both.
 - `favicon-32.png`, `apple-touch-icon.png`, `icon-512.png`, `Pavel-Bushuyeu-CV.pdf`, `.nojekyll`, and `CNAME`, which binds
   the custom domain; DNS for bushuyeu.com is managed at GoDaddy.

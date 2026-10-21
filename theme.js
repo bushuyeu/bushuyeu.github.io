@@ -1,4 +1,4 @@
-// Theme toggle in the masthead of every page: a "Dark" on/off switch. By default the site
+// Theme toggle in the masthead of every page: a moon (light) or sun (dark) icon, a "Dark mode" switch. By default the site
 // follows the OS setting (prefers-color-scheme) and the toggle shows it. Flipping the toggle
 // away from the OS setting keeps the pick in localStorage ("theme"); flipping it back clears
 // it, so the site follows the OS again. The inline script in each page's <head> applies a
@@ -31,6 +31,7 @@
     var dark = (pick || system()) === "dark";
     document.querySelectorAll(".theme-switch").forEach(function (b) {
       b.setAttribute("aria-checked", String(dark));
+      b.title = dark ? "Switch to light mode" : "Switch to dark mode";
     });
   }
 
