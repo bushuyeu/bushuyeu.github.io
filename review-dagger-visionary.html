@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<script>/* Theme: apply a stored Light/Dark pick before the first paint (theme.js) */(function(){var r=document.documentElement;try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark"){r.setAttribute("data-theme",t);document.querySelector('meta[name="color-scheme"]').content=t}}catch(e){}r.classList.add("theme-js")})()</script>
+<title>Teacher recoverability in DAgger for VLAs — Pavel Bushuyeu</title>
+<meta name="description" content="A visionary follow-up to DAgger: which states should a large VLA teacher label for a small student, the ones it can still recover from or the ones where the two models disagree, and can a router send each failure to the cheapest expert that fixes it?">
+<link rel="canonical" href="https://bushuyeu.com/review-dagger-visionary">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Teacher recoverability in DAgger for VLAs — Pavel Bushuyeu">
+<meta property="og:description" content="A visionary follow-up to DAgger: which states should a large VLA teacher label for a small student, the ones it can still recover from or the ones where the two models disagree, and can a router send each failure to the cheapest expert that fixes it?">
+<meta property="og:url" content="https://bushuyeu.com/review-dagger-visionary">
+<meta property="og:image" content="https://bushuyeu.com/media/og-card.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Pavel Bushuyeu, AI researcher, University of Hawaiʻi at Mānoa">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://bushuyeu.com/media/og-card.jpg">
+<link rel="icon" href="favicon-32.png?v=3" type="image/png" sizes="32x32">
+<link rel="icon" href="icon-512.png?v=3" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="alternate" type="application/rss+xml" title="Pavel Bushuyeu — News" href="https://bushuyeu.com/feed.xml">
+<link rel="stylesheet" href="style.css?v=33">
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "WebPage", "author": {"@type": "Person", "@id": "https://bushuyeu.com/#person", "name": "Pavel Bushuyeu", "url": "https://bushuyeu.com/"}}
+</script>
+<style>
+/* Page-only styles. Built on the tokens in style.css; the light-theme grey is darkened here so small text passes 4.5:1. */
+:root { --ink-3: #707075; --viz-a: var(--link); --viz-b: #1f7a35; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ink-3: #86868b; --viz-b: #30d158; } }
+:root[data-theme="dark"] { --ink-3: #86868b; --viz-b: #30d158; }
+.meta .pill-link + .pill-link { margin-left: 0; }   /* two pills side by side (also in style.css after PR #46) */
+.hyp { counter-reset: h; list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.hyp li { counter-increment: h; display: grid; grid-template-columns: 2.6rem 1fr; gap: 10px; align-items: baseline; }
+.hyp li::before { content: "H" counter(h); font: 500 0.86rem var(--font-mono); color: var(--link); }
+.prose a { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.diagram { border: 1px solid var(--hair-soft); border-radius: 12px; padding: 14px; background: var(--bg); margin: 18px 0; }
+.diagram svg { display: block; width: 100%; height: auto; }
+.diagram text { font-family: var(--font-sans); fill: var(--ink); }
+.diagram .box { fill: var(--tint); stroke: var(--hair); }
+.diagram .box.a { stroke: var(--viz-a); stroke-width: 1.5; }
+.diagram .box.b { stroke: var(--viz-b); stroke-width: 1.5; }
+.diagram .arrow { stroke: var(--ink-3); stroke-width: 1.4; fill: none; }
+.diagram .head { fill: var(--ink-3); }
+.diagram .small { fill: var(--ink-2); font-size: 13px; }
+.diagram-list { display: none; margin: 18px 0; padding: 14px 14px 14px 2.2em; border: 1px solid var(--hair-soft); border-radius: 12px; }
+.diagram-list li { margin-bottom: 6px; } .diagram-list li:last-child { margin-bottom: 0; }
+.diagram-list .a { color: var(--viz-a); } .diagram-list .b { color: var(--viz-b); }
+@media (max-width: 640px) { .diagram { display: none; } .diagram-list { display: block; } }
+.prose table.design th[scope="row"] { font-weight: 600; white-space: nowrap; vertical-align: top; padding: 8px 18px 8px 0; border-bottom: 1px solid var(--hair-soft); }
+.prose table.design tbody tr:last-child th { border-bottom: none; }
+.prose table.prior td:first-child { font-weight: 500; white-space: nowrap; }
+@media (max-width: 640px) { .prose table.prior td:first-child, .prose table.design th[scope="row"] { white-space: normal; } }
+</style>
+<script src="faro.js" async></script>
+<script src="theme.js?v=2" defer></script>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="topbar">
+      <nav class="eyebrow eyebrow-nav" aria-label="Main">
+        <a href="/">Home</a>
+        <a href="/research">Research</a>
+        <a href="/teaching">Teaching</a>
+        <a href="/product-management">Product management</a>
+        <a href="/services">Services</a>
+      </nav>
+      <button type="button" class="theme-switch" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode">
+        <svg class="theme-switch__moon" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M13.6 9.9A5.7 5.7 0 0 1 6.1 2.4a5.8 5.8 0 1 0 7.5 7.5z"/></svg>
+        <svg class="theme-switch__sun" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1.3v1.5M8 13.2v1.5M1.3 8h1.5M13.2 8h1.5M3.3 3.3l1 1M11.7 11.7l1 1M3.3 12.7l1-1M11.7 4.3l1-1"/></svg>
+      </button>
+    </div>
+    <h1>Teacher recoverability in DAgger for VLAs</h1>
+    <p class="sub">The project compares two ways to choose the states that a large vision-language-action (VLA) teacher labels for a small student: the states where the teacher can still finish the task, and the states where the two models disagree. The application sends each failure to the cheapest tested expert that recovers from it.</p>
+    <div class="meta">
+      <span>Paper: <a rel="noopener" target="_blank" href="https://arxiv.org/abs/1011.0686">DAgger, arXiv:1011.0686</a></span>
+      <span>Role: visionary</span>
+      <span>October 2026</span>
+      <a class="pill-link" href="https://docs.google.com/presentation/d/1QnCnJRET3IinImgTOdSyuANJewu-eZ_DYLr8PWiOShU/edit?usp=sharing" rel="noopener" target="_blank" style="gap:7px" aria-label="View the slides in Google Slides (opens in a new tab)"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="12" height="9" rx="1.5"/><path d="M8 12v2M5.5 14h5"/></svg>View slides</a>
+      <a class="pill-link" href="/media/review-dagger-visionary-slides.pdf" download style="gap:7px" aria-label="Download the presentation (PDF)"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v8m0 0 3.2-3.2M8 10.5 4.8 7.3M3 13.5h10"/></svg>Download presentation</a>
+    </div>
+  </div>
+</header>
+
+<section id="research">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Which states should a VLA teacher label?</h2>
+      <p class="eyebrow">Proposed research</p>
+    </div>
+    <div class="prose">
+      <p>DAgger assumes a good expert. Theorem 3.2 gives J(DAgger policy) ≤ J(expert) + u·T·ε + O(1), where T is the horizon and ε is the loss of the best policy in hindsight. The constant u bounds the extra cost of one learner action followed by the expert (Theorem 2.2). The bound is linear in T when u stays bounded, for example when the expert returns to its own state distribution within a few steps. The theorem also needs its learning assumptions (a no-regret learner, a strongly convex loss), which a neural network trained for three rounds does not meet. A VLA teacher can fail from the states that a student reaches, so its labels there can be wrong.</p>
+      <p>Two recent papers choose which states get labels. <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2609.31048">Kintsugi-VLA</a> restores saved simulator states, runs a fixed privileged expert from them many times, and estimates the probability that the task still finishes. It uses this “interventional recoverability” to choose recovery starts for a SmolVLA policy. <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2610.05745">PIVOT-Q</a> lets a quantized VLA act and has its full-precision version label only the states where their actions differ most; with 7.4% of the state-level labels it beats labeling all states. I found no study that compares the two selectors for a VLA teacher on the states of a student.</p>
+      <h3>Hypotheses</h3>
+      <ol class="hyp">
+        <li><span>From the student’s states, the teacher finishes the task less often than from matched start states of the same tasks.</span></li>
+        <li><span>At the same number of labels and, separately, at the same total cost, labels on recoverable states give higher student success than labels on high-disagreement states, on all states, or on random states.</span></li>
+        <li><span>The gain from on-policy labels over offline distillation grows with the student’s imitation error on teacher data. The analysis of <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2407.15007">Foster, Block and Misra</a> motivates this: with the log loss and a realizable policy class, online imitation cannot improve on offline imitation without further assumptions.</span></li>
+      </ol>
+      <p><b>Why it matters.</b> If H1 holds, the labels of a VLA teacher need a check before use. If H2 holds, the check is worth its cost.</p>
+      <h3>Measuring teacher recoverability</h3>
+      <figure class="diagram" role="img" aria-label="The recoverability test: a student rollout saves its state s every 10 steps. From each tested state, the teacher continues n times and the student continues n times as a control.">
+        <svg viewBox="0 0 900 200" aria-hidden="true">
+          <defs><marker id="ah1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0 0 10 5 0 10z"/></marker></defs>
+          <rect class="box" x="10" y="68" width="190" height="64" rx="10"/><text x="105" y="105" text-anchor="middle" font-size="15" font-weight="600">Student rollout</text>
+          <rect class="box" x="250" y="68" width="210" height="64" rx="10"/><text x="355" y="96" text-anchor="middle" font-size="15" font-weight="600">Save the state s</text><text class="small" x="355" y="117" text-anchor="middle">every 10 steps</text>
+          <rect class="box a" x="540" y="10" width="350" height="64" rx="10"/><text x="715" y="38" text-anchor="middle" font-size="15" font-weight="600">Teacher continues from s</text><text class="small" x="715" y="59" text-anchor="middle">n times: recovery rate r(s)</text>
+          <rect class="box" x="540" y="126" width="350" height="64" rx="10"/><text x="715" y="154" text-anchor="middle" font-size="15" font-weight="600">Student continues from s</text><text class="small" x="715" y="175" text-anchor="middle">n times: the control</text>
+          <path class="arrow" d="M200 100h48" marker-end="url(#ah1)"/>
+          <path class="arrow" d="M460 100h40v-58h38" marker-end="url(#ah1)"/>
+          <path class="arrow" d="M500 100v58h38" marker-end="url(#ah1)"/>
+        </svg>
+      </figure>
+      <ol class="diagram-list">
+        <li>The student runs, and its state s is saved every 10 policy steps.</li>
+        <li>From each tested state, the <b class="a">teacher continues</b> n times. The share that finishes the task is the recovery rate r(s).</li>
+        <li>From the same state, the student continues n times. This control measures how often the student finishes the task from s by itself.</li>
+      </ol>
+      <p><b>Definitions.</b> r(s) is the share of n teacher continuations from the restored state s that finish the original task within the remaining step budget of the episode, reported with a Wilson interval; n = 10 with fresh sampling seeds, adapted after the pilot. The restore includes the simulator state, the controller state, the elapsed steps and the policy’s action queue and history. Selection and evaluation use separate continuations. r(s) is a diagnostic related to u, not u itself: u bounds a difference in cost-to-go over all actions, and the test measures task completion after a takeover.</p>
+      <p>The student control matters. In a <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2610.06921">study of a frozen π0.5 on RoboTwin</a>, 30% of the initially failed episodes over four tasks succeeded when the same policy restarted from the same initial scene. Saved-state continuations of the student apply the same lesson here.</p>
+      <h3>Design</h3>
+      <div class="scroll"><table class="design">
+        <tbody>
+          <tr><th scope="row">Teacher</th><td>The π0.5 LIBERO checkpoint of <a rel="noopener" target="_blank" href="https://github.com/Physical-Intelligence/openpi/tree/main/examples/libero">openpi</a>, frozen (92.4% on LIBERO-Long; 96.85% on average over the four suites).</td></tr>
+          <tr><th scope="row">Student</th><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2506.01844">SmolVLA</a> (450M parameters), round 0 trained by behavior cloning on 10% and, separately, on 50% of the demonstrations. The two versions give two levels of imitation error for H3.</td></tr>
+          <tr><th scope="row">Selectors</th><td>All visited states (DAgger, β<sub>i</sub> = I(i = 1)); the largest teacher–student action difference (as in PIVOT-Q); the recoverable states (r(s) above a threshold); random states.</td></tr>
+          <tr><th scope="row">Label unit</th><td>One teacher action chunk at a selected state.</td></tr>
+          <tr><th scope="row">Budgets</th><td>The same number of labeled chunks per round; separately, the same total cost: teacher inference, simulator steps and failed continuations.</td></tr>
+          <tr><th scope="row">Tasks</th><td>LIBERO Spatial, Object, Goal and Long; <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2510.13626">LIBERO-Plus</a> camera and layout shifts.</td></tr>
+          <tr><th scope="row">Metrics</th><td>H1: r(s) against teacher success from matched start states, by task, time and episode outcome. H2: student success against labels and against cost, per selector. H3: success of on-policy labels minus offline distillation, against the student’s imitation error.</td></tr>
+          <tr><th scope="row">Controls</th><td>Same round-0 data and training steps for every selector; 3 rounds; paired seeds; student continuations from each tested state.</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note"><b>Compute (estimate).</b> Each round tests 300 states with 10 teacher and 10 student continuations each, so three rounds need 18,000 continuations. With fine-tuning and evaluation, the plan needs about 200 GPU-hours on one RTX 5090. The pilot measures simulation, continuation and training speed first, and the final scope follows from it.</p>
+      <p class="note"><b>Risks.</b> The teacher is strong on LIBERO, so few states may be unrecoverable; harder tasks and the LIBERO-Plus shifts may expose more. An inexact restore makes r(s) wrong, so the pilot checks that a restored state replays. PIVOT-Q already selects by disagreement, so the new part is recoverability with a VLA teacher and the comparison at equal cost.</p>
+    </div>
+  </div>
+</section>
+
+<section id="application">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Application: a failure router</h2>
+      <p class="eyebrow">Proposed application</p>
+    </div>
+    <div class="prose">
+      <p>The router collects recovery data in simulation. Each failure goes to the expert with the lowest measured cost that passes a recovery threshold in the test above. A person in VR is asked only after the automated experts fail the test. A failure that no expert recovers from is logged as unresolved and reset to an earlier state.</p>
+      <figure class="diagram" role="img" aria-label="The failure router: a saved failure state goes first to a policy expert. If it passes the recoverability test, the policy labels the state. If not, a planner with full simulator state gets the same test, and its labels are used if it passes. If both fail, a person in VR corrects the robot, or the failure is logged as unresolved.">
+        <svg viewBox="0 0 900 250" aria-hidden="true">
+          <defs><marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0 0 10 5 0 10z"/></marker></defs>
+          <rect class="box" x="10" y="10" width="170" height="60" rx="10"/><text x="95" y="45" text-anchor="middle" font-size="15" font-weight="600">Failure state</text>
+          <rect class="box b" x="240" y="10" width="300" height="60" rx="10"/><text x="390" y="45" text-anchor="middle" font-size="15" font-weight="600">Policy expert: recoverability test</text>
+          <rect class="box b" x="240" y="95" width="300" height="60" rx="10"/><text x="390" y="130" text-anchor="middle" font-size="15" font-weight="600">Planner with full state: test</text>
+          <rect class="box b" x="240" y="180" width="300" height="60" rx="10"/><text x="390" y="215" text-anchor="middle" font-size="15" font-weight="600">Person in VR</text>
+          <rect class="box" x="620" y="10" width="270" height="60" rx="10"/><text x="755" y="45" text-anchor="middle" font-size="15" font-weight="600">Policy labels</text>
+          <rect class="box" x="620" y="95" width="270" height="60" rx="10"/><text x="755" y="130" text-anchor="middle" font-size="15" font-weight="600">Planner labels</text>
+          <rect class="box" x="620" y="180" width="270" height="60" rx="10"/><text x="755" y="207" text-anchor="middle" font-size="15" font-weight="600">Correction</text><text class="small" x="755" y="227" text-anchor="middle">or logged as unresolved</text>
+          <path class="arrow" d="M180 40h58" marker-end="url(#ah2)"/>
+          <path class="arrow" d="M390 70v23" marker-end="url(#ah2)"/><text class="small" x="402" y="87">fails</text>
+          <path class="arrow" d="M390 155v23" marker-end="url(#ah2)"/><text class="small" x="402" y="172">fails</text>
+          <path class="arrow" d="M540 40h78" marker-end="url(#ah2)"/><text class="small" x="579" y="32" text-anchor="middle">passes</text>
+          <path class="arrow" d="M540 125h78" marker-end="url(#ah2)"/><text class="small" x="579" y="117" text-anchor="middle">passes</text>
+          <path class="arrow" d="M540 210h78" marker-end="url(#ah2)"/>
+        </svg>
+      </figure>
+      <ol class="diagram-list">
+        <li>A failure state is saved. A <b class="b">policy expert</b> gets the recoverability test. If it passes, it labels the state.</li>
+        <li>If not, a <b class="b">planner with full simulator state</b> gets the same test. If it passes, its labels are used.</li>
+        <li>If both fail, a <b class="b">person in VR</b> corrects the robot, or the failure is logged as unresolved.</li>
+      </ol>
+      <p><b>Outputs.</b> For simulated household tasks: recovery data for each failure type, human time only after the automated experts fail, and a table per task of which expert handles which failures and which stay unresolved.</p>
+      <p><b>Prior work and gaps.</b> Kintsugi-VLA chooses recovery starts with one privileged expert. <a rel="noopener" target="_blank" href="https://arxiv.org/abs/1810.02890">HG-DAgger</a> collects a person’s takeover segments, and <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2509.07953">RaC</a> collects a person’s rewind-and-correct interventions. The <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2512.06951">winner of the 2025 BEHAVIOR Challenge</a> trained on successful demonstrations only, with no recovery demonstrations, and added hand-written correction rules.</p>
+      <p><b>Pilot (go/no-go).</b> LIBERO-Long, the round-0 student and 300 saved states, stratified by task, time and episode outcome. The work goes on if a restored state replays exactly and r(s) varies enough between states to select on. A high r(s) everywhere is kept as a negative result for H1.</p>
+      <p class="note"><b>Router test.</b> Two or three household tasks in simulation, with a policy expert, a motion planner with full simulator state and a person in VR. Policy-only, human-only and router collection run at the same total cost. The measures are student success, human minutes, and the share of failures that each expert recovers from.</p>
+      <p class="note"><b>Risk.</b> A label from an expert that recovers is not always one that the student can learn: a planner with privileged state can act on information that the student does not see (<a rel="noopener" target="_blank" href="https://arxiv.org/abs/2007.12173">ADVISOR</a>). The test therefore measures student gains separately for policy, planner and human labels, and recovery is one filter, not proof of a good label.</p>
+    </div>
+  </div>
+</section>
+
+<section id="prior">
+  <div class="wrap">
+    <div class="shead">
+      <h2>What this builds on</h2>
+      <p class="eyebrow">Related work</p>
+    </div>
+    <div class="prose">
+      <div class="scroll"><table class="prior">
+        <thead><tr><th>Work</th><th>What it does</th><th>What this proposal adds</th></tr></thead>
+        <tbody>
+          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/1011.0686">DAgger</a>, 2011</td><td>The expert labels all states that the learner visits. The bound has the constant u.</td><td>A recovery test for the expert.</td></tr>
+          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2609.31048">Kintsugi-VLA</a>, 2026</td><td>Interventional recoverability from saved states, with a privileged expert, to choose recovery starts for SmolVLA.</td><td>A VLA teacher as the expert, and DAgger labels.</td></tr>
+          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2610.05745">PIVOT-Q</a>, 2026</td><td>A full-precision VLA labels only the high-disagreement states of its quantized version: 7.4% of the labels, better than all states.</td><td>Recoverability as the selector, compared at equal cost.</td></tr>
+          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2603.26666">VLA-OPD</a>, 2026</td><td>A VLA teacher labels the states of an OpenVLA-OFT student: LIBERO success from 48.9% to 87.4% (teacher 93.9%).</td><td>A check of the teacher on those states.</td></tr>
+          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/1810.02890">HG-DAgger</a>, <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2509.07953">RaC</a></td><td>A person takes over, or rewinds and corrects.</td><td>People only after the models fail.</td></tr>
+          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2610.04054">Reward-DAgger</a>, 2026</td><td>A reward model decides when the π0.5 expert takes over. It uses the four LIBERO-10 tasks on which the expert “consistently recovers from frequent failure states”.</td><td>A recovery rate per state and per task.</td></tr>
+          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2407.15007">Foster, Block and Misra</a>, 2024</td><td>Theory: with the log loss and a realizable policy class, online imitation cannot improve on offline imitation without further assumptions.</td><td>A test of the gain against the student’s imitation error.</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+</section>
+
+<section id="sources">
+  <div class="wrap">
+    <div class="prose">
+      <p class="note"><b>Sources.</b> DAgger (arXiv:1011.0686), Theorems 2.2 and 3.2 for the bound and the constant u. The teacher checkpoint and its LIBERO results come from the openpi LIBERO example (examples/libero/README.md), and the student from SmolVLA (arXiv:2506.01844). The RoboTwin re-run figure is pooled over four tasks in arXiv:2610.06921. I read the related work on arXiv on 21 and 22 October 2026, and the list can be incomplete. The compute figures are estimates, not measurements.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="backlink"><a href="/paper-review">← All paper reviews</a></p>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <img class="footer-portrait" src="media/portrait.jpg" alt="Portrait of Pavel Bushuyeu" width="640" height="640" loading="lazy">
+      <nav aria-label="Site">
+        <h2 class="footer-h">Site</h2>
+        <ul>
+          <li><a href="/research">Research</a></li>
+          <li><a href="/teaching">Teaching</a></li>
+          <li><a href="/product-management">Product management</a></li>
+          <li><a href="/services">Services</a></li>
+          <li><a href="/projects">Projects</a></li>
+          <li><a href="/paper-review">Paper review</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Profiles">
+        <h2 class="footer-h">Elsewhere</h2>
+        <ul>
+          <li><a rel="noopener" target="_blank" href="https://linkedin.com/in/bushuyeu/">LinkedIn</a></li>
+          <li><a rel="noopener" target="_blank" href="https://github.com/bushuyeu">GitHub</a></li>
+          <li><a rel="noopener" target="_blank" href="https://huggingface.co/bushuyeu">Hugging Face</a></li>
+          <li><a rel="noopener" target="_blank" href="https://scholar.google.com/citations?user=ub3osgUAAAAJ">Google Scholar</a></li>
+          <li><a rel="noopener" target="_blank" href="https://orcid.org/0009-0009-7183-6714">ORCID</a></li>
+          <li><a rel="noopener" target="_blank" href="https://openreview.net/profile?id=~Pavel_Bushuyeu1">OpenReview</a></li>
+          <li><a rel="noopener" target="_blank" href="https://www.semanticscholar.org/author/2405429742">Semantic Scholar</a></li>
+          <li><a rel="noopener" target="_blank" href="https://www.researchgate.net/profile/Pavel-Bushuyeu">ResearchGate</a></li>
+        </ul>
+      </nav>
+      <div>
+        <h2 class="footer-h">Contact</h2>
+        <ul>
+          <li><a href="mailto:pavelbushuyeu@gmail.com">pavelbushuyeu@gmail.com</a></li>
+          <li><a rel="noopener" target="_blank" href="https://calendar.app.google/aTs1mDgEEfqNLnNf6">Schedule a call</a></li>
+          <li><a href="https://follow.it/pavel-bushuyeu-news" rel="noopener" target="_blank">Subscribe to updates</a></li>
+          <li><a href="/feed.xml">RSS feed</a></li>
+          <li><a href="Pavel-Bushuyeu-CV.pdf" download>Download Resume</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="footer-base">© 2026 Pavel Bushuyeu</p>
+  </div>
+</footer>
+
+</body>
+</html>
