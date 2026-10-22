@@ -24,8 +24,8 @@ Pages from the root of `main`.
 ## Slide decks for paper reviews
 
 Each paper review page has a deck for presenting it. Since 2026-10-21 the deck
-is built first in Google Slides (owned by pavelb@hawaii.edu, shared view-only by
-link); the page is written from it, and its PDF export is `media/<page>-slides.pdf`.
+is built first in Google Slides (owned by pavelb@hawaii.edu, shared by link as
+commenter); the page is written from it, and its PDF export is `media/<page>-slides.pdf`.
 The page header links both: "View slides" (Google Slides) and "Download
 presentation" (the PDF). Example: `review-openvla-visionary.html`. The steps are
 in the `paper-role` skill in `~/projects/paper-review`.
