@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
 <script>/* Theme: apply a stored Light/Dark pick before the first paint (theme.js) */(function(){var r=document.documentElement;try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark"){r.setAttribute("data-theme",t);document.querySelector('meta[name="color-scheme"]').content=t}}catch(e){}r.classList.add("theme-js")})()</script>
-<title>When should a fine-tuned OpenVLA ask for help? — Pavel Bushuyeu</title>
+<title>Confidence calibration of fine-tuned OpenVLA — Pavel Bushuyeu</title>
 <meta name="description" content="A visionary follow-up to OpenVLA: does cheap LoRA fine-tuning keep a vision-language-action model’s confidence calibrated, and can a digital twin of the deployment room set its ask-for-help threshold before the robot runs?">
 <link rel="canonical" href="https://bushuyeu.com/review-openvla-visionary">
 <meta property="og:type" content="article">
-<meta property="og:title" content="When should a fine-tuned OpenVLA ask for help? — Pavel Bushuyeu">
+<meta property="og:title" content="Confidence calibration of fine-tuned OpenVLA — Pavel Bushuyeu">
 <meta property="og:description" content="A visionary follow-up to OpenVLA: does cheap LoRA fine-tuning keep a vision-language-action model’s confidence calibrated, and can a digital twin of the deployment room set its ask-for-help threshold before the robot runs?">
 <meta property="og:url" content="https://bushuyeu.com/review-openvla-visionary">
 <meta property="og:image" content="https://bushuyeu.com/media/og-card.jpg">
@@ -104,7 +104,7 @@
         <svg class="theme-switch__sun" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1.3v1.5M8 13.2v1.5M1.3 8h1.5M13.2 8h1.5M3.3 3.3l1 1M11.7 11.7l1 1M3.3 12.7l1-1M11.7 4.3l1-1"/></svg>
       </button>
     </div>
-    <h1>When should a fine-tuned OpenVLA ask for help?</h1>
+    <h1>Confidence calibration of fine-tuned OpenVLA</h1>
     <p class="sub">The project tests whether the fine-tuning method changes how well the action-token confidence predicts success. The application tests the robot many times in a simulated copy of its workspace to decide when it should ask for help.</p>
     <div class="meta">
       <span>Paper: <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2406.09246">OpenVLA, arXiv:2406.09246</a></span>
