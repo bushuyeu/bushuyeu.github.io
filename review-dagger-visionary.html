@@ -6,11 +6,11 @@
 <meta name="color-scheme" content="light dark">
 <script>/* Theme: apply a stored Light/Dark pick before the first paint (theme.js) */(function(){var r=document.documentElement;try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark"){r.setAttribute("data-theme",t);document.querySelector('meta[name="color-scheme"]').content=t}}catch(e){}r.classList.add("theme-js")})()</script>
 <title>Teacher recoverability in DAgger for VLAs — Pavel Bushuyeu</title>
-<meta name="description" content="A visionary follow-up to DAgger: how often does a large VLA teacher recover from the states that a small student reaches, and can that rate decide which states get the teacher’s labels and which failures need a person?">
+<meta name="description" content="A visionary follow-up to DAgger: which states should a large VLA teacher label for a small student, the ones it can still recover from or the ones where the two models disagree, and can a router send each failure to the cheapest expert that fixes it?">
 <link rel="canonical" href="https://bushuyeu.com/review-dagger-visionary">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Teacher recoverability in DAgger for VLAs — Pavel Bushuyeu">
-<meta property="og:description" content="A visionary follow-up to DAgger: how often does a large VLA teacher recover from the states that a small student reaches, and can that rate decide which states get the teacher’s labels and which failures need a person?">
+<meta property="og:description" content="A visionary follow-up to DAgger: which states should a large VLA teacher label for a small student, the ones it can still recover from or the ones where the two models disagree, and can a router send each failure to the cheapest expert that fixes it?">
 <meta property="og:url" content="https://bushuyeu.com/review-dagger-visionary">
 <meta property="og:image" content="https://bushuyeu.com/media/og-card.jpg">
 <meta property="og:image:width" content="1200">
@@ -78,7 +78,7 @@
       </button>
     </div>
     <h1>Teacher recoverability in DAgger for VLAs</h1>
-    <p class="sub">The project measures how often a large VLA teacher recovers from the states that a small student reaches, and uses this rate to decide which states get the teacher’s labels. The application sends each robot failure to the cheapest expert that can fix it.</p>
+    <p class="sub">The project compares two ways to choose the states that a large vision-language-action (VLA) teacher labels for a small student: the states where the teacher can still finish the task, and the states where the two models disagree. The application sends each failure to the cheapest tested expert that recovers from it.</p>
     <div class="meta">
       <span>Paper: <a rel="noopener" target="_blank" href="https://arxiv.org/abs/1011.0686">DAgger, arXiv:1011.0686</a></span>
       <span>Role: visionary</span>
@@ -92,52 +92,54 @@
 <section id="research">
   <div class="wrap">
     <div class="shead">
-      <h2>When is a VLA a good DAgger expert?</h2>
+      <h2>Which states should a VLA teacher label?</h2>
       <p class="eyebrow">Proposed research</p>
     </div>
     <div class="prose">
-      <p>DAgger’s guarantee has an expert term. Theorem 3.2 gives J(DAgger policy) ≤ J(expert) + u·T·ε + O(1), where T is the horizon and ε is the loss of the best policy in hindsight. The constant u bounds how much the expert’s cost-to-go increases after one mistake of the learner (Section 2.2). The bound is linear in T only when u is small, that is, when the expert recovers from the learner’s mistakes within a few steps.</p>
-      <p>Recent work uses large VLAs as experts for a small one. <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2603.26666">VLA-OPD</a> and <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2610.21522">Multi-Teacher OPD</a> let the student act and label the states that it visits with VLA teachers. <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2610.04054">Reward-DAgger</a> uses the π0.5 LIBERO checkpoint as its simulated expert, and it kept only the four LIBERO-10 tasks on which this expert “consistently recovers from frequent failure states”. None of them reports how often the teacher recovers from the student’s states. A simulator can measure this directly.</p>
+      <p>DAgger assumes a good expert. Theorem 3.2 gives J(DAgger policy) ≤ J(expert) + u·T·ε + O(1), where T is the horizon and ε is the loss of the best policy in hindsight. The constant u bounds the extra cost of one learner action followed by the expert (Theorem 2.2). The bound is linear in T when u stays bounded, for example when the expert returns to its own state distribution within a few steps. The theorem also needs its learning assumptions (a no-regret learner, a strongly convex loss), which a neural network trained for three rounds does not meet. A VLA teacher can fail from the states that a student reaches, so its labels there can be wrong.</p>
+      <p>Two recent papers choose which states get labels. <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2609.31048">Kintsugi-VLA</a> restores saved simulator states, runs a fixed privileged expert from them many times, and estimates the probability that the task still finishes. It uses this “interventional recoverability” to choose recovery starts for a SmolVLA policy. <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2610.05745">PIVOT-Q</a> lets a quantized VLA act and has its full-precision version label only the states where their actions differ most; with 7.4% of the state-level labels it beats labeling all states. I found no study that compares the two selectors for a VLA teacher on the states of a student.</p>
       <h3>Hypotheses</h3>
       <ol class="hyp">
-        <li><span>From states that the student visits, the teacher succeeds less often than from the start of the task. This recovery rate predicts the DAgger gain for each task.</span></li>
-        <li><span>At a fixed label budget, labels only on states that the teacher recovers from give a higher student success than labels on all visited states.</span></li>
-        <li><span>On-policy labels beat offline distillation only when the student is too small to copy the teacher, as the analysis of <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2407.15007">Foster, Block and Misra</a> suggests. The gap increases as the student gets smaller.</span></li>
+        <li><span>From the student’s states, the teacher finishes the task less often than from matched start states of the same tasks.</span></li>
+        <li><span>At the same number of labels and, separately, at the same total cost, labels on recoverable states give higher student success than labels on high-disagreement states, on all states, or on random states.</span></li>
+        <li><span>The gain from on-policy labels over offline distillation grows with the student’s imitation error on teacher data. The analysis of <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2407.15007">Foster, Block and Misra</a> motivates this: with the log loss and a realizable policy class, online imitation cannot improve on offline imitation without further assumptions.</span></li>
       </ol>
-      <p><b>Why it matters.</b> If H1 holds, the labels of a model teacher need a check before use. If H2 holds, the same check also saves labels.</p>
-      <h3>The takeover test</h3>
-      <figure class="diagram" role="img" aria-label="The takeover test: a student rollout saves its state s every 10 steps. From each saved state, the teacher takes over n times, and the student also runs again n times as a control.">
+      <p><b>Why it matters.</b> If H1 holds, the labels of a VLA teacher need a check before use. If H2 holds, the check is worth its cost.</p>
+      <h3>Measuring teacher recoverability</h3>
+      <figure class="diagram" role="img" aria-label="The recoverability test: a student rollout saves its state s every 10 steps. From each tested state, the teacher continues n times and the student continues n times as a control.">
         <svg viewBox="0 0 900 200" aria-hidden="true">
           <defs><marker id="ah1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0 0 10 5 0 10z"/></marker></defs>
           <rect class="box" x="10" y="68" width="190" height="64" rx="10"/><text x="105" y="105" text-anchor="middle" font-size="15" font-weight="600">Student rollout</text>
           <rect class="box" x="250" y="68" width="210" height="64" rx="10"/><text x="355" y="96" text-anchor="middle" font-size="15" font-weight="600">Save the state s</text><text class="small" x="355" y="117" text-anchor="middle">every 10 steps</text>
-          <rect class="box a" x="540" y="10" width="350" height="64" rx="10"/><text x="715" y="38" text-anchor="middle" font-size="15" font-weight="600">Teacher takes over from s</text><text class="small" x="715" y="59" text-anchor="middle">n times: recovery rate r(s)</text>
-          <rect class="box" x="540" y="126" width="350" height="64" rx="10"/><text x="715" y="154" text-anchor="middle" font-size="15" font-weight="600">Student runs again from s</text><text class="small" x="715" y="175" text-anchor="middle">n times: success without help</text>
+          <rect class="box a" x="540" y="10" width="350" height="64" rx="10"/><text x="715" y="38" text-anchor="middle" font-size="15" font-weight="600">Teacher continues from s</text><text class="small" x="715" y="59" text-anchor="middle">n times: recovery rate r(s)</text>
+          <rect class="box" x="540" y="126" width="350" height="64" rx="10"/><text x="715" y="154" text-anchor="middle" font-size="15" font-weight="600">Student continues from s</text><text class="small" x="715" y="175" text-anchor="middle">n times: the control</text>
           <path class="arrow" d="M200 100h48" marker-end="url(#ah1)"/>
           <path class="arrow" d="M460 100h40v-58h38" marker-end="url(#ah1)"/>
           <path class="arrow" d="M500 100v58h38" marker-end="url(#ah1)"/>
         </svg>
       </figure>
       <ol class="diagram-list">
-        <li>The student runs, and its state s is saved every 10 steps.</li>
-        <li>From each saved state, the <b class="a">teacher takes over</b> n times. The share of successes is the recovery rate r(s).</li>
-        <li>From the same state, the student runs again n times. This control shows how often s succeeds without help.</li>
+        <li>The student runs, and its state s is saved every 10 policy steps.</li>
+        <li>From each tested state, the <b class="a">teacher continues</b> n times. The share that finishes the task is the recovery rate r(s).</li>
+        <li>From the same state, the student continues n times. This control measures how often the student finishes the task from s by itself.</li>
       </ol>
-      <p>The control matters. In a <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2610.06921">study of a frozen π0.5 on RoboTwin</a>, 30% of the failed episodes over four tasks succeeded when the same policy ran again. A takeover success alone thus overstates what the teacher adds.</p>
+      <p><b>Definitions.</b> r(s) is the share of n teacher continuations from the restored state s that finish the original task within the remaining step budget of the episode, reported with a Wilson interval; n = 10 with fresh sampling seeds, adapted after the pilot. The restore includes the simulator state, the controller state, the elapsed steps and the policy’s action queue and history. Selection and evaluation use separate continuations. r(s) is a diagnostic related to u, not u itself: u bounds a difference in cost-to-go over all actions, and the test measures task completion after a takeover.</p>
+      <p>The student control matters. In a <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2610.06921">study of a frozen π0.5 on RoboTwin</a>, 30% of the initially failed episodes over four tasks succeeded when the same policy restarted from the same initial scene. Saved-state continuations of the student apply the same lesson here.</p>
       <h3>Design</h3>
       <div class="scroll"><table class="design">
         <tbody>
-          <tr><th scope="row">Teacher</th><td>The π0.5 LIBERO checkpoint of <a rel="noopener" target="_blank" href="https://github.com/Physical-Intelligence/openpi">openpi</a> (96.85% average success on the four LIBERO suites), frozen.</td></tr>
-          <tr><th scope="row">Students</th><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2506.01844">SmolVLA</a> (450M parameters); π0 with LoRA as a larger student; a diffusion policy as a smaller one.</td></tr>
-          <tr><th scope="row">Round 0</th><td>Behavior cloning on 10% of the LIBERO demonstrations, so that the students have room to improve.</td></tr>
-          <tr><th scope="row">Conditions</th><td>Offline distillation; DAgger with β<sub>i</sub> = I(i = 1); DAgger with labels only on recoverable states; takeover segments as in <a rel="noopener" target="_blank" href="https://arxiv.org/abs/1810.02890">HG-DAgger</a>.</td></tr>
+          <tr><th scope="row">Teacher</th><td>The π0.5 LIBERO checkpoint of <a rel="noopener" target="_blank" href="https://github.com/Physical-Intelligence/openpi/tree/main/examples/libero">openpi</a>, frozen (92.4% on LIBERO-Long; 96.85% on average over the four suites).</td></tr>
+          <tr><th scope="row">Student</th><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2506.01844">SmolVLA</a> (450M parameters), round 0 trained by behavior cloning on 10% and, separately, on 50% of the demonstrations. The two versions give two levels of imitation error for H3.</td></tr>
+          <tr><th scope="row">Selectors</th><td>All visited states (DAgger, β<sub>i</sub> = I(i = 1)); the largest teacher–student action difference (as in PIVOT-Q); the recoverable states (r(s) above a threshold); random states.</td></tr>
+          <tr><th scope="row">Label unit</th><td>One teacher action chunk at a selected state.</td></tr>
+          <tr><th scope="row">Budgets</th><td>The same number of labeled chunks per round; separately, the same total cost: teacher inference, simulator steps and failed continuations.</td></tr>
           <tr><th scope="row">Tasks</th><td>LIBERO Spatial, Object, Goal and Long; <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2510.13626">LIBERO-Plus</a> camera and layout shifts.</td></tr>
-          <tr><th scope="row">Metrics</th><td>Student success per teacher label; the distribution of r(s) per task; the correlation of r(s) with the DAgger gain per task; the gap between offline and on-policy labels for each student size.</td></tr>
-          <tr><th scope="row">Controls</th><td>The same teacher-label budget in each condition; 3 DAgger rounds; paired seeds; student re-runs from each tested state.</td></tr>
+          <tr><th scope="row">Metrics</th><td>H1: r(s) against teacher success from matched start states, by task, time and episode outcome. H2: student success against labels and against cost, per selector. H3: success of on-policy labels minus offline distillation, against the student’s imitation error.</td></tr>
+          <tr><th scope="row">Controls</th><td>Same round-0 data and training steps for every selector; 3 rounds; paired seeds; student continuations from each tested state.</td></tr>
         </tbody>
       </table></div>
-      <p class="note"><b>Compute (estimate).</b> Each round has 2,000 student episodes and takeover tests, with re-runs, on 2,000 saved states. This is about 60 GPU-hours of rollouts, 50 of fine-tuning and 30 of evaluation: 140–180 GPU-hours on one RTX 5090.</p>
-      <p class="note"><b>Risks.</b> The teacher succeeds on most LIBERO tasks, so few states may be unrecoverable. LIBERO-Long and the LIBERO-Plus shifts give more. The test needs an exact reset to a saved state, which simulators have and real robots do not. <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2610.02832">FastOPD</a> already distills π0.5 into SmolVLA from the dataset (77–82% against the teacher’s 97.5% on LIBERO), so the contribution is the measurement and the routing, not a new training loss.</p>
+      <p class="note"><b>Compute (estimate).</b> Each round tests 300 states with 10 teacher and 10 student continuations each, so three rounds need 18,000 continuations. With fine-tuning and evaluation, the plan needs about 200 GPU-hours on one RTX 5090. The pilot measures simulation, continuation and training speed first, and the final scope follows from it.</p>
+      <p class="note"><b>Risks.</b> The teacher is strong on LIBERO, so few states may be unrecoverable; harder tasks and the LIBERO-Plus shifts may expose more. An inexact restore makes r(s) wrong, so the pilot checks that a restored state replays. PIVOT-Q already selects by disagreement, so the new part is recoverability with a VLA teacher and the comparison at equal cost.</p>
     </div>
   </div>
 </section>
@@ -149,34 +151,35 @@
       <p class="eyebrow">Proposed application</p>
     </div>
     <div class="prose">
-      <p>Recovery data is expensive. A person in VR is the most reliable expert and the slowest one. A policy or a planner with full simulator state is fast, but it can label states that it cannot recover from. The router uses the takeover test to send each failure to the cheapest expert that recovers from it.</p>
-      <figure class="diagram" role="img" aria-label="The failure router: a saved failure state goes first to a policy expert. If its takeover test succeeds, the policy labels the state. If not, a planner with full state gets the same test, and its labels are used if it succeeds. If both fail, a person in VR corrects the robot.">
+      <p>The router collects recovery data in simulation. Each failure goes to the expert with the lowest measured cost that passes a recovery threshold in the test above. A person in VR is asked only after the automated experts fail the test. A failure that no expert recovers from is logged as unresolved and reset to an earlier state.</p>
+      <figure class="diagram" role="img" aria-label="The failure router: a saved failure state goes first to a policy expert. If it passes the recoverability test, the policy labels the state. If not, a planner with full simulator state gets the same test, and its labels are used if it passes. If both fail, a person in VR corrects the robot, or the failure is logged as unresolved.">
         <svg viewBox="0 0 900 250" aria-hidden="true">
           <defs><marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0 0 10 5 0 10z"/></marker></defs>
           <rect class="box" x="10" y="10" width="170" height="60" rx="10"/><text x="95" y="45" text-anchor="middle" font-size="15" font-weight="600">Failure state</text>
-          <rect class="box b" x="240" y="10" width="300" height="60" rx="10"/><text x="390" y="45" text-anchor="middle" font-size="15" font-weight="600">Policy expert: takeover test</text>
-          <rect class="box b" x="240" y="95" width="300" height="60" rx="10"/><text x="390" y="130" text-anchor="middle" font-size="15" font-weight="600">Planner with full state: takeover test</text>
+          <rect class="box b" x="240" y="10" width="300" height="60" rx="10"/><text x="390" y="45" text-anchor="middle" font-size="15" font-weight="600">Policy expert: recoverability test</text>
+          <rect class="box b" x="240" y="95" width="300" height="60" rx="10"/><text x="390" y="130" text-anchor="middle" font-size="15" font-weight="600">Planner with full state: test</text>
           <rect class="box b" x="240" y="180" width="300" height="60" rx="10"/><text x="390" y="215" text-anchor="middle" font-size="15" font-weight="600">Person in VR</text>
           <rect class="box" x="620" y="10" width="270" height="60" rx="10"/><text x="755" y="45" text-anchor="middle" font-size="15" font-weight="600">Policy labels</text>
           <rect class="box" x="620" y="95" width="270" height="60" rx="10"/><text x="755" y="130" text-anchor="middle" font-size="15" font-weight="600">Planner labels</text>
-          <rect class="box" x="620" y="180" width="270" height="60" rx="10"/><text x="755" y="215" text-anchor="middle" font-size="15" font-weight="600">Human correction</text>
+          <rect class="box" x="620" y="180" width="270" height="60" rx="10"/><text x="755" y="207" text-anchor="middle" font-size="15" font-weight="600">Correction</text><text class="small" x="755" y="227" text-anchor="middle">or logged as unresolved</text>
           <path class="arrow" d="M180 40h58" marker-end="url(#ah2)"/>
           <path class="arrow" d="M390 70v23" marker-end="url(#ah2)"/><text class="small" x="402" y="87">fails</text>
           <path class="arrow" d="M390 155v23" marker-end="url(#ah2)"/><text class="small" x="402" y="172">fails</text>
-          <path class="arrow" d="M540 40h78" marker-end="url(#ah2)"/><text class="small" x="579" y="32" text-anchor="middle">recovers</text>
-          <path class="arrow" d="M540 125h78" marker-end="url(#ah2)"/><text class="small" x="579" y="117" text-anchor="middle">recovers</text>
+          <path class="arrow" d="M540 40h78" marker-end="url(#ah2)"/><text class="small" x="579" y="32" text-anchor="middle">passes</text>
+          <path class="arrow" d="M540 125h78" marker-end="url(#ah2)"/><text class="small" x="579" y="117" text-anchor="middle">passes</text>
           <path class="arrow" d="M540 210h78" marker-end="url(#ah2)"/>
         </svg>
       </figure>
       <ol class="diagram-list">
-        <li>A failure state is saved. A <b class="b">policy expert</b> gets the takeover test. If it recovers, it labels the state.</li>
-        <li>If not, a <b class="b">planner with full state</b> gets the same test. If it recovers, its labels are used.</li>
-        <li>If both fail, a <b class="b">person in VR</b> corrects the robot.</li>
+        <li>A failure state is saved. A <b class="b">policy expert</b> gets the recoverability test. If it passes, it labels the state.</li>
+        <li>If not, a <b class="b">planner with full simulator state</b> gets the same test. If it passes, its labels are used.</li>
+        <li>If both fail, a <b class="b">person in VR</b> corrects the robot, or the failure is logged as unresolved.</li>
       </ol>
-      <p><b>What a user gets.</b> For long-horizon household tasks: recovery data for each failure type, human time only on the failures that no model recovers from, and a list per task of which expert fixes which failures.</p>
-      <p><b>Prior work and gaps.</b> <a rel="noopener" target="_blank" href="https://arxiv.org/abs/1810.02890">HG-DAgger</a> and <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2509.07953">RaC</a> use a person for each correction. VLA-OPD uses a model teacher for every state that the student visits. The <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2512.06951">winner of the 2025 BEHAVIOR Challenge</a> trained on successful demonstrations only, with no recovery demonstrations, and added hand-written correction rules instead.</p>
-      <p><b>Pilot (go/no-go).</b> LIBERO-Long, the round-0 SmolVLA student and 300 saved states from failed episodes. The work continues only if the teacher recovers from clearly fewer of these states than its success rate from the start of the task (H1).</p>
-      <p class="note"><b>Router test.</b> Two or three household tasks in simulation, with a policy expert, a planner with full state and a person in VR. The measures are the student success per expert-minute and the share of failures that each expert recovers from.</p>
+      <p><b>Outputs.</b> For simulated household tasks: recovery data for each failure type, human time only after the automated experts fail, and a table per task of which expert handles which failures and which stay unresolved.</p>
+      <p><b>Prior work and gaps.</b> Kintsugi-VLA chooses recovery starts with one privileged expert. <a rel="noopener" target="_blank" href="https://arxiv.org/abs/1810.02890">HG-DAgger</a> collects a person’s takeover segments, and <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2509.07953">RaC</a> collects a person’s rewind-and-correct interventions. The <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2512.06951">winner of the 2025 BEHAVIOR Challenge</a> trained on successful demonstrations only, with no recovery demonstrations, and added hand-written correction rules.</p>
+      <p><b>Pilot (go/no-go).</b> LIBERO-Long, the round-0 student and 300 saved states, stratified by task, time and episode outcome. The work goes on if a restored state replays exactly and r(s) varies enough between states to select on. A high r(s) everywhere is kept as a negative result for H1.</p>
+      <p class="note"><b>Router test.</b> Two or three household tasks in simulation, with a policy expert, a motion planner with full simulator state and a person in VR. Policy-only, human-only and router collection run at the same total cost. The measures are student success, human minutes, and the share of failures that each expert recovers from.</p>
+      <p class="note"><b>Risk.</b> A label from an expert that recovers is not always one that the student can learn: a planner with privileged state can act on information that the student does not see (<a rel="noopener" target="_blank" href="https://arxiv.org/abs/2007.12173">ADVISOR</a>). The test therefore measures student gains separately for policy, planner and human labels, and recovery is one filter, not proof of a good label.</p>
     </div>
   </div>
 </section>
@@ -191,12 +194,13 @@
       <div class="scroll"><table class="prior">
         <thead><tr><th>Work</th><th>What it does</th><th>What this proposal adds</th></tr></thead>
         <tbody>
-          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/1011.0686">DAgger</a>, 2011</td><td>The expert labels all states that the learner visits. The bound has the recovery constant u.</td><td>u measured for a VLA teacher.</td></tr>
-          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/1810.02890">HG-DAgger</a>, <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2509.07953">RaC</a></td><td>A person takes over, or rewinds and then corrects. Only those segments are labeled.</td><td>People only where models cannot recover.</td></tr>
-          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2603.26666">VLA-OPD</a>, 2026</td><td>A VLA teacher labels the states of an OpenVLA-OFT student: LIBERO success from 48.9% to 87.4% (teacher 93.9%).</td><td>A test of the teacher on those states.</td></tr>
-          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2610.04054">Reward-DAgger</a>, 2026</td><td>A reward model decides when the π0.5 expert takes over. The tasks are chosen so that the expert recovers.</td><td>A recovery rate per state and per task.</td></tr>
-          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2610.06921">Learned corrector vs retreat</a>, 2026</td><td>Paired re-runs of a frozen π0.5: 30% of failed episodes succeed again.</td><td>Re-runs as a control in the takeover test.</td></tr>
-          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2407.15007">Foster, Block and Misra</a>, 2024</td><td>Theory: with the log loss and a realizable policy class, online imitation cannot improve on offline imitation without further assumptions.</td><td>A test with VLA students of three sizes.</td></tr>
+          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/1011.0686">DAgger</a>, 2011</td><td>The expert labels all states that the learner visits. The bound has the constant u.</td><td>A recovery test for the expert.</td></tr>
+          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2609.31048">Kintsugi-VLA</a>, 2026</td><td>Interventional recoverability from saved states, with a privileged expert, to choose recovery starts for SmolVLA.</td><td>A VLA teacher as the expert, and DAgger labels.</td></tr>
+          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2610.05745">PIVOT-Q</a>, 2026</td><td>A full-precision VLA labels only the high-disagreement states of its quantized version: 7.4% of the labels, better than all states.</td><td>Recoverability as the selector, compared at equal cost.</td></tr>
+          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2603.26666">VLA-OPD</a>, 2026</td><td>A VLA teacher labels the states of an OpenVLA-OFT student: LIBERO success from 48.9% to 87.4% (teacher 93.9%).</td><td>A check of the teacher on those states.</td></tr>
+          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/1810.02890">HG-DAgger</a>, <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2509.07953">RaC</a></td><td>A person takes over, or rewinds and corrects.</td><td>People only after the models fail.</td></tr>
+          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2610.04054">Reward-DAgger</a>, 2026</td><td>A reward model decides when the π0.5 expert takes over. It uses the four LIBERO-10 tasks on which the expert “consistently recovers from frequent failure states”.</td><td>A recovery rate per state and per task.</td></tr>
+          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2407.15007">Foster, Block and Misra</a>, 2024</td><td>Theory: with the log loss and a realizable policy class, online imitation cannot improve on offline imitation without further assumptions.</td><td>A test of the gain against the student’s imitation error.</td></tr>
         </tbody>
       </table></div>
     </div>
@@ -206,7 +210,7 @@
 <section id="sources">
   <div class="wrap">
     <div class="prose">
-      <p class="note"><b>Sources.</b> DAgger (arXiv:1011.0686), Theorem 3.2 and Section 2.2 for the bound and the constant u. The teacher checkpoint and its LIBERO results come from the openpi LIBERO example (examples/libero/README.md), and the student from SmolVLA (arXiv:2506.01844). The FastOPD numbers are its Table 1 at 1 to 10 denoising steps. I read the related work on arXiv on 21 October 2026, and the list can be incomplete. The compute figures are estimates, not measurements.</p>
+      <p class="note"><b>Sources.</b> DAgger (arXiv:1011.0686), Theorems 2.2 and 3.2 for the bound and the constant u. The teacher checkpoint and its LIBERO results come from the openpi LIBERO example (examples/libero/README.md), and the student from SmolVLA (arXiv:2506.01844). The RoboTwin re-run figure is pooled over four tasks in arXiv:2610.06921. I read the related work on arXiv on 21 and 22 October 2026, and the list can be incomplete. The compute figures are estimates, not measurements.</p>
     </div>
   </div>
 </section>
