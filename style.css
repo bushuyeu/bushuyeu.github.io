@@ -161,6 +161,7 @@ section[id] { scroll-margin-top: 24px; }
 .sub-row { display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; }
 a.pill-link--accent { color: var(--bg); }
 .meta .pill-link { margin-left: auto; }
+.meta .pill-link + .pill-link { margin-left: 0; }   /* a second pill (View slides, Download presentation) sits next to the first */
 .pill-link--accent { background: var(--ink); border-color: var(--ink); color: var(--bg); }
 .meta a.pill-link--accent { color: var(--bg); }
 .pill-link--accent:hover, .meta a.pill-link--accent:hover { background: var(--link); border-color: var(--link); color: #fff; }
