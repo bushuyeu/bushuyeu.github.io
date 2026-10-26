@@ -62,6 +62,7 @@
 .prose table.prior td:first-child { font-weight: 500; white-space: nowrap; }
 @media (max-width: 640px) { .prose table.prior td:first-child, .prose table.design th[scope="row"] { white-space: normal; } }
 .facts--4 { grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); }
+.facts + .prose { margin-top: 24px; }
 .charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; margin: 24px 0 18px; }
 .charts figure { margin: 0; border: 1px solid var(--hair-soft); border-radius: 12px; padding: 12px 12px 10px; background: var(--bg); }
 .charts figcaption { margin-top: 8px; font-size: 0.86rem; line-height: 1.45; color: var(--ink-2); }
@@ -146,7 +147,7 @@
         </tbody>
       </table></div>
       <p class="note"><b>Compute (estimate).</b> Stage 1 has 6 LoRA runs, about 60–90 A100-hours at the rates of OpenVLA (10–15 per LoRA run, §5.2–5.3), plus about 30 GPU-hours of evaluation. One run is timed first. Stage 2 has 6 full fine-tuning runs, 240–720 A100-hours (40–120 per run), on GPUs with 80 GB or more. It starts only when the allocation is confirmed.</p>
-      <p class="note"><b>Risks.</b> Token-based success confidence is a proxy, and Zollo and Zemel found it weakest late in failed episodes. LIBERO-Plus can collapse OpenVLA: success falls to 1.1% under camera changes and to 4.4% under lighting changes, from 76.5% without changes. Thus the shift for H4 must be mild, and separate pilot data sets it. The same episode gave a different first-step confidence on two GPU setups (0.81 on one RTX 5090, 0.89 on two A4000), so hardware stays fixed within a comparison.</p>
+      <p class="note"><b>Risks.</b> Token-based success confidence is a proxy, and Zollo and Zemel found it weakest late in failed episodes. LIBERO-Plus can collapse OpenVLA: success falls to 1.1% under camera changes and to 4.4% under lighting changes, from 76.5% without changes. Thus the shift for H4 must be mild, and separate pilot data sets it. A first check found that the first-step confidence of the same episode differs between GPU setups, so the hardware stays fixed within a comparison.</p>
     </div>
   </div>
 </section>
@@ -154,7 +155,7 @@
 <section id="baseline">
   <div class="wrap">
     <div class="shead">
-      <h2>First result: modest overconfidence, weak failure discrimination</h2>
+      <h2>First results: overconfident, weak at predicting failure</h2>
       <p class="eyebrow">Preliminary result</p>
     </div>
     <div class="prose">
@@ -268,7 +269,28 @@
           <tr><td>Action-wise Platt scaling</td><td>0.468</td><td>0.136</td><td>0.52</td></tr>
         </tbody>
       </table></div>
-      <p class="note"><b>Limits.</b> One suite, one seed and one checkpoint. Success per task is 68–98%. The intervals come from resampling the episodes of one checkpoint, so they do not include the training variance. LIBERO-Long, where Zollo and Zemel report an ECE of 0.381, is running.</p>
+      <h3>On LIBERO-Long, the confidence points the wrong way</h3>
+      <p>I ran the released LIBERO-Long checkpoint in the same way: 500 episodes, one seed, on two A4000 GPUs per process on the KOA cluster of the University of Hawaiʻi. Success and calibration again agree with the published numbers. The model is much more overconfident than on Spatial. Episodes with a higher first-step confidence fail more often, also within each task, so the task mix does not explain it.</p>
+    </div>
+    <ul class="facts facts--4">
+      <li><b>54.8%</b><span>success (s.e. 2.2 points). OpenVLA reports 53.7%.</span></li>
+      <li><b>ECE 0.364</b><span>95% interval 0.321–0.406. Zollo and Zemel report 0.381.</span></li>
+      <li><b>+36.4 points</b><span>mean confidence (0.912) minus success.</span></li>
+      <li><b>AUROC 0.44</b><span>failure prediction, 95% interval 0.39–0.49, below chance.</span></li>
+    </ul>
+    <div class="prose">
+      <p>On the same 1,000 splits, a constant success rate halves the held-out NLL of the raw confidence. A threshold that flags 10% of the episodes catches 9% of the failures, fewer than random flags would.</p>
+      <div class="scroll"><table class="nums">
+        <thead><tr><th>Predictor (LIBERO-Long)</th><th>Held-out NLL</th><th>Brier score</th><th>Failure AUROC</th></tr></thead>
+        <tbody>
+          <tr><td>Raw first-step confidence</td><td>1.347</td><td>0.390</td><td>0.44</td></tr>
+          <tr><td>Constant success rate</td><td>0.694</td><td>0.250</td><td>0.50</td></tr>
+          <tr><td>Success rate per task</td><td>0.696</td><td>0.249</td><td>0.60</td></tr>
+          <tr><td>Platt scaling</td><td>0.699</td><td>0.252</td><td>0.52</td></tr>
+          <tr><td>Action-wise Platt scaling</td><td>0.747</td><td>0.271</td><td>0.49</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note"><b>Limits.</b> Two suites, with one seed and one checkpoint each. The intervals come from resampling the episodes of one checkpoint, so they do not include the training variance. The two suites ran on different GPUs, so I compare their aggregate numbers, not single episodes.</p>
       <details class="fig-toggle"><summary>The numbers behind the charts</summary>
         <div class="scroll"><table class="nums">
           <thead><tr><th>Measure</th><th>This run (95% interval)</th><th>Zollo and Zemel</th><th>OpenVLA paper</th></tr></thead>
@@ -329,6 +351,23 @@
             <tr><td>8</td><td>pick up the black bowl on the stove and place it on the plate</td><td>82%</td><td>+7.7 points</td></tr>
             <tr><td>9</td><td>pick up the black bowl next to the plate and place it on the plate</td><td>84%</td><td>+4.7 points</td></tr>
             <tr><td>10</td><td>pick up the black bowl on the wooden cabinet and place it on the plate</td><td>68%</td><td>+21.0 points</td></tr>
+          </tbody>
+        </table></div>
+      </details>
+      <details class="fig-toggle"><summary>LIBERO-Long per task</summary>
+        <div class="scroll"><table class="nums">
+          <thead><tr><th>Task</th><th>Instruction</th><th>Success</th><th>Confidence minus success</th><th>Failure AUROC in the task</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>put both the alphabet soup and the tomato sauce in the basket</td><td>46%</td><td>+44.8 points</td><td>0.39</td></tr>
+            <tr><td>2</td><td>put both the cream cheese box and the butter in the basket</td><td>78%</td><td>+13.5 points</td><td>0.55</td></tr>
+            <tr><td>3</td><td>turn on the stove and put the moka pot on it</td><td>56%</td><td>+35.8 points</td><td>0.48</td></tr>
+            <tr><td>4</td><td>put the black bowl in the bottom drawer of the cabinet and close it</td><td>46%</td><td>+45.3 points</td><td>0.38</td></tr>
+            <tr><td>5</td><td>put the white mug on the left plate and put the yellow and white mug on the right plate</td><td>44%</td><td>+47.8 points</td><td>0.44</td></tr>
+            <tr><td>6</td><td>pick up the book and place it in the back compartment of the caddy</td><td>80%</td><td>+9.6 points</td><td>0.48</td></tr>
+            <tr><td>7</td><td>put the white mug on the plate and put the chocolate pudding to the right of the plate</td><td>56%</td><td>+37.0 points</td><td>0.50</td></tr>
+            <tr><td>8</td><td>put both the alphabet soup and the cream cheese box in the basket</td><td>58%</td><td>+33.7 points</td><td>0.36</td></tr>
+            <tr><td>9</td><td>put both moka pots on the stove</td><td>30%</td><td>+61.0 points</td><td>0.35</td></tr>
+            <tr><td>10</td><td>put the yellow and white mug in the microwave and close it</td><td>54%</td><td>+35.7 points</td><td>0.50</td></tr>
           </tbody>
         </table></div>
       </details>
@@ -418,7 +457,7 @@
 <section id="sources">
   <div class="wrap">
     <div class="prose">
-      <p class="note"><b>Sources.</b> OpenVLA (arXiv:2406.09246v3), §5.2–5.3 and Table 1 for fine-tuning cost (the LoRA rates come from a smaller SigLIP-only variant, footnote 4), Appendix E for LIBERO. LIBERO step limits come from the OpenVLA evaluation script. The calibration protocol comes from Zollo and Zemel, §3–4 and Appendix C. I read the related work on arXiv on 19 and 22 October 2026, and the list can be incomplete. LIBERO-Plus success rates for OpenVLA come from its Table 1. The first result is my run of openvla/openvla-7b-finetuned-libero-spatial with seed 7 and the first 50 initial states per task. The intervals come from 1,000 bootstrap resamples of episodes. The simple calibrators use 1,000 task-balanced splits of the same 500 episodes, with ECE in 10 bins as in the recalibration tests of Zollo and Zemel.</p>
+      <p class="note"><b>Sources.</b> OpenVLA (arXiv:2406.09246v3), §5.2–5.3 and Table 1 for fine-tuning cost (the LoRA rates come from a smaller SigLIP-only variant, footnote 4), Appendix E for LIBERO. LIBERO step limits come from the OpenVLA evaluation script. The calibration protocol comes from Zollo and Zemel, §3–4 and Appendix C. I read the related work on arXiv on 19 and 22 October 2026, and the list can be incomplete. LIBERO-Plus success rates for OpenVLA come from its Table 1. The first results are my runs of openvla/openvla-7b-finetuned-libero-spatial (one RTX 5090) and openvla/openvla-7b-finetuned-libero-10 (two A4000 per process, KOA), with seed 7 and the first 50 initial states per task. The intervals come from 1,000 bootstrap resamples of episodes. The simple calibrators use 1,000 task-balanced splits of the same 500 episodes, with ECE in 10 bins as in the recalibration tests of Zollo and Zemel.</p>
     </div>
   </div>
 </section>
