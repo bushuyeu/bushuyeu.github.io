@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<script>/* Theme: apply a stored Light/Dark pick before the first paint (theme.js) */(function(){var r=document.documentElement;try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark"){r.setAttribute("data-theme",t);document.querySelector('meta[name="color-scheme"]').content=t}}catch(e){}r.classList.add("theme-js")})()</script>
+<title>Robot concentration in Open X-Embodiment — Pavel Bushuyeu</title>
+<meta name="description" content="An empiricist audit of the Open X-Embodiment data and of the training mixtures that Octo and OpenVLA drew from it: three robots hold most of the trajectories, and reweighting spreads data across datasets but not across robots.">
+<link rel="canonical" href="https://bushuyeu.com/review-oxe-empiricist">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Robot concentration in Open X-Embodiment — Pavel Bushuyeu">
+<meta property="og:description" content="An empiricist audit of the Open X-Embodiment data and of the training mixtures that Octo and OpenVLA drew from it: three robots hold most of the trajectories, and reweighting spreads data across datasets but not across robots.">
+<meta property="og:url" content="https://bushuyeu.com/review-oxe-empiricist">
+<meta property="og:image" content="https://bushuyeu.com/media/og-card.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Pavel Bushuyeu, AI researcher, University of Hawaiʻi at Mānoa">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://bushuyeu.com/media/og-card.jpg">
+<link rel="icon" href="favicon-32.png?v=3" type="image/png" sizes="32x32">
+<link rel="icon" href="icon-512.png?v=3" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="alternate" type="application/rss+xml" title="Pavel Bushuyeu — News" href="https://bushuyeu.com/feed.xml">
+<link rel="stylesheet" href="style.css?v=34">
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "WebPage", "author": {"@type": "Person", "@id": "https://bushuyeu.com/#person", "name": "Pavel Bushuyeu", "url": "https://bushuyeu.com/"}}
+</script>
+<style>
+/* Page-only styles. Built on the tokens in style.css; the light-theme grey is darkened here so small text passes 4.5:1. */
+:root { --ink-3: #707075; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ink-3: #86868b; } }
+:root[data-theme="dark"] { --ink-3: #86868b; }
+.facts { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 14px 28px; }
+.facts li { border-top: 1px solid var(--hair-soft); padding-top: 12px; display: flex; flex-direction: column; gap: 4px; }
+.facts b { font-size: 1.35rem; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.facts span { color: var(--ink-2); font-size: 0.93rem; }
+.facts + .prose { margin-top: 24px; }
+.prose a { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.prose table.design th[scope="row"] { font-weight: 600; white-space: nowrap; vertical-align: top; padding: 8px 18px 8px 0; border-bottom: 1px solid var(--hair-soft); }
+.prose table.design tbody tr:last-child th { border-bottom: none; }
+.prose table.nums { font-variant-numeric: tabular-nums; }
+@media (max-width: 640px) { .prose table.design th[scope="row"] { white-space: normal; } }
+.charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; margin: 24px 0 18px; }
+.charts figure { margin: 0; border: 1px solid var(--hair-soft); border-radius: 12px; padding: 12px 12px 10px; background: #fff; }
+.charts img { display: block; width: 100%; height: auto; }
+.charts figcaption { margin-top: 8px; font-size: 0.86rem; line-height: 1.45; color: #5e5e63; }
+</style>
+<script src="faro.js" async></script>
+<script src="theme.js?v=2" defer></script>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="topbar">
+      <nav class="eyebrow eyebrow-nav" aria-label="Main">
+        <a href="/">Home</a>
+        <a href="/research">Research</a>
+        <a href="/teaching">Teaching</a>
+        <a href="/product-management">Product management</a>
+        <a href="/services">Services</a>
+      </nav>
+      <button type="button" class="theme-switch" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode">
+        <svg class="theme-switch__moon" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M13.6 9.9A5.7 5.7 0 0 1 6.1 2.4a5.8 5.8 0 1 0 7.5 7.5z"/></svg>
+        <svg class="theme-switch__sun" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1.3v1.5M8 13.2v1.5M1.3 8h1.5M13.2 8h1.5M3.3 3.3l1 1M11.7 11.7l1 1M3.3 12.7l1-1M11.7 4.3l1-1"/></svg>
+      </button>
+    </div>
+    <h1>Robot concentration in Open X-Embodiment</h1>
+    <p class="sub">An audit of the Open X-Embodiment data, and of the training mixtures that Octo and OpenVLA drew from it, from public metadata only. Three robots hold most of the trajectories, and the mixtures spread the data across datasets but not across robots.</p>
+    <div class="meta">
+      <span>Paper: <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2310.08864">Open X-Embodiment, arXiv:2310.08864</a></span>
+      <span>Role: empiricist</span>
+      <span>November 2026</span>
+      <a class="pill-link" href="https://docs.google.com/presentation/d/19B-RPLlIbdBvBMjHFcXf2TpjobTlLC0tAAUoSuYSgnI/edit?usp=sharing" rel="noopener" target="_blank" style="gap:7px" aria-label="View the slides in Google Slides (opens in a new tab)"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="12" height="9" rx="1.5"/><path d="M8 12v2M5.5 14h5"/></svg>View slides</a>
+      <a class="pill-link" href="/media/review-oxe-empiricist-slides.pdf" download style="gap:7px" aria-label="Download the presentation (PDF)"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v8m0 0 3.2-3.2M8 10.5 4.8 7.3M3 13.5h10"/></svg>Download presentation</a>
+    </div>
+  </div>
+</header>
+
+<section id="question">
+  <div class="wrap">
+    <div class="shead">
+      <h2>How many robots does OXE really cover?</h2>
+      <p class="eyebrow">Experimental design</p>
+    </div>
+    <div class="prose">
+      <p>Open X-Embodiment (OXE) pools 60 datasets from 22 robots. RT-X, <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2405.12213">Octo</a>, <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2406.09246">OpenVLA</a> and <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2410.24164">π0</a> train on it for transfer across robots. Whether pooling helps a robot may depend on how much of the data comes from each robot, not only on how many robots are listed.</p>
+      <p><b>Hypothesis.</b> A few robots and datasets hold most of the trajectories. The mixtures that later models trained on reweight the datasets, but they stay concentrated on a few robots.</p>
+    </div>
+  </div>
+</section>
+
+<section id="method">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Public metadata only, one script</h2>
+      <p class="eyebrow">Implementation</p>
+    </div>
+    <div class="prose">
+      <div class="scroll"><table class="design">
+        <tbody>
+          <tr><th scope="row">Sheet</th><td>The OXE dataset overview and metadata tabs, linked from the <a rel="noopener" target="_blank" href="https://robotics-transformer-x.github.io">project site</a>: robot, episodes, control rate, action space, cameras, language, operator, scenes.</td></tr>
+          <tr><th scope="row">TFDS</th><td><code>dataset_info.json</code> and <code>features.json</code> for 69 datasets on <code>gs://gresearch/robotics</code>: split sizes, action and camera features.</td></tr>
+          <tr><th scope="row">Mixtures</th><td>Octo's <code>OXE_MAGIC_SOUP</code> and OpenVLA's <code>oxe_magic_soup_plus</code> and <code>oxe_magic_soup_plus_minus</code> at pinned commits, with the dataset statistics of the released checkpoints.</td></tr>
+          <tr><th scope="row">Papers</th><td>The text of OXE, Octo, OpenVLA and π0. The script checks all 23 quotes it uses against the text.</td></tr>
+          <tr><th scope="row">Measures</th><td>Top-k share and the effective number, 1 / (sum of squared shares): 5 means "as spread as 5 equal parts". Both codebases sample a dataset in proportion to its weight times its number of steps, and the audit does the same.</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">2.3 MB of metadata and no episodes. One script rebuilds every number and chart on this page from the downloaded files.</p>
+    </div>
+  </div>
+</section>
+
+<section id="reproduction">
+  <div class="wrap">
+    <div class="shead">
+      <h2>The headline counts hold, with one fix</h2>
+      <p class="eyebrow">Reproduction</p>
+    </div>
+    <div class="prose">
+      <div class="scroll"><table class="nums">
+        <thead><tr><th>Claim</th><th>Paper</th><th>From the metadata</th></tr></thead>
+        <tbody>
+          <tr><td>Datasets</td><td>60</td><td>60 rows marked v1.0</td></tr>
+          <tr><td>Robots</td><td>22</td><td>22 named; Figure 2 likely counts RoboNet ("data from 5 robots") once per robot and leaves out ALOHA</td></tr>
+          <tr><td>Trajectories</td><td>1M+</td><td>1,403,481 as listed; 1,032,969 with non-empty Kuka episodes</td></tr>
+          <tr><td>Labs, skills, tasks</td><td>34, 527, 160,266</td><td>Not in the metadata</td></tr>
+        </tbody>
+      </table></div>
+      <p>The sheet lists QT-Opt (Kuka) with 580,392 episodes, but the Octo and OpenVLA loaders count 209,880 non-empty ones. With the listed number, Kuka is the largest robot (41.6%), which contradicts Figure 2(c). With the non-empty number the figure matches: xArm 43.0% (figure about 43%), Kuka 20.6% (about 21%), Google Robot 16.8% (about 17.5%). The rest of this page uses the non-empty count.</p>
+    </div>
+  </div>
+</section>
+
+<section id="results">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Results: datasets spread, robots do not</h2>
+      <p class="eyebrow">Empirical observations</p>
+    </div>
+    <ul class="facts">
+      <li><b>80%</b><span>of OXE v1.0 trajectories come from three robots: xArm, Kuka and Google Robot.</span></li>
+      <li><b>3.8</b><span>effective robots out of 23 in the raw data.</span></li>
+      <li><b>4.0–4.8</b><span>effective robots in the Octo and OpenVLA mixtures.</span></li>
+      <li><b>11 of 22</b><span>robots are ever sampled by either mixture.</span></li>
+    </ul>
+    <div class="charts">
+      <figure>
+        <img src="media/oxe-empiricist-robots.svg" alt="Bar chart of the share of OXE v1.0 trajectories per robot: xArm 43.0%, Kuka iiwa 20.6%, Google Robot 16.8%, RoboNet 8.0%, Franka 5.4%, WidowX 2.5%, Jackal 1.1%, 16 other robots 2.6%." width="600" height="276" loading="lazy">
+        <figcaption>Share of OXE v1.0 trajectories per robot, Kuka counted as non-empty episodes. Language Table alone holds 43%. Franka has 23 of the 60 datasets but 5.4% of the trajectories.</figcaption>
+      </figure>
+      <figure>
+        <img src="media/oxe-empiricist-neff.svg" alt="Grouped bar chart of the effective number of datasets and of robots. Raw OXE: 4.1 datasets, 3.8 robots. Octo: 9.1 and 4.8. OpenVLA stage 1: 11.6 and 4.1. OpenVLA stage 2: 7.9 and 4.0. The top three robots take 80%, 71%, 75% and 79% of the samples." width="600" height="358" loading="lazy">
+        <figcaption>Effective number of datasets and of robots, raw data and the Octo and OpenVLA sampling mixtures. Reweighting doubles or triples the datasets; the robots stay near four.</figcaption>
+      </figure>
+    </div>
+    <div class="prose">
+      <div class="scroll"><table class="nums">
+        <thead><tr><th>Distribution</th><th>Effective datasets</th><th>Effective robots</th><th>Top-3 robots</th><th>Which three</th></tr></thead>
+        <tbody>
+          <tr><td>OXE v1.0 trajectories</td><td>4.1</td><td>3.8</td><td>80.5%</td><td>xArm, Kuka iiwa, Google Robot</td></tr>
+          <tr><td>Octo sampling</td><td>9.1</td><td>4.8</td><td>70.7%</td><td>Franka, Google Robot, WidowX</td></tr>
+          <tr><td>OpenVLA stage 1 (DROID at 10%)</td><td>11.6</td><td>4.1</td><td>75.1%</td><td>Franka, Google Robot, WidowX</td></tr>
+          <tr><td>OpenVLA stage 2 (released model)</td><td>7.9</td><td>4.0</td><td>79.1%</td><td>Google Robot, Franka, WidowX</td></tr>
+        </tbody>
+      </table></div>
+      <p>The mixtures move samples between robots more than they add robots. xArm (Language Table) falls from 43% of the trajectories to 5.9% of Octo's samples and is absent from OpenVLA's last stage. Octo keeps the datasets with images and delta end-effector control, and OpenVLA those with a third-person camera and single-arm end-effector control. So the navigation robots, the quadruped, the bimanual setups and the joint-space datasets are never sampled.</p>
+      <h3>The published mixture tables, checked against the code</h3>
+      <p><b>Octo.</b> The code's weights times the released dataset sizes give Octo's mixture table to within 0.03 points on average, so the weights in the code are the ones used.</p>
+      <p><b>OpenVLA.</b> Table 3 of the paper sums to 95.0%, and each row sits about 5% below the computed share. That fits DROID at about 15% of the samples, not the stated 10%. DROID's step count is not in any released statistics file, so this stays an inference. In the last third of training, the code also drops Language Table and raises the weight of Fractal (RT-1) from 0.54 to 1.0, which the paper does not say: Fractal's share goes from 13.4% to 25.6%, so about one sample in four is RT-1 data.</p>
+      <h3>Heterogeneity a cross-robot model must absorb</h3>
+      <div class="scroll"><table class="nums">
+        <thead><tr><th>Share</th><th>OXE v1.0 trajectories</th><th>Octo samples</th><th>OpenVLA stage 2 samples</th></tr></thead>
+        <tbody>
+          <tr><td>Control at 5 Hz or slower</td><td>15%</td><td>37%</td><td>44%</td></tr>
+          <tr><td>Control above 20 Hz</td><td>0.3%</td><td>2.4%</td><td>2.2%</td></tr>
+          <tr><td>No language label</td><td>50%</td><td>26%</td><td>22%</td></tr>
+          <tr><td>Templated language</td><td>12%</td><td>47%</td><td>59%</td></tr>
+          <tr><td>Human operator</td><td>47%</td><td>83%</td><td>86%</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">The weighted median control rate is 10 Hz under every weighting. π0's own robots run "at frequencies of up to 50 Hz", and all of π0's open-source data (OXE, Bridge v2, DROID) is "9.1% of the training mixture" (π0, Sec. V-A). π0 does not publish its per-dataset OXE weights, so the audit computes no π0 shares.</p>
+    </div>
+  </div>
+</section>
+
+<section id="alignment">
+  <div class="wrap">
+    <div class="shead">
+      <h2>What matches the paper and what does not</h2>
+      <p class="eyebrow">Findings vs the paper</p>
+    </div>
+    <div class="prose">
+      <p><b>Matches.</b> 60 datasets, 22 robots by count and 1M+ trajectories. Franka has the most datasets and the most scenes. xArm, Kuka and Google Robot give the most trajectories. Octo's "only 27% of the data contains wrist camera information" reproduces as 27.3% of its samples.</p>
+      <p><b>Does not match.</b> The 22 robots of Figure 2 are not the sheet's 22. In Figure 2(b), Google Robot has 4.4% of the scenes the contributors list, against about 22% in the figure. Octo's "56% of the pretraining data contains language annotations" does not reproduce from the sheet's labels under any weighting. π0 calls its OXE data both "the entire OXE dataset" (Sec. III) and "a subset of OXE, which we refer to as OXE Magic Soup" (Fig. 4).</p>
+    </div>
+  </div>
+</section>
+
+<section id="insights">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Diversity is in the datasets, not the robots</h2>
+      <p class="eyebrow">Challenges &amp; insights</p>
+    </div>
+    <div class="prose">
+      <p><b>Challenges.</b> The labels are contributors' form answers. Step counts exist only for datasets in a mixture. DROID's step count and π0's per-dataset weights are not published. No episodes were opened, so the 370,512 missing QT-Opt episodes stay unexplained: they may be empty in the public release, or lost in the Octo and OpenVLA copies.</p>
+      <p><b>Insights.</b> Cross-robot results from OXE rest on about four effective robots. Reweighting can move samples between robots, but it cannot add robots. The open data is slow: half of it is at 10 Hz or less.</p>
+      <h3>What I would test next</h3>
+      <p><b>Hypothesis.</b> At a fixed step budget, a mixture balanced over robots transfers better to the robots it under-samples than Octo's mixture does.</p>
+      <ol>
+        <li><b>Train</b> two Octo-small models on the same number of steps, one with Octo's weights and one with an equal share per robot.</li>
+        <li><b>Test</b> on SimplerEnv (Google Robot, WidowX) and LIBERO (Franka), plus few-shot fine-tuning on a held-out robot.</li>
+        <li><b>Measure</b> success with intervals, against each robot's share of the samples.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section id="sources">
+  <div class="wrap">
+    <div class="prose">
+      <p class="note"><b>Sources.</b> Open X-Embodiment (arXiv:2310.08864v9), Figure 2 and Sec. III–IV; the OXE dataset overview sheet and the TFDS metadata on <code>gs://gresearch/robotics</code>, fetched 1 November 2026 (the sheet's e-mail column and its form-response tab were not downloaded). Octo (arXiv:2405.12213v2) and its code (<code>octo-models/octo</code>, commit 241fb35); OpenVLA (arXiv:2406.09246v3) and its code (<code>openvla/openvla</code>, commit c8f03f4); the dataset statistics of the released Octo and OpenVLA checkpoints on Hugging Face; π0 (arXiv:2410.24164v4). Figure 2 values were read by eye (pie slices about ±1.5 points).</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="backlink"><a href="/paper-review">← All paper reviews</a></p>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <img class="footer-portrait" src="media/portrait.jpg" alt="Portrait of Pavel Bushuyeu" width="640" height="640" loading="lazy">
+      <nav aria-label="Site">
+        <h2 class="footer-h">Site</h2>
+        <ul>
+          <li><a href="/research">Research</a></li>
+          <li><a href="/teaching">Teaching</a></li>
+          <li><a href="/product-management">Product management</a></li>
+          <li><a href="/services">Services</a></li>
+          <li><a href="/projects">Projects</a></li>
+          <li><a href="/paper-review">Paper review</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Profiles">
+        <h2 class="footer-h">Elsewhere</h2>
+        <ul>
+          <li><a rel="noopener" target="_blank" href="https://linkedin.com/in/bushuyeu/">LinkedIn</a></li>
+          <li><a rel="noopener" target="_blank" href="https://github.com/bushuyeu">GitHub</a></li>
+          <li><a rel="noopener" target="_blank" href="https://huggingface.co/bushuyeu">Hugging Face</a></li>
+          <li><a rel="noopener" target="_blank" href="https://scholar.google.com/citations?user=ub3osgUAAAAJ">Google Scholar</a></li>
+          <li><a rel="noopener" target="_blank" href="https://orcid.org/0009-0009-7183-6714">ORCID</a></li>
+          <li><a rel="noopener" target="_blank" href="https://openreview.net/profile?id=~Pavel_Bushuyeu1">OpenReview</a></li>
+          <li><a rel="noopener" target="_blank" href="https://www.semanticscholar.org/author/2405429742">Semantic Scholar</a></li>
+          <li><a rel="noopener" target="_blank" href="https://www.researchgate.net/profile/Pavel-Bushuyeu">ResearchGate</a></li>
+        </ul>
+      </nav>
+      <div>
+        <h2 class="footer-h">Contact</h2>
+        <ul>
+          <li><a href="mailto:pavelbushuyeu@gmail.com">pavelbushuyeu@gmail.com</a></li>
+          <li><a rel="noopener" target="_blank" href="https://calendar.app.google/aTs1mDgEEfqNLnNf6">Schedule a call</a></li>
+          <li><a href="https://follow.it/pavel-bushuyeu-news" rel="noopener" target="_blank">Subscribe to updates</a></li>
+          <li><a href="/feed.xml">RSS feed</a></li>
+          <li><a href="Pavel-Bushuyeu-CV.pdf" download>Download Resume</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="footer-base">© 2026 Pavel Bushuyeu</p>
+  </div>
+</footer>
+
+</body>
+</html>
