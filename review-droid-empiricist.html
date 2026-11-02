@@ -6,11 +6,11 @@
 <meta name="color-scheme" content="light dark">
 <script>/* Theme: apply a stored Light/Dark pick before the first paint (theme.js) */(function(){var r=document.documentElement;try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark"){r.setAttribute("data-theme",t);document.querySelector('meta[name="color-scheme"]').content=t}}catch(e){}r.classList.add("theme-js")})()</script>
 <title>View, scene and instruction in π0.5-DROID — Pavel Bushuyeu</title>
-<meta name="description" content="Offline probes of Physical Intelligence's open π0.5-DROID policy on 500 DROID states: swapping one exterior camera for the other barely changes its actions, another scene changes them a lot, and a wrong instruction changes them less than the policy's own sampling noise.">
+<meta name="description" content="Offline probes of Physical Intelligence's open π0.5-DROID policy on 500 DROID states: swapping one exterior camera for the other barely changes its actions, an exterior image from another scene changes them a lot, and a wrong instruction changes them less than the policy's own sampling noise in most states.">
 <link rel="canonical" href="https://bushuyeu.com/review-droid-empiricist">
 <meta property="og:type" content="article">
 <meta property="og:title" content="View, scene and instruction in π0.5-DROID — Pavel Bushuyeu">
-<meta property="og:description" content="Offline probes of Physical Intelligence's open π0.5-DROID policy on 500 DROID states: swapping one exterior camera for the other barely changes its actions, another scene changes them a lot, and a wrong instruction changes them less than the policy's own sampling noise.">
+<meta property="og:description" content="Offline probes of Physical Intelligence's open π0.5-DROID policy on 500 DROID states: swapping one exterior camera for the other barely changes its actions, an exterior image from another scene changes them a lot, and a wrong instruction changes them less than the policy's own sampling noise in most states.">
 <meta property="og:url" content="https://bushuyeu.com/review-droid-empiricist">
 <meta property="og:image" content="https://bushuyeu.com/media/og-card.jpg">
 <meta property="og:image:width" content="1200">
@@ -72,7 +72,7 @@
       </button>
     </div>
     <h1>View, scene and instruction in π0.5-DROID</h1>
-    <p class="sub">Offline probes of Physical Intelligence's open π0.5-DROID policy on 500 states from DROID. Swapping one exterior camera for the other barely changes the actions, another scene changes them a lot, and a wrong instruction changes them less than the policy's own sampling noise.</p>
+    <p class="sub">Offline probes of Physical Intelligence's open π0.5-DROID policy on 500 states from DROID. Swapping one exterior camera for the other barely changes the actions, an exterior image from another scene changes them a lot, and a wrong instruction changes them less than the policy's own sampling noise in most states.</p>
     <div class="meta">
       <span>Paper: <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2403.12945">DROID, arXiv:2403.12945</a></span>
       <span>Role: empiricist</span>
@@ -90,7 +90,7 @@
       <p class="eyebrow">Experimental design</p>
     </div>
     <div class="prose">
-      <p>DROID argues that diversity makes policies generalize: 564 scenes, 52 buildings, 86 tasks, and 1,417 exterior camera viewpoints, because the collection software prompts collectors to move and re-calibrate the cameras. In the paper's words, "camera viewpoint diversity allows for greater generalization to new instructions and camera angles". <a rel="noopener" target="_blank" href="https://github.com/Physical-Intelligence/openpi">π0.5-DROID</a> is π0.5 fine-tuned on DROID and released by Physical Intelligence. Without a robot, how much do its actions depend on the camera view, on the scene and on the instruction?</p>
+      <p>DROID argues that diversity makes policies generalize: 564 scenes, 52 buildings, 86 tasks, and 1,417 exterior camera viewpoints, because the collection software prompts collectors to move and re-calibrate the cameras. The paper expects that "task or camera viewpoint diversity allows for greater generalization to new instructions and camera angles". <a rel="noopener" target="_blank" href="https://github.com/Physical-Intelligence/openpi">π0.5-DROID</a> is π0.5 fine-tuned on DROID and released by Physical Intelligence. Without a robot, how much do its actions depend on the camera view, on the scene and on the instruction?</p>
       <p><b>H1, camera diversity buys view invariance.</b> For the same state and the same sampling noise, the actions predicted from exterior camera 2 are about as close to those from camera 1 as two sampling seeds are to each other.</p>
       <p><b>H2, language matters early.</b> Replacing the instruction moves the actions well above the sampling noise early in an episode, and less late.</p>
       <p class="note">Both hypotheses and their decision rules were written down before the GPU run.</p>
@@ -110,12 +110,12 @@
           <tr><th scope="row">Model</th><td><code>pi05_droid</code> from openpi (commit 215abfb), in JAX. Inputs: one exterior image, the wrist image, the joint and gripper state, and the instruction. Output: 15 actions of 7 joint velocities and a gripper position.</td></tr>
           <tr><th scope="row">Data</th><td><code>droid_100</code>, the first 100 DROID episodes (RLDS v1.0.0, 13 labs, 15 Hz). Each episode is cut into five equal phases and one step is drawn in each: 500 states.</td></tr>
           <tr><th scope="row">Probes</th><td>Exterior camera 2 in place of camera 1; another episode's instruction; an empty instruction; a paraphrase; a black wrist or exterior image; the wrist or exterior image of an episode from another lab.</td></tr>
-          <tr><th scope="row">Yardstick</th><td>The noise floor: the change from a second sampling seed on the same input. The probes use the same seed as the base prediction, so a difference comes from the input, not from sampling.</td></tr>
+          <tr><th scope="row">Yardstick</th><td>The noise floor: for each state, the mean distance between the predictions from three sampling seeds on the same input, reported as the median over states. Each probe uses the same sampling noise as the base prediction, so it measures how much the input moves the prediction, not task success.</td></tr>
           <tr><th scope="row">Measure</th><td>RMS change over the first 8 actions (0.53 s, the part openpi's DROID client executes), in the model's normalised units. Medians over states, with 95% intervals from 10,000 bootstrap resamples of whole episodes.</td></tr>
-          <tr><th scope="row">Compute</th><td>One RTX 3090: 5,140 calls at 177 ms each, about 30 minutes.</td></tr>
+          <tr><th scope="row">Compute</th><td>One RTX 3090: 5,140 calls in about 28 minutes, with a median of 177 ms of inference per call. Setup and the wait for the GPU are not included.</td></tr>
         </tbody>
       </table></div>
-      <p class="note">What the model saw in training comes from openpi's open-source DROID loader, which openpi calls "an approximate open-source reproduction of the pi05-DROID training pipeline": each sample uses exterior camera 1 or 2 at random and one of the instructions at random, and only successful episodes.</p>
+      <p class="note">The training recipe of the released checkpoint is not public. openpi's open-source DROID loader, which openpi calls "an approximate open-source reproduction of the pi05-DROID training pipeline", picks exterior camera 1 or 2 and one of the instructions at random for each sample, and uses only successful episodes.</p>
     </div>
   </div>
 </section>
@@ -123,29 +123,29 @@
 <section id="results">
   <div class="wrap">
     <div class="shead">
-      <h2>Results: the scene matters, the viewpoint does not</h2>
+      <h2>Results: a small camera-swap effect, a large image effect</h2>
       <p class="eyebrow">Empirical observations</p>
     </div>
     <ul class="facts">
       <li><b>0.15×</b><span>the noise floor: the change when exterior camera 2 replaces camera 1.</span></li>
       <li><b>1.9×</b><span>the noise floor: the change when the exterior image comes from another lab's scene.</span></li>
-      <li><b>0.58×</b><span>the noise floor: the change when another episode's instruction replaces the true one.</span></li>
+      <li><b>0.58×</b><span>the noise floor: the change when another episode's instruction replaces the true one (230 annotated states).</span></li>
       <li><b>1.17×</b><span>the noise floor: the error against the recorded actions.</span></li>
     </ul>
     <div class="charts">
       <figure class="wide">
         <img src="media/droid-empiricist-probes.svg" alt="Dot chart of the median change in the predicted actions for each probe, with 95% intervals. Noise floor 0.16. Paraphrased instruction 0.01, exterior camera swap 0.02, empty instruction 0.05, another episode's instruction 0.07, wrist image black 0.26, exterior image black 0.27, exterior image from another lab 0.31, wrist image from another lab 0.36. Prediction against the recorded actions 0.19." width="633" height="262" loading="lazy">
-        <figcaption>Median change in the predicted actions for each probe (first 8 actions, normalised units, 95% intervals). The dashed line is the noise floor, the change from a second sampling seed.</figcaption>
+        <figcaption>Median change in the predicted actions for each probe (first 8 actions, normalised units, 95% episode-bootstrap intervals). Camera and image probes use 500 states; other and empty instructions use 230 states, and paraphrases 155. The dashed line is the 500-state noise floor; the instruction ratios use the floor of their own states.</figcaption>
       </figure>
     </div>
     <div class="prose">
-      <h3>Camera swap: H1 holds, more strongly than stated</h3>
-      <p>Swapping exterior camera 1 for camera 2 changes the actions by 0.023 [0.019, 0.027], 0.15× [0.12, 0.16] the noise floor. The change is above the floor in 1.4% of states. It is the same in every phase of the episode and in all 13 labs (0.06× to 0.24×), and the error against the recorded actions does not change (paired difference 0.000). The two views of one scene are very different images: the median pixel difference is 67 of 255.</p>
-      <p>The model does not ignore the exterior image. The exterior image of an episode from another lab changes the actions by 0.31, 1.9× the floor and 13× the swap, and raises the error against the recorded actions by 0.14. The model reads the scene, not the viewpoint. The decision rule expected a ratio near 1 and did not foresee one this far below 1, so H1 holds in a stronger form than stated.</p>
+      <h3>Camera swap: a small effect</h3>
+      <p>Swapping exterior camera 1 for camera 2 changes the actions by 0.023 [0.019, 0.027], 0.15× [0.12, 0.16] the noise floor. The change is above the floor in 1.4% of states. It stays small in every phase of the episode (0.10× to 0.18×) and in all 13 labs (0.06× to 0.24×, descriptive), and the median paired change in the error against the recorded actions is 0.000 [−0.001, 0.001]. The two views of one scene are very different images: the median pixel difference is 67 of 255.</p>
+      <p>The model does not ignore the exterior image. The exterior image of an episode from another lab changes the actions by 0.31, 1.9× the floor and 13× the swap, and raises the error against the recorded actions by 0.14. So the model uses the exterior image, but changes little between the two recorded views of one scene. The pre-set rule for H1 expected a ratio near 1 (an interval that overlaps 0.8 to 1.25), so it leaves 0.15× unclassified. Read after the fact, the result supports low sensitivity to this camera swap. It does not show that camera diversity in training causes it, and unseen viewpoints are not tested.</p>
     </div>
     <div class="charts">
       <figure>
-        <img src="media/droid-empiricist-phase.svg" alt="Line chart of the change divided by the noise floor, by position in the episode. The camera swap stays between 0.10 and 0.18. Another episode's instruction is 0.56, 0.45, 0.45, 0.52 and 0.88 from the first to the last fifth. The empty instruction rises from 0.36 to 0.49." width="501" height="266" loading="lazy">
+        <img src="media/droid-empiricist-phase.svg" alt="Line chart of the change divided by the noise floor, by position in the episode. The camera swap stays between 0.10 and 0.18. Another episode's instruction is 0.55, 0.45, 0.45, 0.52 and 0.88 from the first to the last fifth. The empty instruction rises from 0.36 to 0.49." width="501" height="266" loading="lazy">
         <figcaption>Change divided by the noise floor, by position in the episode (46 annotated episodes for the instruction probes). Shaded: 95% intervals.</figcaption>
       </figure>
       <figure>
@@ -156,16 +156,16 @@
     <div class="prose">
       <h3>Instruction: H2 fails</h3>
       <div class="scroll"><table class="nums">
-        <thead><tr><th>Instruction (46 annotated episodes)</th><th>Change</th><th>× noise floor</th><th>States above 2× the floor</th></tr></thead>
+        <thead><tr><th>Instruction (230 states, 46 episodes)</th><th>Change</th><th>× noise floor</th><th>States above 2× the floor</th></tr></thead>
         <tbody>
           <tr><td>Another episode's</td><td>0.073</td><td>0.58 [0.43, 0.85]</td><td>19%</td></tr>
           <tr><td>Empty</td><td>0.049</td><td>0.39 [0.32, 0.48]</td><td>5%</td></tr>
-          <tr><td>Paraphrase (31 episodes)</td><td>0.012</td><td>0.09 [0.07, 0.12]</td><td></td></tr>
+          <tr><td>Paraphrase (155 states, 31 episodes)</td><td>0.012</td><td>0.09 [0.07, 0.12]</td><td></td></tr>
         </tbody>
       </table></div>
-      <p>A wrong instruction moves the actions less than the sampling noise in the median state. The trend runs against H2: the ratio is 0.51 early in the episode and 0.82 late, and the difference is not significant. The effect is concentrated in a few states: 19% change by more than twice the floor, and the largest by 11×. The true instruction still carries information: another episode's instruction raises the error against the recorded actions by 0.019 [0.011, 0.029], and an empty one by 0.008. Paraphrases are almost free.</p>
-      <h3>Open loop: most of the error is sampling spread</h3>
-      <p>The error against the recorded actions is 0.185 [0.156, 0.217], only 1.17× [1.04, 1.33] the noise floor. Where the policy is uncertain, it also disagrees with the operator (Spearman 0.72 between the two per state). It beats zero velocity (0.281) and the mean action (0.399). Repeating the previous recorded action, which the model does not get, wins for the first action and over 8 steps; π0.5-DROID wins over the full 1 s chunk (paired −0.020 [−0.036, −0.005]). On the 19 failed episodes the error is 0.370, against 0.153 on the 81 successful ones.</p>
+      <p>A wrong instruction moves the actions less than the sampling noise in the median state. The trend runs against H2: the ratio is 0.51 early in the episode and 0.82 late, and the difference is not significant. The effect is concentrated in a few states: 19% change by more than twice the floor, and the largest by 11×. The true instruction still carries information: another episode's instruction raises the error against the recorded actions by 0.019 [0.011, 0.029], and an empty one by 0.008. Paraphrases are almost free. These probes do not test language following in closed loop, and the swapped-in instructions usually name objects from another scene.</p>
+      <h3>Open loop: error close to the sampling spread</h3>
+      <p>The error against the recorded actions is 0.185 [0.156, 0.217], 1.17× [1.04, 1.33] the noise floor. States with a larger sampling spread also have a larger error (Spearman 0.72). These comparisons do not show how much of the error sampling causes. It beats zero velocity (0.281) and the mean action (0.399). Repeating the previous recorded action, which the model does not get, wins for the first action and over 8 steps; π0.5-DROID wins over the full 1 s chunk (paired −0.020 [−0.036, −0.005]). On the 19 failed episodes the error is 0.370, against 0.153 on the 81 successful ones.</p>
       <h3>Surprises in droid_100</h3>
       <p>54 of the 100 episodes have no instruction, and all 19 failures are among them, so the instruction probes use the 46 annotated episodes. The likely reason is the version: openpi's training notes say that v1.0.0 "only has annotations for 30k episodes", and v1.0.1 has about 75k. One lab (TRI) has 29 of the 100 episodes, so a 100-episode slice does not show the diversity of the full dataset.</p>
     </div>
@@ -179,9 +179,9 @@
       <p class="eyebrow">Findings vs the paper</p>
     </div>
     <div class="prose">
-      <p><b>Viewpoints: matches, in-distribution.</b> A policy trained on DROID with a random choice between the two exterior cameras gives nearly the same actions from either view, while it still depends strongly on the scene. That is what the paper's argument predicts. It is not the paper's own experiment: the paper's diffusion policies use both exterior cameras together and end-effector actions, and test generalization in closed loop on new scenes.</p>
-      <p><b>Scenes: consistent, transfer not tested.</b> The actions depend on the scene content (1.9× to 2.3× the floor for images from another lab), so the policy is not a scene-blind motion prior. Whether that dependence transfers to unseen scenes is the paper's claim, and it needs held-out data.</p>
-      <p><b>Language: weaker than a naive reading.</b> openpi describes π0.5-DROID as having "good language-following". Offline, in DROID's own scenes, the scene and the robot state already fix most of the action. This does not contradict good language following on a robot, where instructions matter most when several tasks are possible in one scene. It means that DROID's recorded states rarely test it.</p>
+      <p><b>Viewpoints: consistent, in-distribution.</b> The tested checkpoint gives nearly the same predictions from either recorded exterior view, while it still depends strongly on the exterior image. That fits the paper's argument. It is not the paper's own experiment: the paper's diffusion policies use both exterior cameras together and end-effector actions, and are tested in closed loop after co-training on DROID and demonstrations of each evaluation task.</p>
+      <p><b>Scenes: transfer not tested.</b> The actions depend on the images (1.9× to 2.3× the floor for an image from another lab), so the policy is not a motion prior that ignores its cameras. The paper tests robustness in closed loop after co-training with demonstrations from each evaluation task. It does not test zero-shot transfer to unseen scenes, and this probe tests neither transfer nor task success.</p>
+      <p><b>Language: a small median effect offline.</b> openpi describes π0.5-DROID as having "good language-following". On 230 states, another episode's instruction moves the predictions less than the sampling noise in the median state, and by more than the noise in 33% of states. This does not contradict good language following on a robot, where instructions matter most when several tasks are possible in one scene. Instructions from other episodes usually name objects that are not in the scene, so feasible alternatives in the same scene remain untested.</p>
     </div>
   </div>
 </section>
@@ -189,12 +189,12 @@
 <section id="insights">
   <div class="wrap">
     <div class="shead">
-      <h2>Scene and state set the action</h2>
+      <h2>Offline sensitivity, not robot behaviour</h2>
       <p class="eyebrow">Challenges &amp; insights</p>
     </div>
     <div class="prose">
       <p><b>Challenges.</b> The GPU was shared with two text-to-speech jobs, and the run waited 69 minutes for one of them. The run needed 24 GiB on a disk that was 95% full, and all of it was deleted after. The training recipe of the released checkpoint is not public; it is inferred from openpi's open loader. All 500 states are in DROID, so the policy may have trained on these frames, and the view invariance may be partly memorised.</p>
-      <p><b>Insights.</b> Compare a policy with its own sampling noise: an error of 0.185 alone looks large, but it is 1.17× the noise. In DROID's scenes, a wrong instruction rarely changes what the robot does next.</p>
+      <p><b>Insights.</b> Compare a policy with its own sampling noise: an error of 0.185 alone looks large, but it is 1.17× the noise. In these offline probes, a wrong instruction moves the predicted actions less than the sampling noise in most states; closed-loop language following is a separate question.</p>
       <h3>What I would test next</h3>
       <p><b>Hypothesis.</b> The view invariance holds for camera poses outside DROID, and the language effect rises when two tasks are possible in one scene.</p>
       <ol>
