@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<script>/* Theme: apply a stored Light/Dark pick before the first paint (theme.js) */(function(){var r=document.documentElement;try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark"){r.setAttribute("data-theme",t);document.querySelector('meta[name="color-scheme"]').content=t}}catch(e){}r.classList.add("theme-js")})()</script>
+<title>Open X-Embodiment read-along — Pavel Bushuyeu</title>
+<meta name="description" content="Open X-Embodiment pools 60 existing robot datasets from 34 labs into one format: more than 1M real robot trajectories from 22 robot types, from single arms to quadrupeds.">
+<link rel="canonical" href="https://bushuyeu.com/read-along-oxe">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Open X-Embodiment read-along — Pavel Bushuyeu">
+<meta property="og:description" content="Open X-Embodiment pools 60 existing robot datasets from 34 labs into one format: more than 1M real robot trajectories from 22 robot types, from single arms to quadrupeds.">
+<meta property="og:url" content="https://bushuyeu.com/read-along-oxe">
+<meta property="og:image" content="https://bushuyeu.com/media/og-card.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Pavel Bushuyeu, AI researcher, University of Hawaiʻi at Mānoa">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://bushuyeu.com/media/og-card.jpg">
+<link rel="icon" href="favicon-32.png?v=3" type="image/png" sizes="32x32">
+<link rel="icon" href="icon-512.png?v=3" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="alternate" type="application/rss+xml" title="Pavel Bushuyeu — News" href="https://bushuyeu.com/feed.xml">
+<link rel="stylesheet" href="style.css?v=34">
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "WebPage", "author": {"@type": "Person", "@id": "https://bushuyeu.com/#person", "name": "Pavel Bushuyeu", "url": "https://bushuyeu.com/"}}
+</script>
+<style>
+/* Page-only styles for read-along pages. Built on the tokens in style.css; the light-theme grey is darkened here so small text passes 4.5:1. */
+:root { --ink-3: #707075; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ink-3: #86868b; } }
+:root[data-theme="dark"] { --ink-3: #86868b; }
+.prose a { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.chapters { list-style: none; margin: 0; padding: 0; columns: 2 18rem; column-gap: 32px; }
+.chapters li { break-inside: avoid; padding: 5px 0; border-bottom: 1px solid var(--hair-soft); display: flex; gap: 12px; }
+.chapters a { font-variant-numeric: tabular-nums; min-width: 4.2em; }
+.sketch { margin: 0; border: 1px solid var(--hair-soft); border-radius: 12px; padding: 10px; background: #fff; }
+.sketch img { display: block; width: 100%; height: auto; }
+.sketch figcaption { margin-top: 8px; font-size: 0.86rem; line-height: 1.45; color: #5e5e63; }
+.faq details { border-top: 1px solid var(--hair-soft); padding: 12px 0; }
+.faq details:last-child { border-bottom: 1px solid var(--hair-soft); }
+.faq summary { cursor: pointer; font-weight: 600; list-style-position: outside; }
+.faq details p { margin: 8px 0 0; }
+.faq .ref { color: var(--ink-3); font-size: 0.88rem; white-space: nowrap; }
+.terms { display: grid; grid-template-columns: max-content 1fr; gap: 8px 22px; margin: 0; }
+.terms dt { font-weight: 600; }
+.terms dd { margin: 0; color: var(--ink-2); }
+@media (max-width: 640px) { .terms { grid-template-columns: 1fr; } .terms dd { margin-bottom: 8px; } }
+</style>
+<script src="faro.js" async></script>
+<script src="theme.js?v=2" defer></script>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="topbar">
+      <nav class="eyebrow eyebrow-nav" aria-label="Main">
+        <a href="/">Home</a>
+        <a href="/research">Research</a>
+        <a href="/teaching">Teaching</a>
+        <a href="/product-management">Product management</a>
+        <a href="/services">Services</a>
+      </nav>
+      <button type="button" class="theme-switch" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode">
+        <svg class="theme-switch__moon" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M13.6 9.9A5.7 5.7 0 0 1 6.1 2.4a5.8 5.8 0 1 0 7.5 7.5z"/></svg>
+        <svg class="theme-switch__sun" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1.3v1.5M8 13.2v1.5M1.3 8h1.5M13.2 8h1.5M3.3 3.3l1 1M11.7 11.7l1 1M3.3 12.7l1-1M11.7 4.3l1-1"/></svg>
+      </button>
+    </div>
+    <h1>Open X-Embodiment read-along</h1>
+    <p class="sub">Open X-Embodiment: Robotic Learning Datasets and RT-X Models. Open X-Embodiment Collaboration (O&#x27;Neill, Rehman, Gupta, Maddukuri, Gupta, Padalkar and others), ICRA 2024.</p>
+    <div class="meta">
+      <span>Paper: <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2310.08864">Open X-Embodiment, arXiv:2310.08864</a></span>
+      <span class="tag">read-along</span>
+      <span>Video 31:29</span>
+      <a class="pill-link" href="https://youtu.be/1R3zTXq7AWc" rel="noopener" target="_blank" style="gap:7px" aria-label="Watch the read-along on YouTube (opens in a new tab)"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="3" width="13" height="10" rx="2.5"/><path d="M6.5 6v4l3.5-2z"/></svg>Watch on YouTube</a>
+      <a class="pill-link" href="/media/read-along-oxe-sketchnote.pdf" download style="gap:7px" aria-label="Download the sketchnote and listening sheet (PDF)"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v8m0 0 3.2-3.2M8 10.5 4.8 7.3M3 13.5h10"/></svg>Sketchnote (PDF)</a>
+    </div>
+  </div>
+</header>
+
+<section id="summary">
+  <div class="wrap">
+    <div class="shead">
+      <h2>In short</h2>
+      <p class="eyebrow">Summary</p>
+    </div>
+    <div class="prose">
+      <p>Open X-Embodiment pools 60 existing robot datasets from 34 labs into one format: more than 1M real robot trajectories from 22 robot types, from single arms to quadrupeds.</p>
+      <p>The authors train two existing policies, RT-1-X (35M parameters) and RT-2-X (a 55B vision-language-action model), on a 12-dataset mixture from 9 manipulators, with every action coarsely mapped to a 7-DoF end-effector action.</p>
+      <p>RT-1-X raises mean success on 5 small-data domains by about 50% over each dataset&#x27;s original method, and RT-2-X nearly triples success on Google Robot tasks whose skills are in the Bridge (WidowX) data but not in the Google Robot data (27.3% to 75.8%); in the two large-data domains only RT-2-X keeps up with single-robot training.</p>
+    </div>
+  </div>
+</section>
+
+<section id="sketchnote">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Sketchnote</h2>
+      <p class="eyebrow">One-page summary</p>
+    </div>
+    <figure class="sketch">
+      <a href="/media/read-along-oxe-sketchnote.png"><img src="media/read-along-oxe-sketchnote.png" alt="Hand-drawn summary of Open X-Embodiment: Open X-Embodiment pools 60 existing robot datasets from 34 labs into one format: more than 1M real robot trajectories from 22 robot types, from single arms to quadrupeds. The authors train two existing policies, RT-1-X (35M parameters) and RT-2-X (a 55B vision-language-action model), on a 12-dataset mixture from 9 manipulators, with every action coarsely mapped to a 7-DoF end-effector action. RT-1-X raises mean success on 5 small-data domains by about 50% over each dataset&#x27;s original method, and RT-2-X nearly triples success on Google Robot tasks whose skills are in the Bridge (WidowX) data but not in the Google Robot data (27.3% to 75.8%); in the two large-data domains only RT-2-X keeps up with single-robot training." width="1600" height="1200" loading="lazy"></a>
+      <figcaption>A one-page summary in sketchnote style. Download the <a href="/media/read-along-oxe-sketchnote.pdf" download>PDF</a> (page 1 the sketchnote, page 2 the listening sheet) to annotate it in Concepts or GoodNotes.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="listen">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Listen for</h2>
+      <p class="eyebrow">In class</p>
+    </div>
+    <div class="prose">
+      <p>Keep these in mind while the presenter talks. Tick them on page 2 of the PDF as they come up.</p>
+      <ol>
+        <li>What &quot;22 embodiments&quot; and &quot;60 datasets&quot; count, and which 9 robots RT-X actually trains on</li>
+        <li>What the shared action format aligns, and what it leaves unaligned</li>
+        <li>What each result is compared against: the Original Method, RT-1 on one dataset, or RT-2</li>
+        <li>Which comparisons isolate model size, and which also change the architecture or web pre-training</li>
+        <li>Which experiments use RT-1-X and which use RT-2-X</li>
+      </ol>
+      <h3>Questions worth asking</h3>
+      <ol>
+        <li>The inputs are images and an instruction only, and the coordinate frames are not aligned. What would an explicit robot input add, and how would you test it?</li>
+        <li>The emergent skills move from Bridge (WidowX) to the Google Robot. What experiment would show transfer between other pairs of robots, or to a robot outside the mix?</li>
+        <li>The paper gives no rule for when transfer helps. What would you measure on a new robot&#x27;s dataset to predict it?</li>
+      </ol>
+      <h3>In class, on an iPad</h3>
+      <ol>
+        <li><b>Before:</b> watch or listen to the read-along (the chapters are below) and skim the questions below.</li>
+        <li><b>Open</b> the sketchnote PDF in Concepts or another note app. Page 1 is the summary drawing, with room to annotate. Page 2 is the listening sheet.</li>
+        <li><b>During the talk:</b> tick each "listen for" item as it comes up, and write one line in each box of the sheet.</li>
+        <li><b>After:</b> mark the one answer below that the talk changed for you, and ask your question.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Common questions and misunderstandings</h2>
+      <p class="eyebrow">FAQ</p>
+    </div>
+    <div class="prose faq">
+      <details>
+        <summary>Was the Open X-Embodiment data collected for this paper?</summary>
+        <p>No. The authors pooled 60 existing datasets from 34 research labs and converted them into one format (RLDS). Together they hold more than 1M real robot trajectories from 22 robot types, from single arms to bimanual robots and quadrupeds. The paper also counts 21 institutions (abstract, Sec. III, Sec. VI) next to the 34 labs, and does not explain the difference. <span class="ref">(Abstract, Sec. III-A, Fig. 2)</span></p>
+      </details>
+      <details>
+        <summary>Is the data spread evenly over the 22 robots?</summary>
+        <p>No. Franka appears in the most datasets and scenes, while a few large datasets give a few robots most of the trajectories (Fig. 2). Pavel&#x27;s audit of the 60 v1.0 rows in the public dataset sheet puts the top three robots (xArm, Kuka iiwa, Google Robot) at 85.6% of the listed trajectories, or 80.5% if QT-Opt counts only the 209,880 trajectories in the Octo-base-1.5 and OpenVLA statistics. Franka has 23 of the 60 datasets but 4.0% of the listed trajectories (5.4% with that count). These shares come from the audit, not from the paper. <span class="ref">(Sec. III-B, Fig. 2; bushuyeu.com/review-oxe-empiricist)</span></p>
+      </details>
+      <details>
+        <summary>Is &quot;1M+ trajectories&quot; an exact count?</summary>
+        <p>No. The paper gives only &quot;1M+&quot;. Pavel&#x27;s audit sums the 60 v1.0 rows of the public dataset sheet to 1,403,481 trajectories, 580,392 of them from QT-Opt (Kuka). The Octo-base-1.5 and OpenVLA data statistics count only 209,880 QT-Opt trajectories, and with that count the total is 1,032,969. So &quot;1M+&quot; holds either way, but the metadata do not show why the two counts differ. <span class="ref">(Sec. III-A; bushuyeu.com/review-oxe-empiricist)</span></p>
+      </details>
+      <details>
+        <summary>Were RT-1-X and RT-2-X trained on all 22 robots?</summary>
+        <p>No. Both were trained on a mixture of 12 datasets from 9 manipulators, among them RT-1, QT-Opt, Bridge and Language Table. The paper says this was all the data at the time of the experiments; the repository grew to 22 embodiments later. So when Sec. V-A says &quot;the full X-embodiment dataset&quot;, it means this mixture. <span class="ref">(Sec. IV-C, Sec. V-A)</span></p>
+      </details>
+      <details>
+        <summary>How do RT-1-X and RT-2-X differ?</summary>
+        <p>RT-1-X is the 35M-parameter RT-1 (EfficientNet with FiLM, a USE instruction embedding, a 15-image history and a Transformer), trained on the robot mixture only and run locally. RT-2-X is RT-2-PaLI-X, a 55B vision-language-action model (5B in some ablations), co-fine-tuned on about a 1:1 mix of web vision-language data and the robot mixture, and queried on a cloud service. Both predict 8 action tokens with 256 bins each: 7 for end-effector movement and 1 for ending the episode. Neither is a new architecture: the paper uses RT-1 and RT-2 with minimal changes. <span class="ref">(Sec. IV-B, Sec. IV-C, Tables I–II)</span></p>
+      </details>
+      <details>
+        <summary>Are the robots&#x27; action spaces unified?</summary>
+        <p>Only coarsely. Each dataset&#x27;s actions are converted to a 7-DoF end-effector action (x, y, z, roll, pitch, yaw, gripper), normalized per dataset and binned, and one camera view per dataset is resized to a common resolution. Coordinate frames are not aligned, and a value can be an absolute or relative position or a velocity, so the same action vector can move two robots very differently. The paper lists only images and an instruction as inputs; no input tells the model which robot it controls. <span class="ref">(Sec. IV-A, Sec. II)</span></p>
+      </details>
+      <details>
+        <summary>Which domains count as small-data and which as large-data?</summary>
+        <p>The paper names them but gives no size threshold. Small: Kitchen Manipulation, Cable Routing, NYU Door Opening, AUTOLab UR5 and Robot Play, each tested with the robot and protocol of its own paper. Large: Bridge on the WidowX and the RT-1 data on the Google Robot. Only RT-1-X is tested on the small domains; both models are tested on the large ones. <span class="ref">(Sec. V-A, Fig. 4, Table I)</span></p>
+      </details>
+      <details>
+        <summary>What does &quot;50% higher&quot; compare?</summary>
+        <p>The mean success rate of RT-1-X over the 5 small-data domains against two baselines: each dataset&#x27;s Original Method and RT-1 trained on that dataset alone. The bar labels in Fig. 4 give means of 63% for RT-1-X, 41% for the Original Method and 44% for RT-1, so the gain is relative (about 54% and 43%) and about 20 points absolute. RT-1-X beats the Original Method on 4 of 5 domains; on AUTOLab UR5 it scores 45% against 53%. <span class="ref">(Fig. 4, Sec. V-A, Sec. VI)</span></p>
+      </details>
+      <details>
+        <summary>Does pooled data help in the large-data domains?</summary>
+        <p>Not for RT-1-X, and Table I cannot tell for RT-2-X. RT-1-X scores below RT-1 trained on the single dataset in all three settings (27% vs 40%, 27% vs 30%, 73% vs 92%), which the authors read as underfitting. RT-2-X (55B) roughly matches or beats that RT-1 (50% vs 40%, 30% vs 30%, 91% vs 92%), but the table has no RT-2 trained on one dataset, so it does not separate pooling from model size, architecture and web pre-training. The caption also says RT-1-X is worse than the Original Method, but the table gives 27% against 13% on both Bridge settings. <span class="ref">(Table I, Sec. V-A)</span></p>
+      </details>
+      <details>
+        <summary>What does the &quot;about 3×&quot; emergent-skills result compare?</summary>
+        <p>RT-2-X against RT-2, both 55B, on Google Robot tasks whose objects and skills are in the Bridge (WidowX) data but not in the Google Robot training data: 75.8% against 27.3%. Without Bridge in training, RT-2-X drops to 42.8%, which points to transfer from the WidowX data. On unseen objects, backgrounds and environments the two models are on par (RT-2 62%, RT-2-X 61%), although Sec. VI calls the result &quot;~3× generalization improvements&quot;. <span class="ref">(Sec. V-B, Table II rows (1)–(3), Sec. VI)</span></p>
+      </details>
+      <details>
+        <summary>Does Table II show that a bigger model transfers more?</summary>
+        <p>Yes, for the RT-2-X runs in the table. Rows (2) and (5) differ only in size (55B vs 5B, both with no image history): 75.8% against 14.5% on emergent skills and 61% against 30% on generalization. The paper instead compares rows (2) and (4), where size and history change together (75.8% vs 44.4%). Other single-change pairs show the effect of history (rows (4) and (5): 44.4% vs 14.5%) and of web pre-training (rows (7) and (6): 48.7% vs 0%). <span class="ref">(Sec. V-C, Table II)</span></p>
+      </details>
+      <details>
+        <summary>What did the paper not test?</summary>
+        <p>It does not test a robot outside the training mix, robots with very different sensing and actuation, or a rule for when transfer helps; Sec. VI lists these as open problems. RT-1-X is never tested out of distribution, and RT-2-X is not tested on the small-data domains. The paper reports 3,600 trials over 6 robots in total, but not the number of trials behind each success rate. <span class="ref">(Sec. V, Sec. VI)</span></p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section id="video">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Chapters</h2>
+      <p class="eyebrow">Video</p>
+    </div>
+    <ol class="chapters">
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/1R3zTXq7AWc?t=0">0:00</a><span>Abstract</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/1R3zTXq7AWc?t=93">1:33</a><span>1. Introduction</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/1R3zTXq7AWc?t=365">6:05</a><span>2. Related work</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/1R3zTXq7AWc?t=539">8:59</a><span>3. The Open X-Embodiment repository</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/1R3zTXq7AWc?t=770">12:50</a><span>4. RT-X design</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/1R3zTXq7AWc?t=1186">19:46</a><span>5. Experimental results</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/1R3zTXq7AWc?t=1744">29:04</a><span>6. Discussion, future work, and open problems</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/1R3zTXq7AWc?t=1866">31:06</a><span>Figures and tables</span></li>
+    </ol>
+  </div>
+</section>
+
+<section id="terms">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Key terms</h2>
+      <p class="eyebrow">Glossary</p>
+    </div>
+    <div class="prose">
+      <dl class="terms">
+        <dt>Embodiment</dt><dd>A robot type with its own body, sensors and actuators; OXE has 22, from single arms to quadrupeds.</dd>
+        <dt>X-embodiment training</dt><dd>Training one policy on data from several robot types at once.</dd>
+        <dt>Positive transfer</dt><dd>Data from other robots raises success on a robot above training on its own data only.</dd>
+        <dt>Original Method</dt><dd>The model each dataset&#x27;s creators trained on that dataset alone; the main baseline.</dd>
+        <dt>RLDS</dt><dd>The episode format (serialized TFRecord files) that OXE stores all 60 datasets in.</dd>
+        <dt>VLA</dt><dd>Vision-language-action model: a vision-language model fine-tuned to output robot actions as tokens.</dd>
+        <dt>Co-fine-tuning</dt><dd>Fine-tuning on robot data mixed with web vision-language data; about 1:1 for RT-2-X.</dd>
+        <dt>Action bins</dt><dd>The 7 end-effector dimensions and 1 end-of-episode dimension, each split into 256 uniform bins and predicted as a class.</dd>
+        <dt>Emergent skills</dt><dd>Here: Google Robot tasks whose objects and skills are in Bridge (WidowX) data but not in the Google Robot data.</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<section id="links">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Related</h2>
+      <p class="eyebrow">Links</p>
+    </div>
+    <div class="prose">
+      <ul>
+        <li><a rel="noopener" target="_blank" href="https://youtu.be/1R3zTXq7AWc">Read-along video on YouTube</a></li>
+        <li><a href="/review-oxe-empiricist">Robot concentration in Open X-Embodiment (empiricist review)</a></li>
+        <li><a href="/read-along-droid">DROID read-along</a></li>
+        <li><a href="/read-along-octo">Octo read-along</a></li>
+      </ul>
+      <p class="note"><b>How this page was made.</b> The video is an AI narration (Breeze TTS 2) of the full paper with the text on screen. The summary, questions and sketchnote were drafted with an AI assistant from the paper's text and checked against it; the references in brackets point to the paper. Paper license: CC BY 4.0. The sketchnote is an original drawing, not a copy of the paper's figures.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="backlink"><a href="/paper-review">← All paper reviews</a></p>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <img class="footer-portrait" src="media/portrait.jpg" alt="Portrait of Pavel Bushuyeu" width="640" height="640" loading="lazy">
+      <nav aria-label="Site">
+        <h2 class="footer-h">Site</h2>
+        <ul>
+          <li><a href="/research">Research</a></li>
+          <li><a href="/teaching">Teaching</a></li>
+          <li><a href="/product-management">Product management</a></li>
+          <li><a href="/services">Services</a></li>
+          <li><a href="/projects">Projects</a></li>
+          <li><a href="/paper-review">Paper review</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Profiles">
+        <h2 class="footer-h">Elsewhere</h2>
+        <ul>
+          <li><a rel="noopener" target="_blank" href="https://linkedin.com/in/bushuyeu/">LinkedIn</a></li>
+          <li><a rel="noopener" target="_blank" href="https://github.com/bushuyeu">GitHub</a></li>
+          <li><a rel="noopener" target="_blank" href="https://huggingface.co/bushuyeu">Hugging Face</a></li>
+          <li><a rel="noopener" target="_blank" href="https://scholar.google.com/citations?user=ub3osgUAAAAJ">Google Scholar</a></li>
+          <li><a rel="noopener" target="_blank" href="https://orcid.org/0009-0009-7183-6714">ORCID</a></li>
+          <li><a rel="noopener" target="_blank" href="https://openreview.net/profile?id=~Pavel_Bushuyeu1">OpenReview</a></li>
+          <li><a rel="noopener" target="_blank" href="https://www.semanticscholar.org/author/2405429742">Semantic Scholar</a></li>
+          <li><a rel="noopener" target="_blank" href="https://www.researchgate.net/profile/Pavel-Bushuyeu">ResearchGate</a></li>
+        </ul>
+      </nav>
+      <div>
+        <h2 class="footer-h">Contact</h2>
+        <ul>
+          <li><a href="mailto:pavelbushuyeu@gmail.com">pavelbushuyeu@gmail.com</a></li>
+          <li><a rel="noopener" target="_blank" href="https://calendar.app.google/aTs1mDgEEfqNLnNf6">Schedule a call</a></li>
+          <li><a href="https://follow.it/pavel-bushuyeu-news" rel="noopener" target="_blank">Subscribe to updates</a></li>
+          <li><a href="/feed.xml">RSS feed</a></li>
+          <li><a href="Pavel-Bushuyeu-CV.pdf" download>Download Resume</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="footer-base">© 2026 Pavel Bushuyeu</p>
+  </div>
+</footer>
+
+</body>
+</html>

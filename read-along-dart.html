@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<script>/* Theme: apply a stored Light/Dark pick before the first paint (theme.js) */(function(){var r=document.documentElement;try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark"){r.setAttribute("data-theme",t);document.querySelector('meta[name="color-scheme"]').content=t}}catch(e){}r.classList.add("theme-js")})()</script>
+<title>DART read-along — Pavel Bushuyeu</title>
+<meta name="description" content="DART (Disturbances for Augmenting Robot Trajectories) is Behavior Cloning with noise: while the supervisor demonstrates, Gaussian noise is added to the controls it executes, so it has to recover from small errors, and the robot is trained on the supervisor&#x27;s noise-free controls at the states it reached.">
+<link rel="canonical" href="https://bushuyeu.com/read-along-dart">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DART read-along — Pavel Bushuyeu">
+<meta property="og:description" content="DART (Disturbances for Augmenting Robot Trajectories) is Behavior Cloning with noise: while the supervisor demonstrates, Gaussian noise is added to the controls it executes, so it has to recover from small errors, and the robot is trained on the supervisor&#x27;s noise-free controls at the states it reached.">
+<meta property="og:url" content="https://bushuyeu.com/read-along-dart">
+<meta property="og:image" content="https://bushuyeu.com/media/og-card.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Pavel Bushuyeu, AI researcher, University of Hawaiʻi at Mānoa">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://bushuyeu.com/media/og-card.jpg">
+<link rel="icon" href="favicon-32.png?v=3" type="image/png" sizes="32x32">
+<link rel="icon" href="icon-512.png?v=3" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="alternate" type="application/rss+xml" title="Pavel Bushuyeu — News" href="https://bushuyeu.com/feed.xml">
+<link rel="stylesheet" href="style.css?v=34">
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "WebPage", "author": {"@type": "Person", "@id": "https://bushuyeu.com/#person", "name": "Pavel Bushuyeu", "url": "https://bushuyeu.com/"}}
+</script>
+<style>
+/* Page-only styles for read-along pages. Built on the tokens in style.css; the light-theme grey is darkened here so small text passes 4.5:1. */
+:root { --ink-3: #707075; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ink-3: #86868b; } }
+:root[data-theme="dark"] { --ink-3: #86868b; }
+.prose a { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.chapters { list-style: none; margin: 0; padding: 0; columns: 2 18rem; column-gap: 32px; }
+.chapters li { break-inside: avoid; padding: 5px 0; border-bottom: 1px solid var(--hair-soft); display: flex; gap: 12px; }
+.chapters a { font-variant-numeric: tabular-nums; min-width: 4.2em; }
+.sketch { margin: 0; border: 1px solid var(--hair-soft); border-radius: 12px; padding: 10px; background: #fff; }
+.sketch img { display: block; width: 100%; height: auto; }
+.sketch figcaption { margin-top: 8px; font-size: 0.86rem; line-height: 1.45; color: #5e5e63; }
+.faq details { border-top: 1px solid var(--hair-soft); padding: 12px 0; }
+.faq details:last-child { border-bottom: 1px solid var(--hair-soft); }
+.faq summary { cursor: pointer; font-weight: 600; list-style-position: outside; }
+.faq details p { margin: 8px 0 0; }
+.faq .ref { color: var(--ink-3); font-size: 0.88rem; white-space: nowrap; }
+.terms { display: grid; grid-template-columns: max-content 1fr; gap: 8px 22px; margin: 0; }
+.terms dt { font-weight: 600; }
+.terms dd { margin: 0; color: var(--ink-2); }
+@media (max-width: 640px) { .terms { grid-template-columns: 1fr; } .terms dd { margin-bottom: 8px; } }
+</style>
+<script src="faro.js" async></script>
+<script src="theme.js?v=2" defer></script>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="topbar">
+      <nav class="eyebrow eyebrow-nav" aria-label="Main">
+        <a href="/">Home</a>
+        <a href="/research">Research</a>
+        <a href="/teaching">Teaching</a>
+        <a href="/product-management">Product management</a>
+        <a href="/services">Services</a>
+      </nav>
+      <button type="button" class="theme-switch" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode">
+        <svg class="theme-switch__moon" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M13.6 9.9A5.7 5.7 0 0 1 6.1 2.4a5.8 5.8 0 1 0 7.5 7.5z"/></svg>
+        <svg class="theme-switch__sun" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1.3v1.5M8 13.2v1.5M1.3 8h1.5M13.2 8h1.5M3.3 3.3l1 1M11.7 11.7l1 1M3.3 12.7l1-1M11.7 4.3l1-1"/></svg>
+      </button>
+    </div>
+    <h1>DART read-along</h1>
+    <p class="sub">DART: Noise Injection for Robust Imitation Learning. Laskey, Lee, Fox, Dragan and Goldberg, CoRL 2017.</p>
+    <div class="meta">
+      <span>Paper: <a rel="noopener" target="_blank" href="https://arxiv.org/abs/1703.09327">DART, arXiv:1703.09327</a></span>
+      <span class="tag">read-along</span>
+      <span>Video 1:04:54</span>
+      <a class="pill-link" href="https://youtu.be/85lwMDY2mwo" rel="noopener" target="_blank" style="gap:7px" aria-label="Watch the read-along on YouTube (opens in a new tab)"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="3" width="13" height="10" rx="2.5"/><path d="M6.5 6v4l3.5-2z"/></svg>Watch on YouTube</a>
+      <a class="pill-link" href="/media/read-along-dart-sketchnote.pdf" download style="gap:7px" aria-label="Download the sketchnote and listening sheet (PDF)"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v8m0 0 3.2-3.2M8 10.5 4.8 7.3M3 13.5h10"/></svg>Sketchnote (PDF)</a>
+    </div>
+  </div>
+</header>
+
+<section id="summary">
+  <div class="wrap">
+    <div class="shead">
+      <h2>In short</h2>
+      <p class="eyebrow">Summary</p>
+    </div>
+    <div class="prose">
+      <p>DART (Disturbances for Augmenting Robot Trajectories) is Behavior Cloning with noise: while the supervisor demonstrates, Gaussian noise is added to the controls it executes, so it has to recover from small errors, and the robot is trained on the supervisor&#x27;s noise-free controls at the states it reached.</p>
+      <p>The noise covariance is fit to the current robot policy&#x27;s error and scaled to a guess of its final error, so the data shows the kind of errors the robot will make while the supervisor stays in control (off-policy).</p>
+      <p>In four MuJoCo tasks DART matches DAgger and is 3x faster in computation on Humanoid, and on a Toyota HSR task of finding a target in clutter and clearing a path to it, it reaches 79% success against Behavior Cloning&#x27;s 49%.</p>
+    </div>
+  </div>
+</section>
+
+<section id="sketchnote">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Sketchnote</h2>
+      <p class="eyebrow">One-page summary</p>
+    </div>
+    <figure class="sketch">
+      <a href="/media/read-along-dart-sketchnote.png"><img src="media/read-along-dart-sketchnote.png" alt="Hand-drawn summary of DART: DART (Disturbances for Augmenting Robot Trajectories) is Behavior Cloning with noise: while the supervisor demonstrates, Gaussian noise is added to the controls it executes, so it has to recover from small errors, and the robot is trained on the supervisor&#x27;s noise-free controls at the states it reached. The noise covariance is fit to the current robot policy&#x27;s error and scaled to a guess of its final error, so the data shows the kind of errors the robot will make while the supervisor stays in control (off-policy). In four MuJoCo tasks DART matches DAgger and is 3x faster in computation on Humanoid, and on a Toyota HSR task of finding a target in clutter and clearing a path to it, it reaches 79% success against Behavior Cloning&#x27;s 49%." width="1600" height="1200" loading="lazy"></a>
+      <figcaption>A one-page summary in sketchnote style. Download the <a href="/media/read-along-dart-sketchnote.pdf" download>PDF</a> (page 1 the sketchnote, page 2 the listening sheet) to annotate it in Concepts or GoodNotes.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="listen">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Listen for</h2>
+      <p class="eyebrow">In class</p>
+    </div>
+    <div class="prose">
+      <p>Keep these in mind while the presenter talks. Tick them on page 2 of the PDF as they come up.</p>
+      <ol>
+        <li>Where the noise goes (the control the supervisor executes) and what the label is (the supervisor&#x27;s clean control)</li>
+        <li>Who is in control while data is collected, and why that keeps DART off-policy</li>
+        <li>How the noise covariance is fit to the learner&#x27;s error, and what the α term does</li>
+        <li>What Lemma 4.1 and Proposition 4.1 assume, and what the proof actually compares</li>
+        <li>Which results use an algorithmic TRPO supervisor in simulation, and which use human supervisors on a real robot</li>
+      </ol>
+      <h3>Questions worth asking</h3>
+      <ol>
+        <li>Proposition 4.1 assumes the supervisor acts the same under noise, and α = 6 did worse than α = 3 with humans. How would you measure how much noise a human teleoperator can absorb?</li>
+        <li>DART fits one state-independent Gaussian to the learner&#x27;s error. Where would a real robot&#x27;s errors depend on the state, such as near contact, and how would you inject noise there?</li>
+        <li>With a pretrained policy and some supervisor-labeled states, the learner&#x27;s error could be estimated before any new demonstrations. Would that estimate predict the final policy&#x27;s error on its own states well enough to skip DART&#x27;s iterations?</li>
+      </ol>
+      <h3>In class, on an iPad</h3>
+      <ol>
+        <li><b>Before:</b> watch or listen to the read-along (the chapters are below) and skim the questions below.</li>
+        <li><b>Open</b> the sketchnote PDF in Concepts or another note app. Page 1 is the summary drawing, with room to annotate. Page 2 is the listening sheet.</li>
+        <li><b>During the talk:</b> tick each "listen for" item as it comes up, and write one line in each box of the sheet.</li>
+        <li><b>After:</b> mark the one answer below that the talk changed for you, and ask your question.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Common questions and misunderstandings</h2>
+      <p class="eyebrow">FAQ</p>
+    </div>
+    <div class="prose faq">
+      <details>
+        <summary>Are the training labels noisy?</summary>
+        <p>No. The noise changes which states the supervisor visits, not the targets. Eq. 2 trains on J(θ, θ* | ξ), which compares the robot&#x27;s control with the supervisor&#x27;s control π_θ*(x_t) at each visited state, not with the noisy control that was executed. The paper states this through the equation, not in words. <span class="ref">(Sec. 3, Sec. 4, Eq. 2)</span></p>
+      </details>
+      <details>
+        <summary>Who controls the robot while DART collects data?</summary>
+        <p>The supervisor, with noise added to its controls. The robot&#x27;s own policy is never executed during collection; it is used only to estimate how much noise to inject. That is why DART is off-policy, while DAgger is on-policy: DAgger rolls out the robot&#x27;s policy and asks for labels at the states the robot visits. In the experiments, DAgger mixed the robot&#x27;s policy with the supervisor&#x27;s (β = 0.5). <span class="ref">(Sec. 1, Sec. 4, Fig. 1, Appendix 4.3)</span></p>
+      </details>
+      <details>
+        <summary>How does DART choose the noise?</summary>
+        <p>From the learner&#x27;s current error. After each round it trains a policy, compares that policy&#x27;s controls with the supervisor&#x27;s on states from the noisy supervisor&#x27;s demonstrations, and averages the outer products of the differences, without subtracting their mean, to fit zero-mean noise (the closed form of Eq. 3). Eq. 4 then rescales this covariance so that the squared deviation the noise causes over a demonstration, T·tr(Σ), equals α. In MuJoCo the covariance was estimated on held-out demonstrations from earlier iterations. <span class="ref">(Sec. 4.1, Eq. 3–4, Algorithm 1, Appendix 4.3)</span></p>
+      </details>
+      <details>
+        <summary>What is α, and what do α = 3 and α = 6 mean?</summary>
+        <p>α is a guess of the final robot&#x27;s error, the target for T·tr(Σ). In MuJoCo the authors set α = T·tr(Σ̂_k), which adds no prior knowledge: the noise is just the learner&#x27;s current error. On the HSR, α = 3 means three times the error measured after the first 10 demonstrations, T·tr(Σ̂_1), because with few demonstrations in image space the authors expected the robot&#x27;s error on its own states to be much larger. The text prints both HSR choices as 3T·tr(Σ̂_1); the shorthand α = 6 shows the second is meant to be 6T·tr(Σ̂_1). <span class="ref">(Sec. 4.1, Sec. 5.2, Appendix 4.3)</span></p>
+      </details>
+      <details>
+        <summary>What does the bound in Lemma 4.1 say, and what does it need?</summary>
+        <p>It bounds the covariate shift: the gap between the robot&#x27;s loss on the noisy supervisor&#x27;s trajectories and its loss on its own trajectories is at most T·√(½·KL), where KL is the divergence between the robot&#x27;s and the noisy supervisor&#x27;s trajectory distributions. It needs a surrogate loss between 0 and 1, for example discrete actions or bounded, normalized controls. The proof uses total variation and Pinsker&#x27;s inequality. Minimizing this KL over the noise reduces to making the robot&#x27;s controls likely under the noisy supervisor, which DART approximates round by round (Eq. 3). <span class="ref">(Sec. 4, Lemma 4.1, Appendix 8.1)</span></p>
+      </details>
+      <details>
+        <summary>Does Proposition 4.1 show that DART&#x27;s tuned noise level is the best one?</summary>
+        <p>No. It shows only that, when the robot makes any error, the KL divergence in the bound is smaller with Gaussian noise than without it. The proof is short: with a deterministic supervisor and no noise the divergence is infinite, and Gaussian noise that gives every control a non-zero probability (a full-rank Σ) makes it finite. The argument needs only that support, so it says nothing about which noise level is best, and it assumes the noise does not change how the supervisor behaves. <span class="ref">(Sec. 4.2, Proposition 4.1, Appendix 8.1)</span></p>
+      </details>
+      <details>
+        <summary>When does noise injection not help?</summary>
+        <p>When the robot can represent the supervisor perfectly and has enough data. Then its error is zero, there is no error to simulate, and the condition of Proposition 4.1 (error greater than 0) fails. The paper argues that in practice there is rarely enough data to represent the supervisor perfectly, and notes a similar result for when DAgger beats Behavior Cloning (Laskey et al. 2016). <span class="ref">(Sec. 4.2)</span></p>
+      </details>
+      <details>
+        <summary>Does DART beat Behavior Cloning in every MuJoCo task?</summary>
+        <p>No. DART matches DAgger in all four tasks, but the paper says Behavior Cloning and DAgger-B fall below that level in Walker and Humanoid, and names no gap in Hopper or Half-Cheetah. The supervisor is a TRPO policy (two hidden layers of 64 units), and each demonstration is cut to 50 sampled state–control pairs to make imitation harder. <span class="ref">(Sec. 5.1, Fig. 2)</span></p>
+      </details>
+      <details>
+        <summary>Where do &quot;3x faster&quot; and &quot;5% vs 80%&quot; come from?</summary>
+        <p>From Humanoid, the largest task (376-dimensional state, 17-dimensional control). DART needed 3x less computation time than DAgger, because there DART first collects 50 supervisor demonstrations and then retrains every 25 iterations, while DAgger retrains after every demonstration. While collecting data, DART&#x27;s noisy supervisor earned 5% less reward than the clean supervisor, but the policies DAgger executed earned over 80% less. The abstract&#x27;s &quot;up to 3x&quot; refers to this task. <span class="ref">(Abstract, Sec. 5.1, Fig. 2, Appendix 4.3)</span></p>
+      </details>
+      <details>
+        <summary>What do 79% and 49% mean, and where does 62% come from?</summary>
+        <p>They are HSR task-success rates: DART with α = 3 reached 79% and Behavior Cloning 49%, where success means the robot found the goal object and cleared a path to it (then a human, blind to which policy ran, triggered an open-loop grasp). The abstract&#x27;s 62% is a relative increase, not 62 points: the rounded rates give about 61% (1.6 times), or 30 points, and the paper does not show its calculation. Each policy was tested 20 times from sampled initial states, and the paper reports the results as averages for its four supervisors; 79, 49 and 72 are not multiples of 5, so they are not one set of 20 trials. <span class="ref">(Abstract, Sec. 1, Sec. 5.2, Fig. 3, Appendix 4.5)</span></p>
+      </details>
+      <details>
+        <summary>Why did α = 6 do worse than α = 3 on the real robot?</summary>
+        <p>The paper does not test why. The authors suggest this much noise may have been too high for the human supervisors. If it changed how they demonstrated, Proposition 4.1&#x27;s assumption that the noise does not change the supervisor would fail, but the experiment does not show that. Only two values of α were tried: each supervisor gave 10 noise-free demonstrations, then 30 more with each method, and each final policy was trained on 40. <span class="ref">(Sec. 4.2, Sec. 5.2)</span></p>
+      </details>
+      <details>
+        <summary>Does the direction of the noise matter, or only its size?</summary>
+        <p>In MuJoCo, the size seems to matter most. Random covariance matrices (Wishart samples) scaled to a well-chosen trace, 0.5, matched DART&#x27;s losses, while traces of 0.005 and 5.0 (10.0 for Humanoid) could give much higher losses. Isotropic noise with Σ = I did poorly and led to unsafe policies. The paper&#x27;s point is that the right size is not known before training, and DART estimates it from the learner. <span class="ref">(Sec. 5.1, Appendix 4.3, Appendix 4.4, Fig. 5)</span></p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section id="video">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Chapters</h2>
+      <p class="eyebrow">Video</p>
+    </div>
+    <ol class="chapters">
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/85lwMDY2mwo?t=0">0:00</a><span>Abstract</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/85lwMDY2mwo?t=121">2:01</a><span>1. Introduction</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/85lwMDY2mwo?t=434">7:14</a><span>2. Related Work</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/85lwMDY2mwo?t=628">10:28</a><span>3. Problem Statement</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/85lwMDY2mwo?t=1083">18:03</a><span>4. Off-Policy Imitation Learning with Noise Injection</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/85lwMDY2mwo?t=1925">32:05</a><span>5. Experiments</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/85lwMDY2mwo?t=2491">41:31</a><span>6. Conclusion</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/85lwMDY2mwo?t=2530">42:10</a><span>Appendix</span></li>
+    </ol>
+  </div>
+</section>
+
+<section id="terms">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Key terms</h2>
+      <p class="eyebrow">Glossary</p>
+    </div>
+    <div class="prose">
+      <dl class="terms">
+        <dt>Behavior Cloning</dt><dd>Supervised regression from states to the supervisor&#x27;s controls, on noise-free demonstrations.</dd>
+        <dt>Covariate shift</dt><dd>The robot&#x27;s own states differ from the training states, so its errors compound.</dd>
+        <dt>Off-policy / on-policy</dt><dd>Training data comes from the supervisor&#x27;s trajectories / from the robot&#x27;s current policy.</dd>
+        <dt>DAgger</dt><dd>On-policy method: the robot rolls out, the supervisor labels visited states, retrain on all data.</dd>
+        <dt>Surrogate loss</dt><dd>A loss between two controls, here squared L2; J sums it over a trajectory.</dd>
+        <dt>Noise covariance Σ</dt><dd>Covariance of the Gaussian added to the supervisor&#x27;s control; T·tr(Σ) is the expected squared error it causes per demonstration.</dd>
+        <dt>α</dt><dd>A guess of the final robot&#x27;s error; DART scales Σ so that T·tr(Σ) = α.</dd>
+        <dt>Algorithmic supervisor</dt><dd>A trained policy used as the expert; in MuJoCo, the deterministic mean of a TRPO policy.</dd>
+        <dt>Pinsker&#x27;s inequality</dt><dd>Bounds total variation by √(½·KL); it turns Lemma 4.1 into a KL bound.</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<section id="links">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Related</h2>
+      <p class="eyebrow">Links</p>
+    </div>
+    <div class="prose">
+      <ul>
+        <li><a rel="noopener" target="_blank" href="https://youtu.be/85lwMDY2mwo">Read-along video on YouTube</a></li>
+        <li><a href="/read-along-dagger">DAgger read-along</a></li>
+      </ul>
+      <p class="note"><b>How this page was made.</b> The video is an AI narration (Breeze TTS 2) of the full paper with the text on screen. The summary, questions and sketchnote were drafted with an AI assistant from the paper's text and checked against it; the references in brackets point to the paper. Paper license: arXiv default license. The sketchnote is an original drawing, not a copy of the paper's figures.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="backlink"><a href="/paper-review">← All paper reviews</a></p>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <img class="footer-portrait" src="media/portrait.jpg" alt="Portrait of Pavel Bushuyeu" width="640" height="640" loading="lazy">
+      <nav aria-label="Site">
+        <h2 class="footer-h">Site</h2>
+        <ul>
+          <li><a href="/research">Research</a></li>
+          <li><a href="/teaching">Teaching</a></li>
+          <li><a href="/product-management">Product management</a></li>
+          <li><a href="/services">Services</a></li>
+          <li><a href="/projects">Projects</a></li>
+          <li><a href="/paper-review">Paper review</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Profiles">
+        <h2 class="footer-h">Elsewhere</h2>
+        <ul>
+          <li><a rel="noopener" target="_blank" href="https://linkedin.com/in/bushuyeu/">LinkedIn</a></li>
+          <li><a rel="noopener" target="_blank" href="https://github.com/bushuyeu">GitHub</a></li>
+          <li><a rel="noopener" target="_blank" href="https://huggingface.co/bushuyeu">Hugging Face</a></li>
+          <li><a rel="noopener" target="_blank" href="https://scholar.google.com/citations?user=ub3osgUAAAAJ">Google Scholar</a></li>
+          <li><a rel="noopener" target="_blank" href="https://orcid.org/0009-0009-7183-6714">ORCID</a></li>
+          <li><a rel="noopener" target="_blank" href="https://openreview.net/profile?id=~Pavel_Bushuyeu1">OpenReview</a></li>
+          <li><a rel="noopener" target="_blank" href="https://www.semanticscholar.org/author/2405429742">Semantic Scholar</a></li>
+          <li><a rel="noopener" target="_blank" href="https://www.researchgate.net/profile/Pavel-Bushuyeu">ResearchGate</a></li>
+        </ul>
+      </nav>
+      <div>
+        <h2 class="footer-h">Contact</h2>
+        <ul>
+          <li><a href="mailto:pavelbushuyeu@gmail.com">pavelbushuyeu@gmail.com</a></li>
+          <li><a rel="noopener" target="_blank" href="https://calendar.app.google/aTs1mDgEEfqNLnNf6">Schedule a call</a></li>
+          <li><a href="https://follow.it/pavel-bushuyeu-news" rel="noopener" target="_blank">Subscribe to updates</a></li>
+          <li><a href="/feed.xml">RSS feed</a></li>
+          <li><a href="Pavel-Bushuyeu-CV.pdf" download>Download Resume</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="footer-base">© 2026 Pavel Bushuyeu</p>
+  </div>
+</footer>
+
+</body>
+</html>

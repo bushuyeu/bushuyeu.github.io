@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<script>/* Theme: apply a stored Light/Dark pick before the first paint (theme.js) */(function(){var r=document.documentElement;try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark"){r.setAttribute("data-theme",t);document.querySelector('meta[name="color-scheme"]').content=t}}catch(e){}r.classList.add("theme-js")})()</script>
+<title>DAgger read-along — Pavel Bushuyeu</title>
+<meta name="description" content="DAgger (Dataset Aggregation) learns from an expert in rounds: run the current policy, let the expert label the states it visits, add them to one growing dataset, and retrain on all of it.">
+<link rel="canonical" href="https://bushuyeu.com/read-along-dagger">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DAgger read-along — Pavel Bushuyeu">
+<meta property="og:description" content="DAgger (Dataset Aggregation) learns from an expert in rounds: run the current policy, let the expert label the states it visits, add them to one growing dataset, and retrain on all of it.">
+<meta property="og:url" content="https://bushuyeu.com/read-along-dagger">
+<meta property="og:image" content="https://bushuyeu.com/media/og-card.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Pavel Bushuyeu, AI researcher, University of Hawaiʻi at Mānoa">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://bushuyeu.com/media/og-card.jpg">
+<link rel="icon" href="favicon-32.png?v=3" type="image/png" sizes="32x32">
+<link rel="icon" href="icon-512.png?v=3" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="alternate" type="application/rss+xml" title="Pavel Bushuyeu — News" href="https://bushuyeu.com/feed.xml">
+<link rel="stylesheet" href="style.css?v=34">
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "WebPage", "author": {"@type": "Person", "@id": "https://bushuyeu.com/#person", "name": "Pavel Bushuyeu", "url": "https://bushuyeu.com/"}}
+</script>
+<style>
+/* Page-only styles for read-along pages. Built on the tokens in style.css; the light-theme grey is darkened here so small text passes 4.5:1. */
+:root { --ink-3: #707075; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ink-3: #86868b; } }
+:root[data-theme="dark"] { --ink-3: #86868b; }
+.prose a { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.chapters { list-style: none; margin: 0; padding: 0; columns: 2 18rem; column-gap: 32px; }
+.chapters li { break-inside: avoid; padding: 5px 0; border-bottom: 1px solid var(--hair-soft); display: flex; gap: 12px; }
+.chapters a { font-variant-numeric: tabular-nums; min-width: 4.2em; }
+.sketch { margin: 0; border: 1px solid var(--hair-soft); border-radius: 12px; padding: 10px; background: #fff; }
+.sketch img { display: block; width: 100%; height: auto; }
+.sketch figcaption { margin-top: 8px; font-size: 0.86rem; line-height: 1.45; color: #5e5e63; }
+.faq details { border-top: 1px solid var(--hair-soft); padding: 12px 0; }
+.faq details:last-child { border-bottom: 1px solid var(--hair-soft); }
+.faq summary { cursor: pointer; font-weight: 600; list-style-position: outside; }
+.faq details p { margin: 8px 0 0; }
+.faq .ref { color: var(--ink-3); font-size: 0.88rem; white-space: nowrap; }
+.terms { display: grid; grid-template-columns: max-content 1fr; gap: 8px 22px; margin: 0; }
+.terms dt { font-weight: 600; }
+.terms dd { margin: 0; color: var(--ink-2); }
+@media (max-width: 640px) { .terms { grid-template-columns: 1fr; } .terms dd { margin-bottom: 8px; } }
+</style>
+<script src="faro.js" async></script>
+<script src="theme.js?v=2" defer></script>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="topbar">
+      <nav class="eyebrow eyebrow-nav" aria-label="Main">
+        <a href="/">Home</a>
+        <a href="/research">Research</a>
+        <a href="/teaching">Teaching</a>
+        <a href="/product-management">Product management</a>
+        <a href="/services">Services</a>
+      </nav>
+      <button type="button" class="theme-switch" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode">
+        <svg class="theme-switch__moon" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M13.6 9.9A5.7 5.7 0 0 1 6.1 2.4a5.8 5.8 0 1 0 7.5 7.5z"/></svg>
+        <svg class="theme-switch__sun" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1.3v1.5M8 13.2v1.5M1.3 8h1.5M13.2 8h1.5M3.3 3.3l1 1M11.7 11.7l1 1M3.3 12.7l1-1M11.7 4.3l1-1"/></svg>
+      </button>
+    </div>
+    <h1>DAgger read-along</h1>
+    <p class="sub">A Reduction of Imitation Learning and Structured Prediction to No-Regret Online Learning. Ross, Gordon and Bagnell, AISTATS 2011.</p>
+    <div class="meta">
+      <span>Paper: <a rel="noopener" target="_blank" href="https://arxiv.org/abs/1011.0686">DAgger, arXiv:1011.0686</a></span>
+      <span class="tag">read-along</span>
+      <span>Video 1:02:08</span>
+      <a class="pill-link" href="https://youtu.be/E6kYDirLPUg" rel="noopener" target="_blank" style="gap:7px" aria-label="Watch the read-along on YouTube (opens in a new tab)"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="3" width="13" height="10" rx="2.5"/><path d="M6.5 6v4l3.5-2z"/></svg>Watch on YouTube</a>
+      <a class="pill-link" href="/media/read-along-dagger-sketchnote.pdf" download style="gap:7px" aria-label="Download the sketchnote and listening sheet (PDF)"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v8m0 0 3.2-3.2M8 10.5 4.8 7.3M3 13.5h10"/></svg>Sketchnote (PDF)</a>
+    </div>
+  </div>
+</header>
+
+<section id="summary">
+  <div class="wrap">
+    <div class="shead">
+      <h2>In short</h2>
+      <p class="eyebrow">Summary</p>
+    </div>
+    <div class="prose">
+      <p>DAgger (Dataset Aggregation) learns from an expert in rounds: run the current policy, let the expert label the states it visits, add them to one growing dataset, and retrain on all of it.</p>
+      <p>Analysed as no-regret online learning, this finds a stationary, deterministic policy whose extra cost over the expert is at most uTε_N + O(1) (Theorem 3.2), where ε_N is the best single policy&#x27;s loss on the states the training runs visited. This is linear in the horizon T when u, the extra cost of one mistake, is O(1); behavior cloning&#x27;s bound is T²ε, with ε measured on the expert&#x27;s states.</p>
+      <p>In Super Tux Kart, Super Mario Bros. and handwriting recognition it beats behavior cloning and SMILe, with a Kart policy that never falls off the track after 15 iterations and 85.5% character accuracy against 83.6%.</p>
+    </div>
+  </div>
+</section>
+
+<section id="sketchnote">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Sketchnote</h2>
+      <p class="eyebrow">One-page summary</p>
+    </div>
+    <figure class="sketch">
+      <a href="/media/read-along-dagger-sketchnote.png"><img src="media/read-along-dagger-sketchnote.png" alt="Hand-drawn summary of DAgger: DAgger (Dataset Aggregation) learns from an expert in rounds: run the current policy, let the expert label the states it visits, add them to one growing dataset, and retrain on all of it. Analysed as no-regret online learning, this finds a stationary, deterministic policy whose extra cost over the expert is at most uTε_N + O(1) (Theorem 3.2), where ε_N is the best single policy&#x27;s loss on the states the training runs visited. This is linear in the horizon T when u, the extra cost of one mistake, is O(1); behavior cloning&#x27;s bound is T²ε, with ε measured on the expert&#x27;s states. In Super Tux Kart, Super Mario Bros. and handwriting recognition it beats behavior cloning and SMILe, with a Kart policy that never falls off the track after 15 iterations and 85.5% character accuracy against 83.6%." width="1600" height="1200" loading="lazy"></a>
+      <figcaption>A one-page summary in sketchnote style. Download the <a href="/media/read-along-dagger-sketchnote.pdf" download>PDF</a> (page 1 the sketchnote, page 2 the listening sheet) to annotate it in Concepts or GoodNotes.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="listen">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Listen for</h2>
+      <p class="eyebrow">In class</p>
+    </div>
+    <div class="prose">
+      <p>Keep these in mind while the presenter talks. Tick them on page 2 of the PDF as they come up.</p>
+      <ol>
+        <li>Where each ε is measured: on the expert&#x27;s states or on the learner&#x27;s</li>
+        <li>What u measures, and when the linear bound turns quadratic again</li>
+        <li>What the expert does after the first round: act, or only label</li>
+        <li>What β controls, and which setting wins in the experiments</li>
+        <li>Which policy the theorems cover: the last, the best or a random one</li>
+      </ol>
+      <h3>Questions worth asking</h3>
+      <ol>
+        <li>DAgger&#x27;s expert must label states it would never visit itself. When is that hard for a human teleoperator, and what does a wrong label there cost?</li>
+        <li>Each round runs the current, possibly bad, policy on the system. How would you run DAgger safely on a physical robot, and is β the right safety knob?</li>
+        <li>The guarantee needs a no-regret learner, such as Follow-The-Leader on a strongly convex loss, and the experiments use linear learners. What survives for a large neural policy trained with SGD?</li>
+      </ol>
+      <h3>In class, on an iPad</h3>
+      <ol>
+        <li><b>Before:</b> watch or listen to the read-along (the chapters are below) and skim the questions below.</li>
+        <li><b>Open</b> the sketchnote PDF in Concepts or another note app. Page 1 is the summary drawing, with room to annotate. Page 2 is the listening sheet.</li>
+        <li><b>During the talk:</b> tick each "listen for" item as it comes up, and write one line in each box of the sheet.</li>
+        <li><b>After:</b> mark the one answer below that the talk changed for you, and ask your question.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Common questions and misunderstandings</h2>
+      <p class="eyebrow">FAQ</p>
+    </div>
+    <div class="prose faq">
+      <details>
+        <summary>Is T²ε just a loose bound for behavior cloning?</summary>
+        <p>No, it is tight. Theorem 2.1 bounds the extra cost of a policy trained only on the expert&#x27;s states by T²ε, and the paper cites problems where the extra cost really grows as T²ε, such as Ross and Bagnell&#x27;s example with J(π̂_sup) = (1 − εT)J(π*) + T²ε. The cause is compounding: after a mistake, the learner may reach states that the expert&#x27;s data does not cover, and its errors add up. <span class="ref">(Sec. 1, Sec. 2.1, Theorem 2.1)</span></p>
+      </details>
+      <details>
+        <summary>Does DAgger always turn T² into T?</summary>
+        <p>No. For a general task cost C in [0, 1], with ℓ an upper bound on the 0-1 loss and the other assumptions of Theorem 3.2, some learned policy satisfies J(π̂) ≤ J(π*) + uTε_N + O(1), where u bounds how much one wrong action, followed by the expert, can add to the cost-to-go. u ≤ 1 when the cost is disagreement with the expert, and u = O(1) when the expert gets back on track within a few steps. In the worst case u is O(T), and the bound is no better than behavior cloning&#x27;s. <span class="ref">(Sec. 2.2, Theorems 2.2 and 3.2)</span></p>
+      </details>
+      <details>
+        <summary>Is DAgger&#x27;s ε the same ε as in the T²ε bound?</summary>
+        <p>No. In T²ε (Theorem 2.1), ε is the policy&#x27;s loss on the expert&#x27;s state distribution. In DAgger&#x27;s bounds, ε_N is the loss of the best single policy in hindsight on the states that the training policies visited, which include states the expert never reaches. The paper links the two with an assumption: for any input distribution, some policy in the class reaches loss ε. <span class="ref">(Sec. 2.1, Sec. 3, Sec. 4.2)</span></p>
+      </details>
+      <details>
+        <summary>Does the expert have to drive the system?</summary>
+        <p>Only in the first round of the simplest version. With β_i = I(i = 1), the expert&#x27;s actions run the system in iteration 1 only; after that the learned policy acts, and the expert labels each visited state with the action it would take. So the expert must be able to label states it would never reach itself: in the paper, a human who gives the correct steering for Super Tux Kart images, and a planner with full game state in Mario. <span class="ref">(Sec. 3, Algorithm 3.1, Sec. 5.1–5.2)</span></p>
+      </details>
+      <details>
+        <summary>What does β do, and do you need it?</summary>
+        <p>β_i is the probability that the expert, not the learner, picks the control while data is collected in iteration i, and it is optional. For convergence in the limit, the theory needs only the average of the β_i to go to 0; the iteration counts of Theorems 3.1–3.4 assume the stronger β_i ≤ (1 − α)^(i−1). The analysis pays for β through the gap between the state distributions of the mixed and the learned policy (at most 2Tβ_i, Lemma 4.1). In practice the parameter-free β_i = I(i = 1) often works best; in Mario, β_i = 0.5^(i−1) did slightly better (3030 against 2980 distance per stage) and 0.9^(i−1) converged much more slowly. <span class="ref">(Sec. 3, Lemma 4.1, Theorem 4.1, Sec. 5.2)</span></p>
+      </details>
+      <details>
+        <summary>Which policy do the guarantees cover?</summary>
+        <p>Not necessarily the last one. Each theorem says that some learned policy among π̂_1 ... π̂_N does well under its own state distribution, for example the best of them. Footnote 3 adds that the same guarantee holds, on average, for a policy that picks one of them uniformly at random and runs it for T steps; a single draw can still be a bad policy. Algorithm 3.1 returns the best policy on validation data. <span class="ref">(Theorem 3.1, footnote 3, Algorithm 3.1)</span></p>
+      </details>
+      <details>
+        <summary>How many iterations does DAgger need?</summary>
+        <p>In theory, with a bounded, strongly convex loss and β_i ≤ (1 − α)^(i−1) for a constant α independent of T, infinite data per iteration needs N = Õ(T) for the surrogate-loss bound (Theorem 3.1) and Õ(uT) for the task-cost bound (Theorem 3.2). With a constant number of sampled trajectories per iteration, the two bounds need N = O(T² log(1/δ)) and O(u²T² log(1/δ)), with probability at least 1 − δ (Theorems 3.3–3.4); the paper says a sharper analysis may bring the first down to Õ(T log(1/δ)), but does not prove it. The experiments all run 20 iterations, and in Super Tux Kart DAgger almost never falls after 5 and never falls after 15. <span class="ref">(Sec. 3, Theorems 3.1–3.4, Sec. 5)</span></p>
+      </details>
+      <details>
+        <summary>What does &quot;no-regret&quot; add, and what is reduced to what?</summary>
+        <p>An online learner is no-regret if its average loss over the iterations approaches that of the best fixed policy in hindsight (Eq. 3). Retraining on the aggregated data is Follow-The-Leader, which is no-regret for strongly convex losses, and the analysis uses only that property. So imitation learning reduces to no-regret online learning: give any no-regret algorithm the loss on the states visited by each iteration&#x27;s policy, and Theorem 4.1 bounds the loss by ε_N plus its average regret γ_N and a penalty for β, so the iterations needed depend on how fast γ_N falls. The paper notes this needs more than the classification-only reductions behind SEARN and SMILe: a no-regret method or a strongly convex loss. <span class="ref">(Sec. 3, Sec. 4.1–4.2)</span></p>
+      </details>
+      <details>
+        <summary>How is DAgger different from forward training, SMILe and SEARN?</summary>
+        <p>DAgger trains each new policy on all the data collected so far, then returns one stationary, deterministic policy picked on validation data. Forward training learns a separate policy for each of the T time steps over T iterations, which is impractical when T is large or undefined; SMILe and SEARN return a stochastic mixture that adds one policy per iteration, and the cited SMILe result gets near-linear regret on some problem classes with α in O(1/T²) and N in O(T² log T) iterations. In Super Tux Kart, SMILe still fell off about twice per lap after 20 iterations, partly because its stochastic policy sometimes picks bad actions; in Mario, DAgger beat SEARN for every α tried. <span class="ref">(Sec. 1, Sec. 2.2–2.3, Sec. 5.1–5.2)</span></p>
+      </details>
+      <details>
+        <summary>Is the gain just from collecting more data?</summary>
+        <p>No. The supervised baseline also gets more data, all from the expert&#x27;s own trajectories, and its performance does not improve in Super Tux Kart and stagnates in Mario. The paper&#x27;s reason: the expert&#x27;s laps are alike and never show how to recover, and in Mario the expert jumps early, so the cloned policy never learns to get unstuck next to an obstacle. DAgger and the other iterative methods add data from the states their own policies reach, including those stuck positions. <span class="ref">(Sec. 5.1–5.2, Figs. 2 and 4)</span></p>
+      </details>
+      <details>
+        <summary>Why is handwriting recognition in an imitation learning paper?</summary>
+        <p>Following SEARN (Daumé III et al.), the paper treats structured prediction as imitation learning with trivial dynamics: letters are predicted left to right, and the previous predicted letter is an input to the next prediction. Training with the true previous letter is the supervised approach (83.6% character accuracy, against 82% with no structure); DAgger trains on its own previous predictions and reaches 85.5%. SEARN with α = 0.8 or α = 1 does about as well as DAgger here; the paper notes that only the previous-letter feature depends on the policy, so pure policy iteration stays stable on this task. <span class="ref">(Sec. 5.3, Fig. 5)</span></p>
+      </details>
+      <details>
+        <summary>What do the experiments not show?</summary>
+        <p>They do not test a physical robot or a large model. All learners are linear (ridge regression in Kart, linear SVMs in Mario and handwriting) on simple features: downsampled pixels, hand-coded grid cells and binary pixels. Kart uses one track (Star Track) and Mario only difficulty-1 stages. Most comparisons are curves; the text gives only a few numbers: SMILe&#x27;s about 2 falls per lap, 2980 and 3030 in Mario, and 82%, 83.6% and 85.5% in handwriting. <span class="ref">(Sec. 5, Figs. 2, 4 and 5)</span></p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section id="video">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Chapters</h2>
+      <p class="eyebrow">Video</p>
+    </div>
+    <ol class="chapters">
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/E6kYDirLPUg?t=0">0:00</a><span>Abstract</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/E6kYDirLPUg?t=75">1:15</a><span>1. Introduction</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/E6kYDirLPUg?t=362">6:02</a><span>2. Preliminaries</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/E6kYDirLPUg?t=1220">20:20</a><span>3. Dataset Aggregation</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/E6kYDirLPUg?t=1751">29:11</a><span>4. Theoretical Analysis</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/E6kYDirLPUg?t=2779">46:19</a><span>5. Experiments</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/E6kYDirLPUg?t=3673">1:01:13</a><span>6. Future Work</span></li>
+    </ol>
+  </div>
+</section>
+
+<section id="terms">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Key terms</h2>
+      <p class="eyebrow">Glossary</p>
+    </div>
+    <div class="prose">
+      <dl class="terms">
+        <dt>Supervised approach</dt><dd>Behavior cloning: train only on the expert&#x27;s own trajectories; the baseline with the T²ε bound.</dd>
+        <dt>Induced state distribution</dt><dd>The states a policy visits when it runs, averaged over T steps (d_π); mistakes can shift it away from the expert&#x27;s.</dd>
+        <dt>Surrogate loss ℓ</dt><dd>The imitation loss trained on (0-1, squared or hinge against the expert&#x27;s action), in place of the task cost C.</dd>
+        <dt>Reduction</dt><dd>Solving a hard problem with an ordinary learner as a subroutine, so that its guarantee carries over.</dd>
+        <dt>No-regret learner</dt><dd>An online learner whose average loss approaches that of the best fixed policy in hindsight.</dd>
+        <dt>Follow-The-Leader</dt><dd>Pick the policy that is best on all data seen so far; what retraining on the aggregate does.</dd>
+        <dt>β_i</dt><dd>The probability that the expert, not the learner, picks the action while data is collected in round i.</dd>
+        <dt>u</dt><dd>Bound on the extra cost-to-go of one wrong action followed by the expert; O(1) if the expert recovers fast.</dd>
+        <dt>Stationary, deterministic</dt><dd>One fixed state-to-action map for every time step, with no randomness; unlike forward training or SMILe.</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<section id="links">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Related</h2>
+      <p class="eyebrow">Links</p>
+    </div>
+    <div class="prose">
+      <ul>
+        <li><a rel="noopener" target="_blank" href="https://youtu.be/E6kYDirLPUg">Read-along video on YouTube</a></li>
+        <li><a href="/review-dagger-visionary">Teacher recoverability in DAgger for VLAs (visionary review)</a></li>
+        <li><a href="/read-along-dart">DART read-along</a></li>
+      </ul>
+      <p class="note"><b>How this page was made.</b> The video is an AI narration (Breeze TTS 2) of the full paper with the text on screen. The summary, questions and sketchnote were drafted with an AI assistant from the paper's text and checked against it; the references in brackets point to the paper. Paper license: arXiv default license. The sketchnote is an original drawing, not a copy of the paper's figures.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="backlink"><a href="/paper-review">← All paper reviews</a></p>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <img class="footer-portrait" src="media/portrait.jpg" alt="Portrait of Pavel Bushuyeu" width="640" height="640" loading="lazy">
+      <nav aria-label="Site">
+        <h2 class="footer-h">Site</h2>
+        <ul>
+          <li><a href="/research">Research</a></li>
+          <li><a href="/teaching">Teaching</a></li>
+          <li><a href="/product-management">Product management</a></li>
+          <li><a href="/services">Services</a></li>
+          <li><a href="/projects">Projects</a></li>
+          <li><a href="/paper-review">Paper review</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Profiles">
+        <h2 class="footer-h">Elsewhere</h2>
+        <ul>
+          <li><a rel="noopener" target="_blank" href="https://linkedin.com/in/bushuyeu/">LinkedIn</a></li>
+          <li><a rel="noopener" target="_blank" href="https://github.com/bushuyeu">GitHub</a></li>
+          <li><a rel="noopener" target="_blank" href="https://huggingface.co/bushuyeu">Hugging Face</a></li>
+          <li><a rel="noopener" target="_blank" href="https://scholar.google.com/citations?user=ub3osgUAAAAJ">Google Scholar</a></li>
+          <li><a rel="noopener" target="_blank" href="https://orcid.org/0009-0009-7183-6714">ORCID</a></li>
+          <li><a rel="noopener" target="_blank" href="https://openreview.net/profile?id=~Pavel_Bushuyeu1">OpenReview</a></li>
+          <li><a rel="noopener" target="_blank" href="https://www.semanticscholar.org/author/2405429742">Semantic Scholar</a></li>
+          <li><a rel="noopener" target="_blank" href="https://www.researchgate.net/profile/Pavel-Bushuyeu">ResearchGate</a></li>
+        </ul>
+      </nav>
+      <div>
+        <h2 class="footer-h">Contact</h2>
+        <ul>
+          <li><a href="mailto:pavelbushuyeu@gmail.com">pavelbushuyeu@gmail.com</a></li>
+          <li><a rel="noopener" target="_blank" href="https://calendar.app.google/aTs1mDgEEfqNLnNf6">Schedule a call</a></li>
+          <li><a href="https://follow.it/pavel-bushuyeu-news" rel="noopener" target="_blank">Subscribe to updates</a></li>
+          <li><a href="/feed.xml">RSS feed</a></li>
+          <li><a href="Pavel-Bushuyeu-CV.pdf" download>Download Resume</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="footer-base">© 2026 Pavel Bushuyeu</p>
+  </div>
+</footer>
+
+</body>
+</html>

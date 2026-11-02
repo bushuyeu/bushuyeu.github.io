@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<script>/* Theme: apply a stored Light/Dark pick before the first paint (theme.js) */(function(){var r=document.documentElement;try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark"){r.setAttribute("data-theme",t);document.querySelector('meta[name="color-scheme"]').content=t}}catch(e){}r.classList.add("theme-js")})()</script>
+<title>FAST read-along — Pavel Bushuyeu</title>
+<meta name="description" content="FAST turns robot action chunks into tokens for autoregressive vision-language-action models: a discrete cosine transform on each action dimension, rounding, then byte-pair encoding.">
+<link rel="canonical" href="https://bushuyeu.com/read-along-fast">
+<meta property="og:type" content="article">
+<meta property="og:title" content="FAST read-along — Pavel Bushuyeu">
+<meta property="og:description" content="FAST turns robot action chunks into tokens for autoregressive vision-language-action models: a discrete cosine transform on each action dimension, rounding, then byte-pair encoding.">
+<meta property="og:url" content="https://bushuyeu.com/read-along-fast">
+<meta property="og:image" content="https://bushuyeu.com/media/og-card.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Pavel Bushuyeu, AI researcher, University of Hawaiʻi at Mānoa">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://bushuyeu.com/media/og-card.jpg">
+<link rel="icon" href="favicon-32.png?v=3" type="image/png" sizes="32x32">
+<link rel="icon" href="icon-512.png?v=3" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="alternate" type="application/rss+xml" title="Pavel Bushuyeu — News" href="https://bushuyeu.com/feed.xml">
+<link rel="stylesheet" href="style.css?v=34">
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "WebPage", "author": {"@type": "Person", "@id": "https://bushuyeu.com/#person", "name": "Pavel Bushuyeu", "url": "https://bushuyeu.com/"}}
+</script>
+<style>
+/* Page-only styles for read-along pages. Built on the tokens in style.css; the light-theme grey is darkened here so small text passes 4.5:1. */
+:root { --ink-3: #707075; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ink-3: #86868b; } }
+:root[data-theme="dark"] { --ink-3: #86868b; }
+.prose a { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.chapters { list-style: none; margin: 0; padding: 0; columns: 2 18rem; column-gap: 32px; }
+.chapters li { break-inside: avoid; padding: 5px 0; border-bottom: 1px solid var(--hair-soft); display: flex; gap: 12px; }
+.chapters a { font-variant-numeric: tabular-nums; min-width: 4.2em; }
+.sketch { margin: 0; border: 1px solid var(--hair-soft); border-radius: 12px; padding: 10px; background: #fff; }
+.sketch img { display: block; width: 100%; height: auto; }
+.sketch figcaption { margin-top: 8px; font-size: 0.86rem; line-height: 1.45; color: #5e5e63; }
+.faq details { border-top: 1px solid var(--hair-soft); padding: 12px 0; }
+.faq details:last-child { border-bottom: 1px solid var(--hair-soft); }
+.faq summary { cursor: pointer; font-weight: 600; list-style-position: outside; }
+.faq details p { margin: 8px 0 0; }
+.faq .ref { color: var(--ink-3); font-size: 0.88rem; white-space: nowrap; }
+.terms { display: grid; grid-template-columns: max-content 1fr; gap: 8px 22px; margin: 0; }
+.terms dt { font-weight: 600; }
+.terms dd { margin: 0; color: var(--ink-2); }
+@media (max-width: 640px) { .terms { grid-template-columns: 1fr; } .terms dd { margin-bottom: 8px; } }
+</style>
+<script src="faro.js" async></script>
+<script src="theme.js?v=2" defer></script>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="topbar">
+      <nav class="eyebrow eyebrow-nav" aria-label="Main">
+        <a href="/">Home</a>
+        <a href="/research">Research</a>
+        <a href="/teaching">Teaching</a>
+        <a href="/product-management">Product management</a>
+        <a href="/services">Services</a>
+      </nav>
+      <button type="button" class="theme-switch" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode">
+        <svg class="theme-switch__moon" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M13.6 9.9A5.7 5.7 0 0 1 6.1 2.4a5.8 5.8 0 1 0 7.5 7.5z"/></svg>
+        <svg class="theme-switch__sun" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1.3v1.5M8 13.2v1.5M1.3 8h1.5M13.2 8h1.5M3.3 3.3l1 1M11.7 11.7l1 1M3.3 12.7l1-1M11.7 4.3l1-1"/></svg>
+      </button>
+    </div>
+    <h1>FAST read-along</h1>
+    <p class="sub">FAST: Efficient Action Tokenization for Vision-Language-Action Models. Pertsch, Stachowicz, Ichter, Driess, Nair, Vuong and others, arXiv 2025.</p>
+    <div class="meta">
+      <span>Paper: <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2501.09747">FAST, arXiv:2501.09747</a></span>
+      <span class="tag">read-along</span>
+      <span>Video 1:21:35</span>
+      <a class="pill-link" href="https://youtu.be/3XxyKAxO2f4" rel="noopener" target="_blank" style="gap:7px" aria-label="Watch the read-along on YouTube (opens in a new tab)"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="3" width="13" height="10" rx="2.5"/><path d="M6.5 6v4l3.5-2z"/></svg>Watch on YouTube</a>
+      <a class="pill-link" href="/media/read-along-fast-sketchnote.pdf" download style="gap:7px" aria-label="Download the sketchnote and listening sheet (PDF)"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v8m0 0 3.2-3.2M8 10.5 4.8 7.3M3 13.5h10"/></svg>Sketchnote (PDF)</a>
+    </div>
+  </div>
+</header>
+
+<section id="summary">
+  <div class="wrap">
+    <div class="shead">
+      <h2>In short</h2>
+      <p class="eyebrow">Summary</p>
+    </div>
+    <div class="prose">
+      <p>FAST turns robot action chunks into tokens for autoregressive vision-language-action models: a discrete cosine transform on each action dimension, rounding, then byte-pair encoding.</p>
+      <p>Per-timestep binning makes consecutive tokens nearly redundant at high control rates, and policies trained with it make no progress on 20 Hz table bussing or 50 Hz T-shirt folding; FAST needs up to 13.2 times fewer tokens (53 instead of 700 for one second of shirt folding) and trains effective policies on both.</p>
+      <p>With the universal FAST+ tokenizer and 10k hours of robot data, π0-FAST matches the diffusion π0 model with 5 times fewer GPU hours of training, but at inference it needs about 750 ms per one-second chunk, while diffusion π0 typically needs 100 ms or less on an NVIDIA 4090.</p>
+    </div>
+  </div>
+</section>
+
+<section id="sketchnote">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Sketchnote</h2>
+      <p class="eyebrow">One-page summary</p>
+    </div>
+    <figure class="sketch">
+      <a href="/media/read-along-fast-sketchnote.png"><img src="media/read-along-fast-sketchnote.png" alt="Hand-drawn summary of FAST: FAST turns robot action chunks into tokens for autoregressive vision-language-action models: a discrete cosine transform on each action dimension, rounding, then byte-pair encoding. Per-timestep binning makes consecutive tokens nearly redundant at high control rates, and policies trained with it make no progress on 20 Hz table bussing or 50 Hz T-shirt folding; FAST needs up to 13.2 times fewer tokens (53 instead of 700 for one second of shirt folding) and trains effective policies on both. With the universal FAST+ tokenizer and 10k hours of robot data, π0-FAST matches the diffusion π0 model with 5 times fewer GPU hours of training, but at inference it needs about 750 ms per one-second chunk, while diffusion π0 typically needs 100 ms or less on an NVIDIA 4090." width="1600" height="1200" loading="lazy"></a>
+      <figcaption>A one-page summary in sketchnote style. Download the <a href="/media/read-along-fast-sketchnote.pdf" download>PDF</a> (page 1 the sketchnote, page 2 the listening sheet) to annotate it in Concepts or GoodNotes.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="listen">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Listen for</h2>
+      <p class="eyebrow">In class</p>
+    </div>
+    <div class="prose">
+      <p>Keep these in mind while the presenter talks. Tick them on page 2 of the PDF as they come up.</p>
+      <ol>
+        <li>Why per-timestep binning breaks as the control frequency rises (the spline toy task)</li>
+        <li>Which steps of FAST lose information (rounding) and which do not (DCT, BPE)</li>
+        <li>Which results use per-dataset FAST and which use the universal FAST+</li>
+        <li>Whether the gain holds on a second backbone: the OpenVLA ablation</li>
+        <li>What the 5× measures, and what becomes slower</li>
+      </ol>
+      <h3>Questions worth asking</h3>
+      <ol>
+        <li>π0-FAST needs about 750 ms per 1-second chunk. Which tasks would break first, and would LLM inference methods like speculative decoding be enough?</li>
+        <li>On DROID the autoregressive model follows instructions better than diffusion π0. Is that the decoder, the full backbone, or something else?</li>
+        <li>FAST+ was tested on hands and humanoids only for compression. What policy experiment would show that it transfers to a new robot?</li>
+      </ol>
+      <h3>In class, on an iPad</h3>
+      <ol>
+        <li><b>Before:</b> watch or listen to the read-along (the chapters are below) and skim the questions below.</li>
+        <li><b>Open</b> the sketchnote PDF in Concepts or another note app. Page 1 is the summary drawing, with room to annotate. Page 2 is the listening sheet.</li>
+        <li><b>During the talk:</b> tick each "listen for" item as it comes up, and write one line in each box of the sheet.</li>
+        <li><b>After:</b> mark the one answer below that the talk changed for you, and ask your question.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Common questions and misunderstandings</h2>
+      <p class="eyebrow">FAQ</p>
+    </div>
+    <div class="prose faq">
+      <details>
+        <summary>What does &quot;13.2× compression&quot; mean?</summary>
+        <p>It is a ratio of token counts per 1-second action chunk. For T-shirt folding (14 action dimensions at 50 Hz), per-timestep binning needs 700 tokens and FAST needs 53, at comparable reconstruction error. The text says FAST gives roughly 30 tokens per arm per chunk, but Table I prints averages of 20, 29 and 28 for BridgeV2, DROID and bussing, and 53 for the two arms of shirt folding. Across these four datasets the ratio goes from 1.75× (BridgeV2, 5 Hz) to 13.2× (shirt folding, 50 Hz). <span class="ref">(Sec. VI-B, Table I)</span></p>
+      </details>
+      <details>
+        <summary>Is FAST lossless?</summary>
+        <p>No. The DCT is invertible and the BPE step is lossless, but the scale-and-round step drops small DCT coefficients. The rounding scale γ trades reconstruction error against token count; the paper uses 10 for all single-dataset tokenizers. Appendix B plots this trade-off for FAST, binning and FSQ. <span class="ref">(Sec. V-B, Sec. VI-B, Appendix B (Fig. 12))</span></p>
+      </details>
+      <details>
+        <summary>Does &quot;5× faster&quot; mean the policy runs 5 times faster?</summary>
+        <p>No. It is about training: π0-FAST needed 5 times fewer GPU hours than the π0 model of Black et al., and the abstract says &quot;up to 5x&quot;. Inference is slower: π0-FAST needs about 750 ms per 1-second chunk, and diffusion π0 typically needs 100 ms or less on an NVIDIA 4090. The cause is that π0-FAST decodes 30–60 tokens one by one with the full 2B-parameter backbone. <span class="ref">(Sec. VI-E, Sec. VI-F, Fig. 1)</span></p>
+      </details>
+      <details>
+        <summary>What is the difference between FAST and FAST+?</summary>
+        <p>The BPE vocabulary, the only learned part. FAST trains it on each dataset, which takes a few minutes; FAST+ is one vocabulary trained on about 1M one-second action chunks from many robots, action spaces and control rates (the abstract calls them &quot;trajectories&quot;). In policy training FAST+ closely matches the per-dataset tokenizers. The OpenVLA ablation uses FAST+, and Sec. VII says π0-FAST does too. <span class="ref">(Sec. V-C, Sec. VI-C, Sec. VI-D, Sec. VII, Fig. 6)</span></p>
+      </details>
+      <details>
+        <summary>What is new in FAST, and what is borrowed?</summary>
+        <p>Both building blocks are borrowed: the DCT is the transform behind JPEG, and BPE is the text tokenizer of language models. New are their combination on robot action chunks, the analysis of why per-timestep binning fails, and the universal FAST+ tokenizer. Putting the low frequencies of all dimensions first is a design choice: the authors found that it gives more stable rollouts. The paper argues that any sufficiently effective compression of the action targets should help, and picks DCT because it is simple and fast. <span class="ref">(Sec. I, Sec. V-A, Sec. V-B)</span></p>
+      </details>
+      <details>
+        <summary>Why does per-timestep binning fail at high frequency?</summary>
+        <p>Because consecutive tokens become near copies of each other. A next-token model learns from the new information in each token, and for a smooth signal that information approaches zero as the time step shrinks. In the toy spline task, the binning model&#x27;s error rises steeply as the sampling rate grows from 25 to 800 steps, until it copies the first action; with DCT tokens the error stays low at every rate. <span class="ref">(Sec. IV, Fig. 3)</span></p>
+      </details>
+      <details>
+        <summary>Does FAST replace diffusion or flow-matching action heads?</summary>
+        <p>The paper leaves that open. FAST adds no new weights: action tokens overwrite the least-used tokens of the VLM vocabulary. Against π0 (a flow-matching model that the paper calls &quot;diffusion&quot;), π0-FAST is comparable on small single-task datasets, reaches high performance with 3 times fewer steps on table bussing and follows language better on DROID, but it decodes more slowly. The authors say the best VLA architecture is still open and leave DCT tokens with diffusion decoding to future work. <span class="ref">(Sec. VI-A, Sec. VI-E, Sec. VII)</span></p>
+      </details>
+      <details>
+        <summary>Is the BPE step needed?</summary>
+        <p>Yes, it matters. Without BPE, policies on table bussing and T-shirt folding do worse, though they still beat naive binning. The paper explains that the DCT already puts most of the information in a few coefficients, but the many repeated zero tokens left without BPE dilute the learning signal and make the model decode hundreds of tokens. <span class="ref">(Sec. VI-D)</span></p>
+      </details>
+      <details>
+        <summary>Does a learned tokenizer (VQ or FSQ) beat FAST?</summary>
+        <p>Not in this paper. FSQ, a simpler alternative to VQ-VAE, also compresses actions and trains much better than binning, but FAST is as good or better, especially on the dexterous high-frequency tasks, and needs no network training. In the compression sweep FSQ is more efficient at low fidelity, while FAST keeps improving at high fidelity, which fine-grained control needs. <span class="ref">(Sec. VI-B, Fig. 6, Appendix B (Fig. 12))</span></p>
+      </details>
+      <details>
+        <summary>Was FAST tested on humanoids, hands or new robots?</summary>
+        <p>Only for compression. FAST+ cuts the token count by 2 times or more on 14 datasets it never saw, including dexterous hands, humanoids, UMI and Waymo driving data. All policies in the paper run on static manipulators, and FAST+ was trained on data that includes the real-robot evaluation tasks. Policy tests on other robot types are future work. <span class="ref">(Sec. VI-A, Sec. VI-C, Fig. 8, Table III, Sec. VII)</span></p>
+      </details>
+      <details>
+        <summary>Is the DROID policy really zero-shot?</summary>
+        <p>Yes, as the paper defines it: trained on the 75k successful DROID episodes, then tested in unseen scenes with a new background, objects, viewpoint and table height, without co-training or fine-tuning. The scored suite has 44 trials graded by task progress; Appendix E says 16 tasks, but Table II lists 17. The tests on three university campuses are qualitative, with no success rates. <span class="ref">(Sec. VI-A, Sec. VI-B, Appendix D, Appendix E, Table II, Fig. 7)</span></p>
+      </details>
+      <details>
+        <summary>Are all generalist π0-FAST results zero-shot?</summary>
+        <p>No. Sec. VI-F calls the comparison with diffusion π0 zero-shot, and Appendix E says grocery bagging and toast out of toaster were evaluated out of the box on the pretrained model. Laundry folding, as in Black et al., used a model fine-tuned on a small amount of high-quality task data. <span class="ref">(Sec. VI-F, Appendix E, Fig. 11)</span></p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section id="video">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Chapters</h2>
+      <p class="eyebrow">Video</p>
+    </div>
+    <ol class="chapters">
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/3XxyKAxO2f4?t=0">0:00</a><span>Abstract</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/3XxyKAxO2f4?t=107">1:47</a><span>1. Introduction</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/3XxyKAxO2f4?t=505">8:25</a><span>2. Related work</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/3XxyKAxO2f4?t=825">13:45</a><span>3. Preliminaries</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/3XxyKAxO2f4?t=945">15:45</a><span>4. Case study: how does tokenization affect VLA training?</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/3XxyKAxO2f4?t=1243">20:43</a><span>5. Efficient action tokenization via time-series compression</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/3XxyKAxO2f4?t=1992">33:12</a><span>6. Experiments</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/3XxyKAxO2f4?t=3794">1:03:14</a><span>7. Discussion and future work</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/3XxyKAxO2f4?t=3979">1:06:19</a><span>Appendix</span></li>
+    </ol>
+  </div>
+</section>
+
+<section id="terms">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Key terms</h2>
+      <p class="eyebrow">Glossary</p>
+    </div>
+    <div class="prose">
+      <dl class="terms">
+        <dt>Action chunk</dt><dd>A block of future actions predicted at once; FAST tokenizes 1-second chunks.</dd>
+        <dt>Control frequency</dt><dd>Actions per second in the data: 5 Hz for BridgeV2, 50 Hz for T-shirt folding.</dd>
+        <dt>Naive (binning) tokenization</dt><dd>Each action dimension at each time step becomes one of N bins (most often 256), one token each.</dd>
+        <dt>DCT</dt><dd>Discrete cosine transform: writes a signal as a sum of cosines; smooth signals need few coefficients (as in JPEG).</dd>
+        <dt>BPE</dt><dd>Byte-pair encoding: losslessly merges frequent symbol sequences into new tokens; per-dataset FAST uses a 1,024-token vocabulary.</dd>
+        <dt>Autoregressive VLA</dt><dd>A vision-language model fine-tuned to output action tokens one at a time by next-token prediction.</dd>
+        <dt>Diffusion VLA</dt><dd>Generates continuous actions by iterative denoising; π0 uses flow matching and a 300M-parameter action expert.</dd>
+        <dt>FSQ</dt><dd>Finite scalar quantization, a simpler alternative to VQ-VAE; the paper&#x27;s learned-compression baseline.</dd>
+        <dt>Zero-shot (here)</dt><dd>Tested in a new scene with no co-training or fine-tuning, prompted only in language.</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<section id="links">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Related</h2>
+      <p class="eyebrow">Links</p>
+    </div>
+    <div class="prose">
+      <ul>
+        <li><a rel="noopener" target="_blank" href="https://youtu.be/3XxyKAxO2f4">Read-along video on YouTube</a></li>
+        <li><a href="/review-fast">Does the universal FAST+ tokenizer transfer to cable routing? (empiricist review)</a></li>
+        <li><a href="/review-fast-lineage">Where FAST came from, and what it led to (archeologist review)</a></li>
+        <li><a href="/read-along-openvla">OpenVLA read-along</a></li>
+      </ul>
+      <p class="note"><b>How this page was made.</b> The video is an AI narration (Breeze TTS 2) of the full paper with the text on screen. The summary, questions and sketchnote were drafted with an AI assistant from the paper's text and checked against it; the references in brackets point to the paper. Paper license: CC BY 4.0. The sketchnote is an original drawing, not a copy of the paper's figures.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="backlink"><a href="/paper-review">← All paper reviews</a></p>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <img class="footer-portrait" src="media/portrait.jpg" alt="Portrait of Pavel Bushuyeu" width="640" height="640" loading="lazy">
+      <nav aria-label="Site">
+        <h2 class="footer-h">Site</h2>
+        <ul>
+          <li><a href="/research">Research</a></li>
+          <li><a href="/teaching">Teaching</a></li>
+          <li><a href="/product-management">Product management</a></li>
+          <li><a href="/services">Services</a></li>
+          <li><a href="/projects">Projects</a></li>
+          <li><a href="/paper-review">Paper review</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Profiles">
+        <h2 class="footer-h">Elsewhere</h2>
+        <ul>
+          <li><a rel="noopener" target="_blank" href="https://linkedin.com/in/bushuyeu/">LinkedIn</a></li>
+          <li><a rel="noopener" target="_blank" href="https://github.com/bushuyeu">GitHub</a></li>
+          <li><a rel="noopener" target="_blank" href="https://huggingface.co/bushuyeu">Hugging Face</a></li>
+          <li><a rel="noopener" target="_blank" href="https://scholar.google.com/citations?user=ub3osgUAAAAJ">Google Scholar</a></li>
+          <li><a rel="noopener" target="_blank" href="https://orcid.org/0009-0009-7183-6714">ORCID</a></li>
+          <li><a rel="noopener" target="_blank" href="https://openreview.net/profile?id=~Pavel_Bushuyeu1">OpenReview</a></li>
+          <li><a rel="noopener" target="_blank" href="https://www.semanticscholar.org/author/2405429742">Semantic Scholar</a></li>
+          <li><a rel="noopener" target="_blank" href="https://www.researchgate.net/profile/Pavel-Bushuyeu">ResearchGate</a></li>
+        </ul>
+      </nav>
+      <div>
+        <h2 class="footer-h">Contact</h2>
+        <ul>
+          <li><a href="mailto:pavelbushuyeu@gmail.com">pavelbushuyeu@gmail.com</a></li>
+          <li><a rel="noopener" target="_blank" href="https://calendar.app.google/aTs1mDgEEfqNLnNf6">Schedule a call</a></li>
+          <li><a href="https://follow.it/pavel-bushuyeu-news" rel="noopener" target="_blank">Subscribe to updates</a></li>
+          <li><a href="/feed.xml">RSS feed</a></li>
+          <li><a href="Pavel-Bushuyeu-CV.pdf" download>Download Resume</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="footer-base">© 2026 Pavel Bushuyeu</p>
+  </div>
+</footer>
+
+</body>
+</html>

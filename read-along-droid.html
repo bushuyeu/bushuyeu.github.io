@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<script>/* Theme: apply a stored Light/Dark pick before the first paint (theme.js) */(function(){var r=document.documentElement;try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark"){r.setAttribute("data-theme",t);document.querySelector('meta[name="color-scheme"]').content=t}}catch(e){}r.classList.add("theme-js")})()</script>
+<title>DROID read-along — Pavel Bushuyeu</title>
+<meta name="description" content="DROID is a robot manipulation dataset of 76k successful demonstrations (350 hours) on a shared Franka Panda hardware design, collected by 50 people with 18 robots at 13 institutions, in 564 scenes, 86 tasks and 52 buildings.">
+<link rel="canonical" href="https://bushuyeu.com/read-along-droid">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DROID read-along — Pavel Bushuyeu">
+<meta property="og:description" content="DROID is a robot manipulation dataset of 76k successful demonstrations (350 hours) on a shared Franka Panda hardware design, collected by 50 people with 18 robots at 13 institutions, in 564 scenes, 86 tasks and 52 buildings.">
+<meta property="og:url" content="https://bushuyeu.com/read-along-droid">
+<meta property="og:image" content="https://bushuyeu.com/media/og-card.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Pavel Bushuyeu, AI researcher, University of Hawaiʻi at Mānoa">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://bushuyeu.com/media/og-card.jpg">
+<link rel="icon" href="favicon-32.png?v=3" type="image/png" sizes="32x32">
+<link rel="icon" href="icon-512.png?v=3" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="alternate" type="application/rss+xml" title="Pavel Bushuyeu — News" href="https://bushuyeu.com/feed.xml">
+<link rel="stylesheet" href="style.css?v=34">
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "WebPage", "author": {"@type": "Person", "@id": "https://bushuyeu.com/#person", "name": "Pavel Bushuyeu", "url": "https://bushuyeu.com/"}}
+</script>
+<style>
+/* Page-only styles for read-along pages. Built on the tokens in style.css; the light-theme grey is darkened here so small text passes 4.5:1. */
+:root { --ink-3: #707075; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ink-3: #86868b; } }
+:root[data-theme="dark"] { --ink-3: #86868b; }
+.prose a { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.chapters { list-style: none; margin: 0; padding: 0; columns: 2 18rem; column-gap: 32px; }
+.chapters li { break-inside: avoid; padding: 5px 0; border-bottom: 1px solid var(--hair-soft); display: flex; gap: 12px; }
+.chapters a { font-variant-numeric: tabular-nums; min-width: 4.2em; }
+.sketch { margin: 0; border: 1px solid var(--hair-soft); border-radius: 12px; padding: 10px; background: #fff; }
+.sketch img { display: block; width: 100%; height: auto; }
+.sketch figcaption { margin-top: 8px; font-size: 0.86rem; line-height: 1.45; color: #5e5e63; }
+.faq details { border-top: 1px solid var(--hair-soft); padding: 12px 0; }
+.faq details:last-child { border-bottom: 1px solid var(--hair-soft); }
+.faq summary { cursor: pointer; font-weight: 600; list-style-position: outside; }
+.faq details p { margin: 8px 0 0; }
+.faq .ref { color: var(--ink-3); font-size: 0.88rem; white-space: nowrap; }
+.terms { display: grid; grid-template-columns: max-content 1fr; gap: 8px 22px; margin: 0; }
+.terms dt { font-weight: 600; }
+.terms dd { margin: 0; color: var(--ink-2); }
+@media (max-width: 640px) { .terms { grid-template-columns: 1fr; } .terms dd { margin-bottom: 8px; } }
+</style>
+<script src="faro.js" async></script>
+<script src="theme.js?v=2" defer></script>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="topbar">
+      <nav class="eyebrow eyebrow-nav" aria-label="Main">
+        <a href="/">Home</a>
+        <a href="/research">Research</a>
+        <a href="/teaching">Teaching</a>
+        <a href="/product-management">Product management</a>
+        <a href="/services">Services</a>
+      </nav>
+      <button type="button" class="theme-switch" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode">
+        <svg class="theme-switch__moon" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M13.6 9.9A5.7 5.7 0 0 1 6.1 2.4a5.8 5.8 0 1 0 7.5 7.5z"/></svg>
+        <svg class="theme-switch__sun" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1.3v1.5M8 13.2v1.5M1.3 8h1.5M13.2 8h1.5M3.3 3.3l1 1M11.7 11.7l1 1M3.3 12.7l1-1M11.7 4.3l1-1"/></svg>
+      </button>
+    </div>
+    <h1>DROID read-along</h1>
+    <p class="sub">DROID: A Large-Scale In-The-Wild Robot Manipulation Dataset. Khazatsky, Pertsch, Nair, Balakrishna, Dasari, Karamcheti and others, RSS 2024.</p>
+    <div class="meta">
+      <span>Paper: <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2403.12945">DROID, arXiv:2403.12945</a></span>
+      <span class="tag">read-along</span>
+      <span>Video 1:22:34</span>
+      <a class="pill-link" href="https://youtu.be/mjZPLJz5he8" rel="noopener" target="_blank" style="gap:7px" aria-label="Watch the read-along on YouTube (opens in a new tab)"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="3" width="13" height="10" rx="2.5"/><path d="M6.5 6v4l3.5-2z"/></svg>Watch on YouTube</a>
+      <a class="pill-link" href="/media/read-along-droid-sketchnote.pdf" download style="gap:7px" aria-label="Download the sketchnote and listening sheet (PDF)"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v8m0 0 3.2-3.2M8 10.5 4.8 7.3M3 13.5h10"/></svg>Sketchnote (PDF)</a>
+    </div>
+  </div>
+</header>
+
+<section id="summary">
+  <div class="wrap">
+    <div class="shead">
+      <h2>In short</h2>
+      <p class="eyebrow">Summary</p>
+    </div>
+    <div class="prose">
+      <p>DROID is a robot manipulation dataset of 76k successful demonstrations (350 hours) on a shared Franka Panda hardware design, collected by 50 people with 18 robots at 13 institutions, in 564 scenes, 86 tasks and 52 buildings.</p>
+      <p>Its point is diversity: real homes, offices and labs, cameras that collectors move between sessions (1,417 viewpoints), and tasks that collectors choose themselves.</p>
+      <p>Co-training a diffusion policy with a 40k-trajectory, language-annotated subset of DROID and in-domain task demonstrations beats co-training on Open X-Embodiment by 22 points of success in-distribution and 17 points out of distribution, and a size-matched test on three tasks supports the value of scene diversity.</p>
+    </div>
+  </div>
+</section>
+
+<section id="sketchnote">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Sketchnote</h2>
+      <p class="eyebrow">One-page summary</p>
+    </div>
+    <figure class="sketch">
+      <a href="/media/read-along-droid-sketchnote.png"><img src="media/read-along-droid-sketchnote.png" alt="Hand-drawn summary of DROID: DROID is a robot manipulation dataset of 76k successful demonstrations (350 hours) on a shared Franka Panda hardware design, collected by 50 people with 18 robots at 13 institutions, in 564 scenes, 86 tasks and 52 buildings. Its point is diversity: real homes, offices and labs, cameras that collectors move between sessions (1,417 viewpoints), and tasks that collectors choose themselves. Co-training a diffusion policy with a 40k-trajectory, language-annotated subset of DROID and in-domain task demonstrations beats co-training on Open X-Embodiment by 22 points of success in-distribution and 17 points out of distribution, and a size-matched test on three tasks supports the value of scene diversity." width="1600" height="1200" loading="lazy"></a>
+      <figcaption>A one-page summary in sketchnote style. Download the <a href="/media/read-along-droid-sketchnote.pdf" download>PDF</a> (page 1 the sketchnote, page 2 the listening sheet) to annotate it in Concepts or GoodNotes.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="listen">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Listen for</h2>
+      <p class="eyebrow">In class</p>
+    </div>
+    <div class="prose">
+      <p>Keep these in mind while the presenter talks. Tick them on page 2 of the PDF as they come up.</p>
+      <ol>
+        <li>What is diverse in DROID, and what is fixed (one robot model, one gripper model)?</li>
+        <li>How the collection protocol creates diversity on purpose</li>
+        <li>What the baselines are: in-domain only, and OXE co-training</li>
+        <li>Which test separates diversity from dataset size</li>
+        <li>Whether any experiment uses no in-domain demonstrations</li>
+      </ol>
+      <h3>Questions worth asking</h3>
+      <ol>
+        <li>DROID varies scenes and viewpoints but not robots. When is that the better trade than OXE&#x27;s 22 embodiments?</li>
+        <li>Every evaluated manipulation policy uses in-domain demonstrations. What would a fair zero-shot test of DROID look like?</li>
+        <li>The cameras move between sessions. Does that buy viewpoint robustness, and how would you measure it?</li>
+      </ol>
+      <h3>In class, on an iPad</h3>
+      <ol>
+        <li><b>Before:</b> watch or listen to the read-along (the chapters are below) and skim the questions below.</li>
+        <li><b>Open</b> the sketchnote PDF in Concepts or another note app. Page 1 is the summary drawing, with room to annotate. Page 2 is the listening sheet.</li>
+        <li><b>During the talk:</b> tick each "listen for" item as it comes up, and write one line in each box of the sheet.</li>
+        <li><b>After:</b> mark the one answer below that the talk changed for you, and ask your question.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Common questions and misunderstandings</h2>
+      <p class="eyebrow">FAQ</p>
+    </div>
+    <div class="prose faq">
+      <details>
+        <summary>Is DROID 76k episodes or about 92k?</summary>
+        <p>76k is the number of successful demonstrations. About 16k more episodes were labelled &quot;not successful&quot;; they are in the release but do not count toward the 76k, and the policy experiments leave them out. <span class="ref">(Sec. III-B, Sec. V-A)</span></p>
+      </details>
+      <details>
+        <summary>Was it collected at 13 institutions or 18 labs?</summary>
+        <p>The paper gives both numbers. Section III says 18 robots and 50 data collectors across 13 institutions, and that the setup was built 18 times; the introduction says 18 research labs. Read 13 as institutions and 18 as robots (setups). <span class="ref">(Sec. I, Sec. III, Sec. III-A)</span></p>
+      </details>
+      <details>
+        <summary>Does DROID contain several kinds of robot?</summary>
+        <p>No. All episodes use the same hardware design: a Franka Panda arm with a Robotiq 2F-85 gripper, two exterior Zed 2 cameras, a Zed Mini wrist camera and a Quest 2 for teleoperation, built 18 times. DROID is diverse in scenes, tasks, objects and viewpoints, not in embodiments, which is the opposite trade to Open X-Embodiment. <span class="ref">(Sec. III-A, Fig. 2)</span></p>
+      </details>
+      <details>
+        <summary>Does the paper show that a DROID policy works zero-shot in a new scene?</summary>
+        <p>No. All evaluated manipulation policies use in-domain demonstrations. The baselines train on those demonstrations alone or mix them 50/50 with OXE; the DROID variants mix them 50/50 with DROID data. The authors collect 50–150 demonstrations per task (Toasting and Close Waffle Maker share one multi-task policy). Training for new scenes without in-domain data is listed as an open question. <span class="ref">(Sec. V-A, Sec. V-B, Sec. VI, Appendix F-B)</span></p>
+      </details>
+      <details>
+        <summary>Where does &quot;20% better&quot; come from?</summary>
+        <p>The introduction summarizes the improvement as 20% on average; Figure 8 gives the exact gains: averaged over 6 tasks in 4 locations, co-training with DROID beats the next best method (co-training with OXE) by 22 points of absolute success in-distribution and by 17 points out of distribution. Each task setting and method has 10 rollouts. <span class="ref">(Sec. I, Sec. V-B, Fig. 8)</span></p>
+      </details>
+      <details>
+        <summary>Is the gain from more data or from more diverse data?</summary>
+        <p>Both, and the paper separates them once. Two subsets of the same size (7,362 trajectories) from the training pool are compared on three out-of-distribution tasks: the 20 scenes with the most demonstrations, and a uniform random sample of 7,362 successful demonstrations. The diverse sample does better, and training with the full 40k-trajectory pool matches or beats both on the three tasks. <span class="ref">(Sec. V-C, Fig. 10, Appendix F-B)</span></p>
+      </details>
+      <details>
+        <summary>Does the paper propose a new policy or model?</summary>
+        <p>No. It uses an existing diffusion policy from Robomimic: a ResNet-50 encoder per exterior camera, a frozen DistilBERT instruction embedding, proprioception, and absolute end-effector actions. The contribution is the data, the collection platform and the analysis. <span class="ref">(Sec. V-A, Appendix F)</span></p>
+      </details>
+      <details>
+        <summary>What counts as a &quot;scene&quot;?</summary>
+        <p>A substantial change of the robot&#x27;s workspace, such as moving from the stove to the sink in one kitchen. New objects or moved cameras do not count. The collection software logged 2,080 scene IDs; after removing duplicates the authors report 564, which they call a conservative count. <span class="ref">(Sec. IV(c), Appendix D)</span></p>
+      </details>
+      <details>
+        <summary>Why do the collectors move the cameras?</summary>
+        <p>To get viewpoint diversity. The software regularly prompts &quot;scene augmentations&quot;: nudging the robot, moving and re-calibrating the exterior cameras, changing the lighting, adding or removing objects. DROID has 1,417 camera viewpoints. The paper argues this helps with new camera angles; its Cook Lentils out-of-distribution test adds a camera shift together with distractors, but no experiment isolates the effect of the camera. <span class="ref">(Sec. III-B, Sec. IV, Sec. V-A, Appendix E)</span></p>
+      </details>
+      <details>
+        <summary>Where do the language instructions come from?</summary>
+        <p>Collectors select or type the feasible tasks for each scene, and before each episode the software samples one of them at random, so collectors do not pick only easy tasks. After collection, crowd workers write up to three instructions per episode. The paper&#x27;s policies condition on an instruction through a frozen DistilBERT embedding. <span class="ref">(Sec. III-B, Fig. 11, Sec. V-A)</span></p>
+      </details>
+      <details>
+        <summary>Why was Language Table removed from the OXE baseline?</summary>
+        <p>Its scenes and tasks are repetitive and its raw size was hard for the authors&#x27; training pipeline. It is about 5% of the Octo training mixture that the OXE baseline otherwise follows. <span class="ref">(Sec. V-B)</span></p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section id="video">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Chapters</h2>
+      <p class="eyebrow">Video</p>
+    </div>
+    <ol class="chapters">
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/mjZPLJz5he8?t=0">0:00</a><span>Abstract</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/mjZPLJz5he8?t=88">1:28</a><span>1. Introduction</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/mjZPLJz5he8?t=378">6:18</a><span>2. Related work</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/mjZPLJz5he8?t=786">13:06</a><span>3. DROID data collection setup</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/mjZPLJz5he8?t=1413">23:33</a><span>4. DROID dataset analysis</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/mjZPLJz5he8?t=1972">32:52</a><span>5. Experiments</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/mjZPLJz5he8?t=2861">47:41</a><span>6. Discussion</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/mjZPLJz5he8?t=2974">49:34</a><span>Appendix B. DROID data features</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/mjZPLJz5he8?t=3033">50:33</a><span>Appendix C. Scene type classification</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/mjZPLJz5he8?t=3108">51:48</a><span>Appendix D. Identifying unique scenes</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/mjZPLJz5he8?t=3235">53:55</a><span>Appendix E. Evaluation procedure</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/mjZPLJz5he8?t=3448">57:28</a><span>Appendix F. Diffusion policy details</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/mjZPLJz5he8?t=3725">1:02:05</a><span>Appendix G. Automatic camera calibration</span></li>
+    </ol>
+  </div>
+</section>
+
+<section id="terms">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Key terms</h2>
+      <p class="eyebrow">Glossary</p>
+    </div>
+    <div class="prose">
+      <dl class="terms">
+        <dt>Co-training</dt><dd>Training on two datasets at once; here each batch is half task demonstrations and half DROID.</dd>
+        <dt>In-distribution / OOD</dt><dd>Evaluation like the task demos (with small position noise) / with changes such as distractors or a new object.</dd>
+        <dt>Scene</dt><dd>A distinct robot workspace; 564 in DROID after removing duplicate scene IDs.</dd>
+        <dt>Viewpoint</dt><dd>A placement of the exterior cameras; DROID has 1,417.</dd>
+        <dt>OXE</dt><dd>Open X-Embodiment: pooled robot datasets spanning 22 embodiments. DROID&#x27;s OXE baseline co-trains on a curated Octo-based subset without Language Table.</dd>
+        <dt>Diffusion policy</dt><dd>A policy that generates action sequences by denoising; the paper&#x27;s fixed learner.</dd>
+        <dt>Teleoperation</dt><dd>A person drives the robot, here with Quest 2 controllers, to record demonstrations.</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<section id="links">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Related</h2>
+      <p class="eyebrow">Links</p>
+    </div>
+    <div class="prose">
+      <ul>
+        <li><a rel="noopener" target="_blank" href="https://youtu.be/mjZPLJz5he8">Read-along video on YouTube</a></li>
+        <li><a href="/read-along-oxe">Open X-Embodiment read-along</a></li>
+        <li><a href="/review-oxe-empiricist">Robot concentration in Open X-Embodiment (empiricist review)</a></li>
+      </ul>
+      <p class="note"><b>How this page was made.</b> The video is an AI narration (Breeze TTS 2) of the full paper with the text on screen. The summary, questions and sketchnote were drafted with an AI assistant from the paper's text and checked against it; the references in brackets point to the paper. Paper license: CC BY 4.0. The sketchnote is an original drawing, not a copy of the paper's figures.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="backlink"><a href="/paper-review">← All paper reviews</a></p>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <img class="footer-portrait" src="media/portrait.jpg" alt="Portrait of Pavel Bushuyeu" width="640" height="640" loading="lazy">
+      <nav aria-label="Site">
+        <h2 class="footer-h">Site</h2>
+        <ul>
+          <li><a href="/research">Research</a></li>
+          <li><a href="/teaching">Teaching</a></li>
+          <li><a href="/product-management">Product management</a></li>
+          <li><a href="/services">Services</a></li>
+          <li><a href="/projects">Projects</a></li>
+          <li><a href="/paper-review">Paper review</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Profiles">
+        <h2 class="footer-h">Elsewhere</h2>
+        <ul>
+          <li><a rel="noopener" target="_blank" href="https://linkedin.com/in/bushuyeu/">LinkedIn</a></li>
+          <li><a rel="noopener" target="_blank" href="https://github.com/bushuyeu">GitHub</a></li>
+          <li><a rel="noopener" target="_blank" href="https://huggingface.co/bushuyeu">Hugging Face</a></li>
+          <li><a rel="noopener" target="_blank" href="https://scholar.google.com/citations?user=ub3osgUAAAAJ">Google Scholar</a></li>
+          <li><a rel="noopener" target="_blank" href="https://orcid.org/0009-0009-7183-6714">ORCID</a></li>
+          <li><a rel="noopener" target="_blank" href="https://openreview.net/profile?id=~Pavel_Bushuyeu1">OpenReview</a></li>
+          <li><a rel="noopener" target="_blank" href="https://www.semanticscholar.org/author/2405429742">Semantic Scholar</a></li>
+          <li><a rel="noopener" target="_blank" href="https://www.researchgate.net/profile/Pavel-Bushuyeu">ResearchGate</a></li>
+        </ul>
+      </nav>
+      <div>
+        <h2 class="footer-h">Contact</h2>
+        <ul>
+          <li><a href="mailto:pavelbushuyeu@gmail.com">pavelbushuyeu@gmail.com</a></li>
+          <li><a rel="noopener" target="_blank" href="https://calendar.app.google/aTs1mDgEEfqNLnNf6">Schedule a call</a></li>
+          <li><a href="https://follow.it/pavel-bushuyeu-news" rel="noopener" target="_blank">Subscribe to updates</a></li>
+          <li><a href="/feed.xml">RSS feed</a></li>
+          <li><a href="Pavel-Bushuyeu-CV.pdf" download>Download Resume</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="footer-base">© 2026 Pavel Bushuyeu</p>
+  </div>
+</footer>
+
+</body>
+</html>
