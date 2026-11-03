@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<script>/* Theme: apply a stored Light/Dark pick before the first paint (theme.js) */(function(){var r=document.documentElement;try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark"){r.setAttribute("data-theme",t);document.querySelector('meta[name="color-scheme"]').content=t}}catch(e){}r.classList.add("theme-js")})()</script>
+<title>OpenVLA read-along — Pavel Bushuyeu</title>
+<meta name="description" content="OpenVLA is a 7B-parameter vision-language-action model: the Prismatic-7B VLM (DINOv2 and SigLIP image features fed to Llama 2 7B), fine-tuned on 970k Open X-Embodiment episodes to output each robot action as 7 discrete tokens.">
+<link rel="canonical" href="https://bushuyeu.com/read-along-openvla">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OpenVLA read-along — Pavel Bushuyeu">
+<meta property="og:description" content="OpenVLA is a 7B-parameter vision-language-action model: the Prismatic-7B VLM (DINOv2 and SigLIP image features fed to Llama 2 7B), fine-tuned on 970k Open X-Embodiment episodes to output each robot action as 7 discrete tokens.">
+<meta property="og:url" content="https://bushuyeu.com/read-along-openvla">
+<meta property="og:image" content="https://bushuyeu.com/media/og-card.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Pavel Bushuyeu, AI researcher, University of Hawaiʻi at Mānoa">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://bushuyeu.com/media/og-card.jpg">
+<link rel="icon" href="favicon-32.png?v=3" type="image/png" sizes="32x32">
+<link rel="icon" href="icon-512.png?v=3" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="alternate" type="application/rss+xml" title="Pavel Bushuyeu — News" href="https://bushuyeu.com/feed.xml">
+<link rel="stylesheet" href="style.css?v=34">
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "WebPage", "author": {"@type": "Person", "@id": "https://bushuyeu.com/#person", "name": "Pavel Bushuyeu", "url": "https://bushuyeu.com/"}}
+</script>
+<style>
+/* Page-only styles for read-along pages. Built on the tokens in style.css; the light-theme grey is darkened here so small text passes 4.5:1. */
+:root { --ink-3: #707075; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ink-3: #86868b; } }
+:root[data-theme="dark"] { --ink-3: #86868b; }
+.prose a { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.chapters { list-style: none; margin: 0; padding: 0; columns: 2 18rem; column-gap: 32px; }
+.chapters li { break-inside: avoid; padding: 5px 0; border-bottom: 1px solid var(--hair-soft); display: flex; gap: 12px; }
+.chapters a { font-variant-numeric: tabular-nums; min-width: 4.2em; }
+.sketch { margin: 0; border: 1px solid var(--hair-soft); border-radius: 12px; padding: 10px; background: #fff; }
+.sketch img { display: block; width: 100%; height: auto; }
+.sketch figcaption { margin-top: 8px; font-size: 0.86rem; line-height: 1.45; color: #5e5e63; }
+.faq details { border-top: 1px solid var(--hair-soft); padding: 12px 0; }
+.faq details:last-child { border-bottom: 1px solid var(--hair-soft); }
+.faq summary { cursor: pointer; font-weight: 600; list-style-position: outside; }
+.faq details p { margin: 8px 0 0; }
+.faq .ref { color: var(--ink-3); font-size: 0.88rem; white-space: nowrap; }
+.terms { display: grid; grid-template-columns: max-content 1fr; gap: 8px 22px; margin: 0; }
+.terms dt { font-weight: 600; }
+.terms dd { margin: 0; color: var(--ink-2); }
+@media (max-width: 640px) { .terms { grid-template-columns: 1fr; } .terms dd { margin-bottom: 8px; } }
+</style>
+<script src="faro.js" async></script>
+<script src="theme.js?v=2" defer></script>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="topbar">
+      <nav class="eyebrow eyebrow-nav" aria-label="Main">
+        <a href="/">Home</a>
+        <a href="/research">Research</a>
+        <a href="/teaching">Teaching</a>
+        <a href="/product-management">Product management</a>
+        <a href="/services">Services</a>
+      </nav>
+      <button type="button" class="theme-switch" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode">
+        <svg class="theme-switch__moon" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M13.6 9.9A5.7 5.7 0 0 1 6.1 2.4a5.8 5.8 0 1 0 7.5 7.5z"/></svg>
+        <svg class="theme-switch__sun" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1.3v1.5M8 13.2v1.5M1.3 8h1.5M13.2 8h1.5M3.3 3.3l1 1M11.7 11.7l1 1M3.3 12.7l1-1M11.7 4.3l1-1"/></svg>
+      </button>
+    </div>
+    <h1>OpenVLA read-along</h1>
+    <p class="sub">OpenVLA: An Open-Source Vision-Language-Action Model. Kim, Pertsch, Karamcheti, Xiao, Balakrishna, Nair and others, CoRL 2024.</p>
+    <div class="meta">
+      <span>Paper: <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2406.09246">OpenVLA, arXiv:2406.09246</a></span>
+      <span class="tag">read-along</span>
+      <span>Video 1:56:07</span>
+      <a class="pill-link" href="https://youtu.be/oXBktHyU4gw" rel="noopener" target="_blank" style="gap:7px" aria-label="Watch the read-along on YouTube (opens in a new tab)"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="3" width="13" height="10" rx="2.5"/><path d="M6.5 6v4l3.5-2z"/></svg>Watch on YouTube</a>
+      <a class="pill-link" href="/media/read-along-openvla-sketchnote.pdf" download style="gap:7px" aria-label="Download the sketchnote and listening sheet (PDF)"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v8m0 0 3.2-3.2M8 10.5 4.8 7.3M3 13.5h10"/></svg>Sketchnote (PDF)</a>
+    </div>
+  </div>
+</header>
+
+<section id="summary">
+  <div class="wrap">
+    <div class="shead">
+      <h2>In short</h2>
+      <p class="eyebrow">Summary</p>
+    </div>
+    <div class="prose">
+      <p>OpenVLA is a 7B-parameter vision-language-action model: the Prismatic-7B VLM (DINOv2 and SigLIP image features fed to Llama 2 7B), fine-tuned on 970k Open X-Embodiment episodes to output each robot action as 7 discrete tokens.</p>
+      <p>Out of the box, on two robots from its training mix, it beats the closed 55B RT-2-X by 16.5 points of absolute success over 29 tasks; RT-2-X leads only in the Bridge semantic-generalization category, though it wins some single tasks elsewhere.</p>
+      <p>Fine-tuned on 10–150 demonstrations of new Franka tasks, it has the highest average success, 20.4 points above Diffusion Policy. Separate tests of a smaller SigLIP-only variant found LoRA comparable to full fine-tuning on two Franka tasks, and 4-bit inference comparable to bfloat16 on eight Bridge tasks.</p>
+    </div>
+  </div>
+</section>
+
+<section id="sketchnote">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Sketchnote</h2>
+      <p class="eyebrow">One-page summary</p>
+    </div>
+    <figure class="sketch">
+      <a href="/media/read-along-openvla-sketchnote.png"><img src="media/read-along-openvla-sketchnote.png" alt="Hand-drawn summary of OpenVLA: OpenVLA is a 7B-parameter vision-language-action model: the Prismatic-7B VLM (DINOv2 and SigLIP image features fed to Llama 2 7B), fine-tuned on 970k Open X-Embodiment episodes to output each robot action as 7 discrete tokens. Out of the box, on two robots from its training mix, it beats the closed 55B RT-2-X by 16.5 points of absolute success over 29 tasks; RT-2-X leads only in the Bridge semantic-generalization category, though it wins some single tasks elsewhere. Fine-tuned on 10–150 demonstrations of new Franka tasks, it has the highest average success, 20.4 points above Diffusion Policy. Separate tests of a smaller SigLIP-only variant found LoRA comparable to full fine-tuning on two Franka tasks, and 4-bit inference comparable to bfloat16 on eight Bridge tasks." width="1600" height="1200" loading="lazy"></a>
+      <figcaption>A one-page summary in sketchnote style. Download the <a href="/media/read-along-openvla-sketchnote.pdf" download>PDF</a> (page 1 the sketchnote, page 2 the listening sheet) to annotate it in Concepts or GoodNotes.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="listen">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Listen for</h2>
+      <p class="eyebrow">In class</p>
+    </div>
+    <div class="prose">
+      <p>Keep these in mind while the presenter talks. Tick them on page 2 of the PDF as they come up.</p>
+      <ol>
+        <li>What is borrowed (Prismatic VLM, Llama 2, RT-2&#x27;s action bins, Octo&#x27;s data mix) and what is new</li>
+        <li>How one continuous robot action becomes 7 tokens, and how the tokens become an action again</li>
+        <li>Which robots the out-of-the-box tests use, and whether they are in the training data</li>
+        <li>Where RT-2-X and Diffusion Policy still win, and the reasons the authors give</li>
+        <li>Which model, tasks and GPUs the LoRA and 4-bit claims rest on</li>
+      </ol>
+      <h3>Questions worth asking</h3>
+      <ol>
+        <li>OpenVLA uses one image and predicts one action per step; the paper reports about 6 Hz in bfloat16 on an RTX 4090. Which high-frequency tasks would this setup struggle with, and could action chunking or a different action tokenization help without losing the language grounding?</li>
+        <li>RT-2-X keeps Internet data in its fine-tuning mix and wins on semantic generalization; OpenVLA trains on robot data only. Is that gap worth the cost of co-training, and how would you test it?</li>
+        <li>Part of the BridgeData V2 gain is credited to data cleaning, and RT-2-X had to be queried for its second-best action. How should open and closed policies be compared fairly?</li>
+      </ol>
+      <h3>In class, on an iPad</h3>
+      <ol>
+        <li><b>Before:</b> watch or listen to the read-along (the chapters are below) and skim the questions below.</li>
+        <li><b>Open</b> the sketchnote PDF in Concepts or another note app. Page 1 is the summary drawing, with room to annotate. Page 2 is the listening sheet.</li>
+        <li><b>During the talk:</b> tick each "listen for" item as it comes up, and write one line in each box of the sheet.</li>
+        <li><b>After:</b> mark the one answer below that the talk changed for you, and ask your question.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Common questions and misunderstandings</h2>
+      <p class="eyebrow">FAQ</p>
+    </div>
+    <div class="prose faq">
+      <details>
+        <summary>&quot;Beats RT-2-X by 16.5%&quot;: absolute or relative, and on what?</summary>
+        <p>Absolute: 16.5 percentage points of the paper&#x27;s success score, over 29 tasks on two robots; some Bridge tasks give half credit. On the 17 BridgeData V2 WidowX tasks (170 rollouts per policy) the means are 70.6% vs 50.6%; on the 12 Google robot tasks (60 rollouts) they are 85.0% vs 78.3%, with overlapping error bars, which the paper calls comparable. Pooling all 230 rollouts of Tables 4 and 6 gives 74.3% vs 57.8%, which matches the 16.5 points (our arithmetic; the paper does not show the calculation). <span class="ref">(Abstract, Sec. 5.1, Figs. 3–4, Tables 4 and 6, Appendix B.1.1)</span></p>
+      </details>
+      <details>
+        <summary>Is OpenVLA better than RT-2-X on every kind of task?</summary>
+        <p>No. RT-2-X is better at semantic generalization (unseen objects, instructions and Internet concepts): 15.5 vs 14.5 points out of 40 trials on the four Bridge semantic tasks, counting half credit. The authors explain this by RT-2-X&#x27;s larger Internet pretraining and its co-fine-tuning on Internet data, while OpenVLA is fine-tuned on robot data only. In every other category OpenVLA is comparable or better on average, though RT-2-X wins some single tasks, such as Put {Eggplant, Red Bottle} into Pot (8.5 vs 7.5). <span class="ref">(Sec. 5.1, Fig. 3, Table 4, Appendix B.1.1)</span></p>
+      </details>
+      <details>
+        <summary>Is the RT-2-X comparison like for like?</summary>
+        <p>Not fully. RT-2-X is closed and was reached through an API; trained on Bridge data that still has all-zero (no-op) actions, it often predicts the zero action and freezes, so the authors always take its second-most-likely action, as the Open X-Embodiment team did. OpenVLA&#x27;s training drops the no-op first step of every Bridge demonstration. The authors credit part of OpenVLA&#x27;s Bridge gain to this cleaning, besides more data (970k vs 350k trajectories) and the fused vision encoder. <span class="ref">(Sec. 5.1, Appendix C)</span></p>
+      </details>
+      <details>
+        <summary>What in OpenVLA is new, and what is borrowed?</summary>
+        <p>Most parts are borrowed. The backbone is the Prismatic-7B VLM (a 600M-parameter DINOv2 + SigLIP encoder, a 2-layer MLP projector and Llama 2 7B), the action tokens follow RT-2, and the data-mixture weights follow Octo. New are bin edges at the 1st and 99th percentile instead of min–max, the design choices tested in Sec. 3.4, the study of fine-tuning, LoRA and quantization, and an open release of the weights, code and training data. <span class="ref">(Sec. 2, Secs. 3.1–3.4, footnote 1)</span></p>
+      </details>
+      <details>
+        <summary>How does a language model output a continuous robot action?</summary>
+        <p>Each of the 7 action dimensions is cut into 256 bins between its 1st and 99th percentile in the training data, and each bin is one token. The Llama tokenizer reserves only 100 special tokens, so the 256 least-used tokens (the last 256 of the vocabulary) are overwritten. The model predicts the 7 tokens with ordinary next-token cross-entropy on the action tokens only, and a de-tokenizer maps them back to position change, rotation change and gripper. <span class="ref">(Sec. 3.2, Fig. 2)</span></p>
+      </details>
+      <details>
+        <summary>What does OpenVLA see at each step?</summary>
+        <p>One third-person camera image at 224 × 224 px and the language instruction. It has no wrist camera, no robot state and no observation history, and it predicts one action per step, with no action chunking. The authors list single-image input as the first limitation; the full Diffusion Policy baseline uses two steps of images and robot state, which is why a &quot;matched&quot; version is also tested. <span class="ref">(Sec. 3.4, Sec. 5.2 (footnote 3), Sec. 6, Appendix E.1)</span></p>
+      </details>
+      <details>
+        <summary>Are the out-of-the-box test robots new to OpenVLA?</summary>
+        <p>No. The WidowX (BridgeData V2, 13.3%) and the Google robot (Fractal, the RT-1 data, 12.7%) are among the largest parts of the training mix. The Bridge tests add shifts in scene, objects, lighting and start pose; the Google robot tests have 5 in-distribution tasks and 7 out-of-distribution tasks with unseen objects, backgrounds, instructions or concepts. The Franka arm is tested only after fine-tuning, and DROID&#x27;s Franka data was in the pretraining mix (at 10%) for the first two thirds of training. <span class="ref">(Sec. 3.3, Secs. 5.1–5.2, Appendix A (Table 3), Appendices B.1.2 and B.2.1)</span></p>
+      </details>
+      <details>
+        <summary>Does fine-tuned OpenVLA beat Diffusion Policy everywhere?</summary>
+        <p>No. Diffusion Policy trained from scratch matches or beats it on narrow single-instruction tasks such as Put Carrot in Bowl and Pour Corn into Pot, and it moves more smoothly and precisely. OpenVLA wins on the multi-instruction tasks with several objects and has the best averages: 67.2% vs 48.5% on Franka-Tabletop and 58.3% vs 35.0% on Franka-DROID. The abstract&#x27;s 20.4% is the gap between the aggregate bars in Fig. 5 (63.8% vs 43.4%); these scores include partial credit, and Wipe Table gives up to 2 points per trial. <span class="ref">(Abstract, Sec. 5.2, Fig. 5, Table 7, Appendix B.3.1)</span></p>
+      </details>
+      <details>
+        <summary>Does LoRA really match full fine-tuning?</summary>
+        <p>On the tasks tested, yes, on average: 68.2% vs 69.7% success. Rank 32 trains 97.6M parameters, about 1.4% of the 7,188.1M-parameter model, and rank 64 trains 195.2M (about 2.7%); both average 68.2%, with different per-task results. The test is small: 33 rollouts per method on two Franka-Tabletop tasks (Put Carrot in Bowl, Move &lt;object&gt; onto Plate). It also uses a different OpenVLA, with a SigLIP-only encoder and pretrained on Octo&#x27;s smaller data mix, not the main model. <span class="ref">(Sec. 5.3 (footnote 4), Table 1, Table 8)</span></p>
+      </details>
+      <details>
+        <summary>Can you fine-tune OpenVLA on a consumer GPU?</summary>
+        <p>The paper says so but reports no such run. The LoRA run in Table 1 needs 59.7 GB of GPU memory at batch size 16, and the reported time is 10–15 hours on one A100, 8x less compute than full fine-tuning on 8 A100s. Consumer GPUs appear only for inference: about 6 Hz in bfloat16 on an RTX 4090 (Sec. 3.5) and the speed comparison in Fig. 6. <span class="ref">(Abstract, Sec. 3.5, Sec. 5.3, Table 1, Fig. 6)</span></p>
+      </details>
+      <details>
+        <summary>Does 4-bit inference cost success, and how much memory does OpenVLA need?</summary>
+        <p>Not on average: on 8 Bridge tasks (80 rollouts per method), the SigLIP-only variant scored 71.9 ± 4.7% in int4 (7.0 GB) and 71.3 ± 4.8% in bfloat16 (16.8 GB), though single tasks varied (Lift AAA Battery: 3 vs 7 of 10). int8 drops to 58.1% because it runs at only 1.2 Hz on the A5000 against a 5 Hz controller; with blocking control all three are comparable. The paper does not reconcile its memory figures: 15 GB for the final model in bfloat16 (Sec. 3.5), 16.8 GB for the variant (Table 2), and 16 GB GPUs as enough (Sec. 5.4). <span class="ref">(Sec. 3.5; Secs. 5.3–5.4 (footnote 4); Tables 2 and 5; Appendix D.4 (Table 11))</span></p>
+      </details>
+      <details>
+        <summary>What did the design ablations show?</summary>
+        <p>On 8 Bridge tasks, dropping the Open X mix cost far more than dropping DINOv2. Trained on BridgeData V2 alone, the model falls from 76.3% to 45.6% (about 30 points); removing DINOv2 as well costs another 5 points (40.6%). In separate early tests with a different setup, fine-tuning the vision encoder, unlike common VLM practice, gave 80.0% vs 46.7% with it frozen; the paper says these results are not directly comparable to its other ones. Going from 224 to 384 px gave no gain and tripled training time. <span class="ref">(Sec. 3.4, Appendix D.1–D.3, Tables 9–10)</span></p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section id="video">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Chapters</h2>
+      <p class="eyebrow">Video</p>
+    </div>
+    <ol class="chapters">
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/oXBktHyU4gw?t=0">0:00</a><span>Abstract</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/oXBktHyU4gw?t=152">2:32</a><span>1. Introduction</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/oXBktHyU4gw?t=477">7:57</a><span>2. Related Work</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/oXBktHyU4gw?t=799">13:19</a><span>3. The OpenVLA Model</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/oXBktHyU4gw?t=1684">28:04</a><span>4. The OpenVLA Codebase</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/oXBktHyU4gw?t=1738">28:58</a><span>5. Experiments</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/oXBktHyU4gw?t=3144">52:24</a><span>6. Discussion and Limitations</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/oXBktHyU4gw?t=3280">54:40</a><span>Appendix A. Data Mixture Details</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/oXBktHyU4gw?t=3303">55:03</a><span>Appendix B. Evaluation Tasks and Detailed Results</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/oXBktHyU4gw?t=5442">1:30:42</a><span>Appendix C. RT-2-X versus OpenVLA in BridgeData V2 Evaluations</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/oXBktHyU4gw?t=5658">1:34:18</a><span>Appendix D. Additional Experiments and Ablations</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/oXBktHyU4gw?t=6411">1:46:51</a><span>Appendix E. LIBERO Simulation Experiments</span></li>
+    </ol>
+  </div>
+</section>
+
+<section id="terms">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Key terms</h2>
+      <p class="eyebrow">Glossary</p>
+    </div>
+    <div class="prose">
+      <dl class="terms">
+        <dt>VLA</dt><dd>Vision-language-action model: a pretrained vision-language model fine-tuned to output robot actions as tokens.</dd>
+        <dt>Prismatic-7B</dt><dd>The base VLM: DINOv2 + SigLIP image encoder, 2-layer MLP projector, Llama 2 7B.</dd>
+        <dt>DINOv2 / SigLIP</dt><dd>Two pretrained image encoders, concatenated per patch; DINOv2 adds spatial detail, SigLIP semantics.</dd>
+        <dt>Action bin</dt><dd>One of 256 equal slices of an action dimension between its 1st and 99th percentile; one token each.</dd>
+        <dt>Out of the box</dt><dd>Run with no fine-tuning, on robots that are in the training mix.</dd>
+        <dt>LoRA</dt><dd>Low-rank adaptation: train small low-rank updates to every linear layer; rank 32 trains about 1.4% as many parameters as full fine-tuning here.</dd>
+        <dt>Quantization</dt><dd>Loading the weights at 8 or 4 bits instead of 16 to cut GPU memory.</dd>
+        <dt>Non-blocking control</dt><dd>The robot keeps moving while the next action is computed, so slow inference changes the dynamics.</dd>
+        <dt>Action chunking</dt><dd>Predicting several future actions at once; Diffusion Policy does it, OpenVLA does not.</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<section id="links">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Related</h2>
+      <p class="eyebrow">Links</p>
+    </div>
+    <div class="prose">
+      <ul>
+        <li><a rel="noopener" target="_blank" href="https://youtu.be/oXBktHyU4gw">Read-along video on YouTube</a></li>
+        <li><a href="/review-openvla-visionary">Confidence calibration of fine-tuned OpenVLA (visionary review)</a></li>
+        <li><a href="/read-along-octo">Octo read-along</a></li>
+        <li><a href="/read-along-fast">FAST read-along</a></li>
+      </ul>
+      <p class="note"><b>How this page was made.</b> The video is an AI narration (Breeze TTS 2) of the full paper with the text on screen. The summary, questions and sketchnote were drafted with an AI assistant from the paper's text and checked against it; the references in brackets point to the paper. Paper license: CC BY 4.0. The sketchnote is an original drawing, not a copy of the paper's figures.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="backlink"><a href="/paper-review">← All paper reviews</a></p>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <img class="footer-portrait" src="media/portrait.jpg" alt="Portrait of Pavel Bushuyeu" width="640" height="640" loading="lazy">
+      <nav aria-label="Site">
+        <h2 class="footer-h">Site</h2>
+        <ul>
+          <li><a href="/research">Research</a></li>
+          <li><a href="/teaching">Teaching</a></li>
+          <li><a href="/product-management">Product management</a></li>
+          <li><a href="/services">Services</a></li>
+          <li><a href="/projects">Projects</a></li>
+          <li><a href="/paper-review">Paper review</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Profiles">
+        <h2 class="footer-h">Elsewhere</h2>
+        <ul>
+          <li><a rel="noopener" target="_blank" href="https://linkedin.com/in/bushuyeu/">LinkedIn</a></li>
+          <li><a rel="noopener" target="_blank" href="https://github.com/bushuyeu">GitHub</a></li>
+          <li><a rel="noopener" target="_blank" href="https://huggingface.co/bushuyeu">Hugging Face</a></li>
+          <li><a rel="noopener" target="_blank" href="https://scholar.google.com/citations?user=ub3osgUAAAAJ">Google Scholar</a></li>
+          <li><a rel="noopener" target="_blank" href="https://orcid.org/0009-0009-7183-6714">ORCID</a></li>
+          <li><a rel="noopener" target="_blank" href="https://openreview.net/profile?id=~Pavel_Bushuyeu1">OpenReview</a></li>
+          <li><a rel="noopener" target="_blank" href="https://www.semanticscholar.org/author/2405429742">Semantic Scholar</a></li>
+          <li><a rel="noopener" target="_blank" href="https://www.researchgate.net/profile/Pavel-Bushuyeu">ResearchGate</a></li>
+        </ul>
+      </nav>
+      <div>
+        <h2 class="footer-h">Contact</h2>
+        <ul>
+          <li><a href="mailto:pavelbushuyeu@gmail.com">pavelbushuyeu@gmail.com</a></li>
+          <li><a rel="noopener" target="_blank" href="https://calendar.app.google/aTs1mDgEEfqNLnNf6">Schedule a call</a></li>
+          <li><a href="https://follow.it/pavel-bushuyeu-news" rel="noopener" target="_blank">Subscribe to updates</a></li>
+          <li><a href="/feed.xml">RSS feed</a></li>
+          <li><a href="Pavel-Bushuyeu-CV.pdf" download>Download Resume</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="footer-base">© 2026 Pavel Bushuyeu</p>
+  </div>
+</footer>
+
+</body>
+</html>

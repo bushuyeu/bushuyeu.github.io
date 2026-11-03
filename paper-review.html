@@ -31,6 +31,13 @@
 </script>
 <script src="faro.js" async></script>
 <script src="theme.js?v=2" defer></script>
+<!-- tag-filter: added by paper-review tools/companion_page.py -->
+<style>
+.tag { display: inline-block; font-size: 0.78rem; line-height: 1; padding: 4px 8px; border: 1px solid var(--hair-soft); border-radius: 999px; color: var(--ink-2); vertical-align: 1px; }
+.tag-filter { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 22px; }
+.tag-filter button { font: inherit; font-size: 0.88rem; padding: 6px 14px; border: 1px solid var(--hair-soft); border-radius: 999px; background: none; color: var(--ink-2); cursor: pointer; }
+.tag-filter button[aria-pressed="true"] { border-color: var(--ink); color: var(--ink); }
+</style>
 </head>
 <body>
 
@@ -56,7 +63,39 @@
 
 <section id="reviews">
   <div class="wrap">
+    <div class="tag-filter" role="group" aria-label="Show">
+      <button type="button" data-show="all" aria-pressed="true">All</button>
+      <button type="button" data-show="review" aria-pressed="false">Role reviews</button>
+      <button type="button" data-show="read-along" aria-pressed="false">Read-alongs</button>
+    </div>
     <ol class="rows">
+
+      <li class="row" data-tags="read-along">
+        <div class="row__when">Nov 2026</div>
+        <div class="row__main">
+          <div class="row__title"><a href="/read-along-dart">DART read-along</a></div>
+          <div class="row__sub">DART, Laskey et al. · arXiv:1703.09327 · <span class="tag">read-along</span></div>
+          <div class="row__body">Add noise to the supervisor&#x27;s controls while it demonstrates, sized to the learner&#x27;s error, and get DAgger-like robustness without letting the robot drive. With the video chapters, prompts for listening in class, a sketchnote to annotate and common questions.</div>
+        </div>
+      </li>
+
+      <li class="row" data-tags="read-along">
+        <div class="row__when">Nov 2026</div>
+        <div class="row__main">
+          <div class="row__title"><a href="/read-along-droid">DROID read-along</a></div>
+          <div class="row__sub">DROID, Khazatsky et al. · arXiv:2403.12945 · <span class="tag">read-along</span></div>
+          <div class="row__body">76k robot demonstrations in 564 scenes on a shared Franka hardware design, and what that diversity buys when co-training a policy. With the video chapters, prompts for listening in class, a sketchnote to annotate and common questions.</div>
+        </div>
+      </li>
+
+      <li class="row" data-tags="read-along">
+        <div class="row__when">Nov 2026</div>
+        <div class="row__main">
+          <div class="row__title"><a href="/read-along-oxe">Open X-Embodiment read-along</a></div>
+          <div class="row__sub">Open X-Embodiment, Open X-Embodiment Collaboration (O&#x27;Neill et al. · arXiv:2310.08864 · <span class="tag">read-along</span></div>
+          <div class="row__body">60 robot datasets from 22 robot types pooled into one format, and what training RT-1 and RT-2 on a 9-robot slice of it buys each robot. With the video chapters, prompts for listening in class, a sketchnote to annotate and common questions.</div>
+        </div>
+      </li>
 
       <li class="row">
         <div class="row__when">Nov 2026</div>
@@ -82,6 +121,42 @@
           <div class="row__title"><a href="/review-oxe-empiricist">Robot concentration in Open X-Embodiment</a></div>
           <div class="row__sub">Open X-Embodiment, Open X-Embodiment Collaboration · arXiv:2310.08864 · empiricist</div>
           <div class="row__body">How many robots does the Open X-Embodiment data really cover? An audit from public metadata: three robots hold 80% of the trajectories, and the training mixtures of Octo and OpenVLA spread the data across datasets but keep about four effective robots. It also finds that OpenVLA's published mixture table sums to 95%.</div>
+        </div>
+      </li>
+
+      <li class="row" data-tags="read-along">
+        <div class="row__when">Oct 2026</div>
+        <div class="row__main">
+          <div class="row__title"><a href="/read-along-dagger">DAgger read-along</a></div>
+          <div class="row__sub">DAgger, Ross et al. · arXiv:1011.0686 · <span class="tag">read-along</span></div>
+          <div class="row__body">DAgger lets the learner drive, has the expert label the visited states, and retrains on all data; if the expert recovers fast, the T² bound becomes linear in T. With the video chapters, prompts for listening in class, a sketchnote to annotate and common questions.</div>
+        </div>
+      </li>
+
+      <li class="row" data-tags="read-along">
+        <div class="row__when">Oct 2026</div>
+        <div class="row__main">
+          <div class="row__title"><a href="/read-along-openvla">OpenVLA read-along</a></div>
+          <div class="row__sub">OpenVLA, Kim et al. · arXiv:2406.09246 · <span class="tag">read-along</span></div>
+          <div class="row__body">A 7B open-source vision-language-action model trained on 970k robot episodes: how it turns actions into tokens, where it beats RT-2-X, and what LoRA and 4-bit inference cost. With the video chapters, prompts for listening in class, a sketchnote to annotate and common questions.</div>
+        </div>
+      </li>
+
+      <li class="row" data-tags="read-along">
+        <div class="row__when">Oct 2026</div>
+        <div class="row__main">
+          <div class="row__title"><a href="/read-along-fast">FAST read-along</a></div>
+          <div class="row__sub">FAST, Pertsch et al. · arXiv:2501.09747 · <span class="tag">read-along</span></div>
+          <div class="row__body">A DCT plus byte-pair-encoding tokenizer that compresses robot action chunks, so next-token VLAs learn 50 Hz dexterous tasks and match diffusion π0 with 5× fewer GPU hours. With the video chapters, prompts for listening in class, a sketchnote to annotate and common questions.</div>
+        </div>
+      </li>
+
+      <li class="row" data-tags="read-along">
+        <div class="row__when">Oct 2026</div>
+        <div class="row__main">
+          <div class="row__title"><a href="/read-along-octo">Octo read-along</a></div>
+          <div class="row__sub">Octo, Ghosh et al. · arXiv:2405.12213 · <span class="tag">read-along</span></div>
+          <div class="row__body">An open transformer policy pretrained on 800k Open X-Embodiment trajectories, which finetunes to new sensors, action spaces and robots from about 100 demonstrations. With the video chapters, prompts for listening in class, a sketchnote to annotate and common questions.</div>
         </div>
       </li>
 
@@ -222,5 +297,17 @@
   </div>
 </footer>
 
+<script>/* Tag filter: show all rows, the role reviews, or the read-alongs (rows with data-tags="read-along") */
+document.querySelectorAll(".tag-filter button").forEach(function (b) {
+  b.addEventListener("click", function () {
+    var show = b.dataset.show;
+    document.querySelectorAll(".tag-filter button").forEach(function (o) { o.setAttribute("aria-pressed", o === b ? "true" : "false"); });
+    document.querySelectorAll("ol.rows > li.row").forEach(function (li) {
+      var kind = (li.dataset.tags || "").indexOf("read-along") >= 0 ? "read-along" : "review";
+      li.hidden = !(show === "all" || show === kind);
+    });
+  });
+});
+</script>
 </body>
 </html>

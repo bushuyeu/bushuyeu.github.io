@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<script>/* Theme: apply a stored Light/Dark pick before the first paint (theme.js) */(function(){var r=document.documentElement;try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark"){r.setAttribute("data-theme",t);document.querySelector('meta[name="color-scheme"]').content=t}}catch(e){}r.classList.add("theme-js")})()</script>
+<title>Octo read-along — Pavel Bushuyeu</title>
+<meta name="description" content="Octo is an open-source transformer policy pretrained on 800k robot trajectories from 25 Open X-Embodiment datasets, released as Octo-Small (27M parameters) and Octo-Base (93M) with its training and finetuning code.">
+<link rel="canonical" href="https://bushuyeu.com/read-along-octo">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Octo read-along — Pavel Bushuyeu">
+<meta property="og:description" content="Octo is an open-source transformer policy pretrained on 800k robot trajectories from 25 Open X-Embodiment datasets, released as Octo-Small (27M parameters) and Octo-Base (93M) with its training and finetuning code.">
+<meta property="og:url" content="https://bushuyeu.com/read-along-octo">
+<meta property="og:image" content="https://bushuyeu.com/media/og-card.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Pavel Bushuyeu, AI researcher, University of Hawaiʻi at Mānoa">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://bushuyeu.com/media/og-card.jpg">
+<link rel="icon" href="favicon-32.png?v=3" type="image/png" sizes="32x32">
+<link rel="icon" href="icon-512.png?v=3" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="alternate" type="application/rss+xml" title="Pavel Bushuyeu — News" href="https://bushuyeu.com/feed.xml">
+<link rel="stylesheet" href="style.css?v=34">
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "WebPage", "author": {"@type": "Person", "@id": "https://bushuyeu.com/#person", "name": "Pavel Bushuyeu", "url": "https://bushuyeu.com/"}}
+</script>
+<style>
+/* Page-only styles for read-along pages. Built on the tokens in style.css; the light-theme grey is darkened here so small text passes 4.5:1. */
+:root { --ink-3: #707075; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ink-3: #86868b; } }
+:root[data-theme="dark"] { --ink-3: #86868b; }
+.prose a { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.chapters { list-style: none; margin: 0; padding: 0; columns: 2 18rem; column-gap: 32px; }
+.chapters li { break-inside: avoid; padding: 5px 0; border-bottom: 1px solid var(--hair-soft); display: flex; gap: 12px; }
+.chapters a { font-variant-numeric: tabular-nums; min-width: 4.2em; }
+.sketch { margin: 0; border: 1px solid var(--hair-soft); border-radius: 12px; padding: 10px; background: #fff; }
+.sketch img { display: block; width: 100%; height: auto; }
+.sketch figcaption { margin-top: 8px; font-size: 0.86rem; line-height: 1.45; color: #5e5e63; }
+.faq details { border-top: 1px solid var(--hair-soft); padding: 12px 0; }
+.faq details:last-child { border-bottom: 1px solid var(--hair-soft); }
+.faq summary { cursor: pointer; font-weight: 600; list-style-position: outside; }
+.faq details p { margin: 8px 0 0; }
+.faq .ref { color: var(--ink-3); font-size: 0.88rem; white-space: nowrap; }
+.terms { display: grid; grid-template-columns: max-content 1fr; gap: 8px 22px; margin: 0; }
+.terms dt { font-weight: 600; }
+.terms dd { margin: 0; color: var(--ink-2); }
+@media (max-width: 640px) { .terms { grid-template-columns: 1fr; } .terms dd { margin-bottom: 8px; } }
+</style>
+<script src="faro.js" async></script>
+<script src="theme.js?v=2" defer></script>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="topbar">
+      <nav class="eyebrow eyebrow-nav" aria-label="Main">
+        <a href="/">Home</a>
+        <a href="/research">Research</a>
+        <a href="/teaching">Teaching</a>
+        <a href="/product-management">Product management</a>
+        <a href="/services">Services</a>
+      </nav>
+      <button type="button" class="theme-switch" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode">
+        <svg class="theme-switch__moon" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M13.6 9.9A5.7 5.7 0 0 1 6.1 2.4a5.8 5.8 0 1 0 7.5 7.5z"/></svg>
+        <svg class="theme-switch__sun" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1.3v1.5M8 13.2v1.5M1.3 8h1.5M13.2 8h1.5M3.3 3.3l1 1M11.7 11.7l1 1M3.3 12.7l1-1M11.7 4.3l1-1"/></svg>
+      </button>
+    </div>
+    <h1>Octo read-along</h1>
+    <p class="sub">Octo: An Open-Source Generalist Robot Policy. Ghosh, Walke, Pertsch, Black, Mees, Dasari and others, RSS 2024.</p>
+    <div class="meta">
+      <span>Paper: <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2405.12213">Octo, arXiv:2405.12213</a></span>
+      <span class="tag">read-along</span>
+      <span>Video 37:50</span>
+      <a class="pill-link" href="https://youtu.be/gExHKoogYdM" rel="noopener" target="_blank" style="gap:7px" aria-label="Watch the read-along on YouTube (opens in a new tab)"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="3" width="13" height="10" rx="2.5"/><path d="M6.5 6v4l3.5-2z"/></svg>Watch on YouTube</a>
+      <a class="pill-link" href="/media/read-along-octo-sketchnote.pdf" download style="gap:7px" aria-label="Download the sketchnote and listening sheet (PDF)"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v8m0 0 3.2-3.2M8 10.5 4.8 7.3M3 13.5h10"/></svg>Sketchnote (PDF)</a>
+    </div>
+  </div>
+</header>
+
+<section id="summary">
+  <div class="wrap">
+    <div class="shead">
+      <h2>In short</h2>
+      <p class="eyebrow">Summary</p>
+    </div>
+    <div class="prose">
+      <p>Octo is an open-source transformer policy pretrained on 800k robot trajectories from 25 Open X-Embodiment datasets, released as Octo-Small (27M parameters) and Octo-Base (93M) with its training and finetuning code.</p>
+      <p>It turns language, goal images and camera images into tokens, and a small diffusion head turns the transformer&#x27;s readout tokens into chunks of actions, so finetuning can add new inputs (force-torque) or new action spaces (joint control, two arms) by adding an encoder or a head.</p>
+      <p>Finetuned on about 100 demonstrations, Octo averages 72% success over six new setups, against 20% for the best baseline (Table I); without finetuning, it beats RT-1-X and performs similarly to the 55B RT-2-X on the two robots where both were tested.</p>
+    </div>
+  </div>
+</section>
+
+<section id="sketchnote">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Sketchnote</h2>
+      <p class="eyebrow">One-page summary</p>
+    </div>
+    <figure class="sketch">
+      <a href="/media/read-along-octo-sketchnote.png"><img src="media/read-along-octo-sketchnote.png" alt="Hand-drawn summary of Octo: Octo is an open-source transformer policy pretrained on 800k robot trajectories from 25 Open X-Embodiment datasets, released as Octo-Small (27M parameters) and Octo-Base (93M) with its training and finetuning code. It turns language, goal images and camera images into tokens, and a small diffusion head turns the transformer&#x27;s readout tokens into chunks of actions, so finetuning can add new inputs (force-torque) or new action spaces (joint control, two arms) by adding an encoder or a head. Finetuned on about 100 demonstrations, Octo averages 72% success over six new setups, against 20% for the best baseline (Table I); without finetuning, it beats RT-1-X and performs similarly to the 55B RT-2-X on the two robots where both were tested." width="1600" height="1200" loading="lazy"></a>
+      <figcaption>A one-page summary in sketchnote style. Download the <a href="/media/read-along-octo-sketchnote.pdf" download>PDF</a> (page 1 the sketchnote, page 2 the listening sheet) to annotate it in Concepts or GoodNotes.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="listen">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Listen for</h2>
+      <p class="eyebrow">In class</p>
+    </div>
+    <div class="prose">
+      <p>Keep these in mind while the presenter talks. Tick them on page 2 of the PDF as they come up.</p>
+      <ol>
+        <li>Zero-shot means no finetuning: Figure 5 uses seen tasks, Table VII tests broader generalization on WidowX</li>
+        <li>How readout tokens and masked attention let finetuning add new inputs and action heads</li>
+        <li>Which parts are borrowed (diffusion head, action chunks, ViT recipes) and what is new</li>
+        <li>What the finetuning baselines are, and which action head each one uses</li>
+        <li>The limits the authors admit: wrist cameras, language conditioning, a hand-tuned data mix</li>
+      </ol>
+      <h3>Questions worth asking</h3>
+      <ol>
+        <li>The VC-1 baseline uses an MSE head, and Table II shows that an MSE head drops Octo from 83% to 35%. How much of the 72% vs 15% gap in Table I is pretraining, and how much is the head?</li>
+        <li>The zero-shot tests use only robots from the pretraining mix. What experiment would show that pretraining on many robots helps a new robot more than pretraining on one?</li>
+        <li>Only 27% of the data has wrist images, and finetuning often did better without them. Is the fix more wrist data, or a different way to tokenize the wrist view?</li>
+      </ol>
+      <h3>In class, on an iPad</h3>
+      <ol>
+        <li><b>Before:</b> watch or listen to the read-along (the chapters are below) and skim the questions below.</li>
+        <li><b>Open</b> the sketchnote PDF in Concepts or another note app. Page 1 is the summary drawing, with room to annotate. Page 2 is the listening sheet.</li>
+        <li><b>During the talk:</b> tick each "listen for" item as it comes up, and write one line in each box of the sheet.</li>
+        <li><b>After:</b> mark the one answer below that the talk changed for you, and ask your question.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Common questions and misunderstandings</h2>
+      <p class="eyebrow">FAQ</p>
+    </div>
+    <div class="prose faq">
+      <details>
+        <summary>Is Octo trained on all of Open X-Embodiment?</summary>
+        <p>No. Open X-Embodiment has about 1.5M episodes, and Octo uses 800k of them from 25 datasets. The authors drop datasets without images or without delta end-effector actions, and ones that are too repetitive, low-resolution or niche; then they reweight the rest by hand, doubling the more diverse ones. RT-1-X and RT-2-X were trained on a 350K-episode subset. <span class="ref">(Sec. II, Sec. III-B, Fig. 3, Table III)</span></p>
+      </details>
+      <details>
+        <summary>Does &quot;zero-shot&quot; mean Octo controls a robot it has never seen?</summary>
+        <p>No. Of the nine evaluation setups, the three zero-shot setups (WidowX BridgeV2, UR5, RT-1 Robot) use robots from the pretraining data. The Figure 5 comparison uses tasks from their own datasets, with changes in object positions, lighting, backgrounds and distractors. Table VII separately tests new objects, scenes and skills on WidowX. Robots outside the mix, the ViperX in Berkeley Coke and the two-arm ALOHA, are tested only after finetuning on about 100 demonstrations. <span class="ref">(Sec. IV, Sec. IV-A, Fig. 5, Table VII, Appendix F)</span></p>
+      </details>
+      <details>
+        <summary>What does &quot;outperforms the next best baseline by 52%&quot; mean?</summary>
+        <p>52 percentage points of average success, not a 52% relative gain. In Table I, finetuned Octo averages 72% over six setups, a ResNet+Transformer trained from scratch 20%, and VC-1 15%. The scratch baseline has 28M parameters in total: a ResNet visual encoder with FiLM language conditioning and a small transformer action decoder trained with a diffusion objective, because Octo&#x27;s own architecture overfit quickly when trained from scratch on so few demonstrations. Table I says each domain is averaged over 20 trials, but Appendix F gives 10 trials for Berkeley Bimanual. <span class="ref">(Sec. IV, Sec. IV-B, Table I, Appendix F-C)</span></p>
+      </details>
+      <details>
+        <summary>How does Octo compare with RT-1-X and RT-2-X?</summary>
+        <p>Octo-Base (93M) had on average 29% higher success than RT-1-X (35M) over three robots, with two language tasks per robot and 10 trials per task; the paper does not say whether this is points or a relative gain. It performed similarly to the 55B RT-2-X on WidowX and the RT-1 Robot. RT-2-X is not openly available, so its WidowX numbers come from another paper (Black et al. [7]) on the same tasks, and its RT-1 Robot runs were done by the RT-2-X authors. <span class="ref">(Sec. IV-A, Fig. 5 and footnote 1)</span></p>
+      </details>
+      <details>
+        <summary>Does finetuning freeze the pretrained transformer?</summary>
+        <p>No. Fig. 2 says new inputs and action heads can be added without modifying pretrained parameters, but the finetuning recipe updates the full model, which worked better than freezing parts of it. Every setup uses the same recipe: about 100 trajectories, 50k steps, cosine learning-rate decay with linear warmup, and about 5 hours on one 24 GB A5000 for Octo-Base. <span class="ref">(Fig. 2, Sec. III-C, Sec. III-D)</span></p>
+      </details>
+      <details>
+        <summary>Which finetuning tasks test new inputs, new actions or new robots?</summary>
+        <p>Berkeley Insertion adds force-torque input. Berkeley Pick-Up uses joint position control, and Berkeley Bimanual gets a new head for ALOHA&#x27;s 14-dimensional joint and gripper actions. Berkeley Coke (one ViperX arm) and Bimanual (two ViperX arms) are robots outside the pretraining mix, which has only single-arm data. CMU Baking and Stanford Coffee keep end-effector delta actions on new tasks. <span class="ref">(Table I, Fig. 4, Appendix F-C)</span></p>
+      </details>
+      <details>
+        <summary>Is Octo a vision-language model like RT-2-X?</summary>
+        <p>No. Octo is a transformer of 27M (Small) or 93M (Base) parameters trained on robot data. Images go through a shallow CNN into 16×16 patch tokens, and language goes through a frozen T5-base encoder (111M) as 16 tokens. Appendix E reports that larger or finetuned T5 encoders did not help. <span class="ref">(Sec. III-A, Table V, Appendix D, Appendix E)</span></p>
+      </details>
+      <details>
+        <summary>What is new in Octo, and what is borrowed?</summary>
+        <p>The parts are borrowed, and the paper says so: a transformer backbone, language and goal-image conditioning, a diffusion action head, action chunks, and ViT layouts and learning-rate schedules. The claims are the combination for cross-embodiment policies, being the first generalist policy shown to finetune to new observation and action spaces, and a fully open release of checkpoints, training and finetuning code, and data loaders. <span class="ref">(Sec. I, Sec. II, Sec. III-E)</span></p>
+      </details>
+      <details>
+        <summary>What do the ablations test, and on what?</summary>
+        <p>Tables II and VI test Octo-Small on WidowX, with 40 trials across two language-conditioned and two goal-image-conditioned tasks. The full model scores 83%; the MSE head 35%, discretized actions 18%, the 11-dataset RT-X mix 60%, Bridge data only 43%, and ResNet-50 + Transformer 70%. Separately, Figure 6 compares Octo-Tiny (10M), Small (27M) and Base (93M) on UR5 and WidowX, with 10 trials on one language-conditioned task per robot. <span class="ref">(Sec. IV-C, Table II, Table VI, Fig. 6)</span></p>
+      </details>
+      <details>
+        <summary>Do goal images or language work better?</summary>
+        <p>Goal images, in the one direct comparison: zero-shot on WidowX, goal-image conditioning had a &quot;25% higher success rate&quot; than language; the paper does not say whether that is points or a relative gain. The authors suggest two possible reasons: goal images give more information about the task, and only 56% of the pretraining data has language annotations. Training drops the language or the goal image at random, and datasets without language always use goal images. <span class="ref">(Sec. III-D, Sec. IV-A, Sec. V)</span></p>
+      </details>
+      <details>
+        <summary>Does Octo use the wrist camera well?</summary>
+        <p>No, by the authors&#x27; own account. Finetuning results were often stronger with only the third-person camera than with third-person plus wrist, and only 27% of the pretraining data has wrist images. Wrist images are also resized to 128×128 (64 tokens), against 256×256 (256 tokens) for the third-person view. <span class="ref">(Sec. V, Appendix D)</span></p>
+      </details>
+      <details>
+        <summary>How far does Octo generalize zero-shot on WidowX?</summary>
+        <p>Well to new objects, less to new environments, hardly to new skills. In Table VII (Octo-Small, 20 trials over two tasks per row), success averages 85% in distribution, 80% with novel objects, 40% in a novel environment and 5% for novel skills such as flipping a cup. The text calls the drop in a new scene slight, and the caption says Octo generalizes well to novel environments, but the table shows the average falling by more than half. <span class="ref">(Sec. IV-A, Table VII)</span></p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section id="video">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Chapters</h2>
+      <p class="eyebrow">Video</p>
+    </div>
+    <ol class="chapters">
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/gExHKoogYdM?t=0">0:00</a><span>Abstract</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/gExHKoogYdM?t=103">1:43</a><span>1. Introduction</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/gExHKoogYdM?t=463">7:43</a><span>2. Related work</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/gExHKoogYdM?t=706">11:46</a><span>3. The Octo model</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/gExHKoogYdM?t=1399">23:19</a><span>4. Experiments</span></li>
+      <li><a rel="noopener" target="_blank" href="https://youtu.be/gExHKoogYdM?t=2100">35:00</a><span>5. Discussion and future work</span></li>
+    </ol>
+    <p class="note">These times are estimates from the narration text, within about half a minute.</p>
+  </div>
+</section>
+
+<section id="terms">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Key terms</h2>
+      <p class="eyebrow">Glossary</p>
+    </div>
+    <div class="prose">
+      <dl class="terms">
+        <dt>Generalist robot policy (GRP)</dt><dd>The paper&#x27;s term for a policy that does low-level visuomotor control across tasks, scenes and robots.</dd>
+        <dt>Readout token</dt><dd>A learned token that reads earlier task and observation tokens but is not read by them; the action head sits on it, like BERT&#x27;s [CLS].</dd>
+        <dt>Block-wise masked attention</dt><dd>Observation tokens see only task tokens and tokens of the same or earlier time steps; missing inputs are masked out.</dd>
+        <dt>Diffusion action head</dt><dd>A small MLP that turns Gaussian noise into actions in 20 denoising steps, conditioned on the readout embedding.</dd>
+        <dt>Action chunk</dt><dd>Several consecutive future actions predicted at once.</dd>
+        <dt>Goal-image conditioning</dt><dd>The task is a picture of the desired end state; in training, a random future frame of the episode (hindsight relabeling).</dd>
+        <dt>Delta end-effector control</dt><dd>Actions are relative moves of the end effector; Octo pretrains only on datasets with such actions.</dd>
+        <dt>Zero-shot (in this paper)</dt><dd>Used without finetuning. The tested robots are in the pretraining data; Figure 5 uses in-distribution tasks, and Table VII also tests new objects, scenes and skills on WidowX.</dd>
+        <dt>OXE</dt><dd>Open X-Embodiment: about 1.5M pooled robot episodes; Octo trains on 800k from 25 of its datasets.</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<section id="links">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Related</h2>
+      <p class="eyebrow">Links</p>
+    </div>
+    <div class="prose">
+      <ul>
+        <li><a rel="noopener" target="_blank" href="https://youtu.be/gExHKoogYdM">Read-along video on YouTube</a></li>
+        <li><a href="/read-along-oxe">Open X-Embodiment read-along</a></li>
+        <li><a href="/read-along-openvla">OpenVLA read-along</a></li>
+      </ul>
+      <p class="note"><b>How this page was made.</b> The video is an AI narration (Breeze TTS 2) of the full paper with the text on screen. The summary, questions and sketchnote were drafted with an AI assistant from the paper's text and checked against it; the references in brackets point to the paper. Paper license: CC BY 4.0. The sketchnote is an original drawing, not a copy of the paper's figures.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="backlink"><a href="/paper-review">← All paper reviews</a></p>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <img class="footer-portrait" src="media/portrait.jpg" alt="Portrait of Pavel Bushuyeu" width="640" height="640" loading="lazy">
+      <nav aria-label="Site">
+        <h2 class="footer-h">Site</h2>
+        <ul>
+          <li><a href="/research">Research</a></li>
+          <li><a href="/teaching">Teaching</a></li>
+          <li><a href="/product-management">Product management</a></li>
+          <li><a href="/services">Services</a></li>
+          <li><a href="/projects">Projects</a></li>
+          <li><a href="/paper-review">Paper review</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Profiles">
+        <h2 class="footer-h">Elsewhere</h2>
+        <ul>
+          <li><a rel="noopener" target="_blank" href="https://linkedin.com/in/bushuyeu/">LinkedIn</a></li>
+          <li><a rel="noopener" target="_blank" href="https://github.com/bushuyeu">GitHub</a></li>
+          <li><a rel="noopener" target="_blank" href="https://huggingface.co/bushuyeu">Hugging Face</a></li>
+          <li><a rel="noopener" target="_blank" href="https://scholar.google.com/citations?user=ub3osgUAAAAJ">Google Scholar</a></li>
+          <li><a rel="noopener" target="_blank" href="https://orcid.org/0009-0009-7183-6714">ORCID</a></li>
+          <li><a rel="noopener" target="_blank" href="https://openreview.net/profile?id=~Pavel_Bushuyeu1">OpenReview</a></li>
+          <li><a rel="noopener" target="_blank" href="https://www.semanticscholar.org/author/2405429742">Semantic Scholar</a></li>
+          <li><a rel="noopener" target="_blank" href="https://www.researchgate.net/profile/Pavel-Bushuyeu">ResearchGate</a></li>
+        </ul>
+      </nav>
+      <div>
+        <h2 class="footer-h">Contact</h2>
+        <ul>
+          <li><a href="mailto:pavelbushuyeu@gmail.com">pavelbushuyeu@gmail.com</a></li>
+          <li><a rel="noopener" target="_blank" href="https://calendar.app.google/aTs1mDgEEfqNLnNf6">Schedule a call</a></li>
+          <li><a href="https://follow.it/pavel-bushuyeu-news" rel="noopener" target="_blank">Subscribe to updates</a></li>
+          <li><a href="/feed.xml">RSS feed</a></li>
+          <li><a href="Pavel-Bushuyeu-CV.pdf" download>Download Resume</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="footer-base">© 2026 Pavel Bushuyeu</p>
+  </div>
+</footer>
+
+</body>
+</html>
