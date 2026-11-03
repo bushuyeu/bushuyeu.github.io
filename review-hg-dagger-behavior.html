@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<script>/* Theme: apply a stored Light/Dark pick before the first paint (theme.js) */(function(){var r=document.documentElement;try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark"){r.setAttribute("data-theme",t);document.querySelector('meta[name="color-scheme"]').content=t}}catch(e){}r.classList.add("theme-js")})()</script>
+<title>Harvesting failures for imitation — Pavel Bushuyeu</title>
+<meta name="description" content="How our team ran human-gated DAgger in the 2026 BEHAVIOR Challenge: failures harvested with simulator snapshots, recovered in VR and by automatic experts, reviewed by an AI agent and a person, and what the recoveries changed. With the recordings.">
+<link rel="canonical" href="https://bushuyeu.com/review-hg-dagger-behavior">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Harvesting failures for imitation — Pavel Bushuyeu">
+<meta property="og:description" content="How our team ran human-gated DAgger in the 2026 BEHAVIOR Challenge: failures harvested with simulator snapshots, recovered in VR and by automatic experts, reviewed by an AI agent and a person, and what the recoveries changed. With the recordings.">
+<meta property="og:url" content="https://bushuyeu.com/review-hg-dagger-behavior">
+<meta property="og:image" content="https://bushuyeu.com/media/og-card.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Pavel Bushuyeu, AI researcher, University of Hawaiʻi at Mānoa">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://bushuyeu.com/media/og-card.jpg">
+<link rel="icon" href="favicon-32.png?v=3" type="image/png" sizes="32x32">
+<link rel="icon" href="icon-512.png?v=3" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="alternate" type="application/rss+xml" title="Pavel Bushuyeu — News" href="https://bushuyeu.com/feed.xml">
+<link rel="stylesheet" href="style.css?v=34">
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "WebPage", "author": {"@type": "Person", "@id": "https://bushuyeu.com/#person", "name": "Pavel Bushuyeu", "url": "https://bushuyeu.com/"}}
+</script>
+<style>
+/* Page-only styles. Built on the tokens in style.css; the light-theme grey is darkened here so small text passes 4.5:1. */
+:root { --ink-3: #707075; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ink-3: #86868b; } }
+:root[data-theme="dark"] { --ink-3: #86868b; }
+.prose a { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.prose table.design th[scope="row"] { font-weight: 600; white-space: nowrap; vertical-align: top; padding: 8px 18px 8px 0; border-bottom: 1px solid var(--hair-soft); }
+.prose table.design tbody tr:last-child th { border-bottom: none; }
+.prose table.data td:first-child, .prose table.runs td:first-child { font-weight: 500; }
+.prose table.runs tr.hl td { background: color-mix(in srgb, var(--link) 9%, transparent); }
+.prose ol.steps li, .prose ul.lim li { margin-bottom: 8px; }
+/* Paper-style figures (inline SVG) and the recordings. Colours come from style.css tokens. */
+.prose figure.fig { margin: 1.6em 0; }
+.prose figure.fig .fig-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.prose figure.fig svg { display: block; width: 100%; height: auto; }
+@media (max-width: 640px) { .prose figure.fig svg { min-width: 640px; } }
+.fig { --h: #eb6834; --a: #0066cc; font-family: var(--font-sans, Inter, -apple-system, "Helvetica Neue", sans-serif); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .fig { --h: #f0855a; --a: #2997ff; } }
+:root[data-theme="dark"] .fig { --h: #f0855a; --a: #2997ff; }
+.fig .ink { fill: var(--ink); } .fig .ink2 { fill: var(--ink-2); } .fig .ink3 { fill: var(--ink-3); }
+.fig .mono { font-family: var(--font-mono); }
+.fig .hair { stroke: var(--hair); } .fig .hairs { stroke: var(--hair-soft); }
+.fig .tint { fill: var(--tint); } .fig .bg { fill: var(--bg); }
+.fig .hf { fill: var(--h); } .fig .af { fill: var(--a); } .fig .hs { stroke: var(--h); } .fig .as { stroke: var(--a); }
+.fig .hw { fill: var(--h); fill-opacity: .12; } .fig .aw { fill: var(--a); fill-opacity: .10; }
+.fig .gf { fill: var(--ink-3); } .fig .gs { stroke: var(--ink-3); }
+.fig .inks { stroke: var(--ink); } .fig .ink2s { stroke: var(--ink-2); }
+.prose figure video { display: block; width: 100%; height: auto; border-radius: 10px; background: var(--tint); }
+.vgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; margin: 1.6em 0; }
+.vgrid figure { margin: 0; }
+@media (max-width: 640px) { .vgrid { grid-template-columns: 1fr; } }
+</style>
+<script src="faro.js" async></script>
+<script src="theme.js?v=2" defer></script>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="topbar">
+      <nav class="eyebrow eyebrow-nav" aria-label="Main">
+        <a href="/">Home</a>
+        <a href="/research">Research</a>
+        <a href="/teaching">Teaching</a>
+        <a href="/product-management">Product management</a>
+        <a href="/services">Services</a>
+      </nav>
+      <button type="button" class="theme-switch" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode">
+        <svg class="theme-switch__moon" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M13.6 9.9A5.7 5.7 0 0 1 6.1 2.4a5.8 5.8 0 1 0 7.5 7.5z"/></svg>
+        <svg class="theme-switch__sun" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1.3v1.5M8 13.2v1.5M1.3 8h1.5M13.2 8h1.5M3.3 3.3l1 1M11.7 11.7l1 1M3.3 12.7l1-1M11.7 4.3l1-1"/></svg>
+      </button>
+    </div>
+    <h1>Harvesting failures for imitation</h1>
+    <p class="sub">Human-gated and privileged DAgger in the 2026 BEHAVIOR Challenge. Our team harvested a policy’s failures with simulator snapshots, recovered them in a VR headset and with two automatic experts, had an AI agent and a person review the recordings, and trained on them. This is the short version of the team’s report, with the recordings in place of the report’s stills.</p>
+    <div class="meta">
+      <span>Report: <a rel="noopener" target="_blank" href="https://behavior.stanford.edu/challenge/">BEHAVIOR Challenge 2026</a>, team draft</span>
+      <span>Hawaiʻi AI Initiative</span>
+      <span>November 2026</span>
+      <a class="pill-link" href="https://docs.google.com/presentation/d/1EgkQSj2xSjlQ-Jh2fa5cz-_EN1cQFCkVkc3agzRL_Tk/edit?usp=sharing" rel="noopener" target="_blank" style="gap:7px" aria-label="View the slides in Google Slides (opens in a new tab)"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="12" height="9" rx="1.5"/><path d="M8 12v2M5.5 14h5"/></svg>View slides</a>
+      <a class="pill-link" href="/media/review-hg-dagger-behavior-slides.pdf" download style="gap:7px" aria-label="Download the presentation (PDF)"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v8m0 0 3.2-3.2M8 10.5 4.8 7.3M3 13.5h10"/></svg>Download presentation</a>
+    </div>
+  </div>
+</header>
+
+<section id="problem">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Compounding errors and the human gate</h2>
+      <p class="eyebrow">Problem</p>
+    </div>
+    <div class="prose">
+      <p>A behavior-cloned policy for a long household task fails when a small error leads to a state the demonstrations never show. <a rel="noopener" target="_blank" href="https://arxiv.org/abs/1011.0686">Ross et al.</a> show why: with error ε per step on the expert’s states and T steps per episode, the learner’s cost can exceed the expert’s by up to T²ε, because each mistake leads to states where it makes more. Their algorithm, DAgger, labels the states the learner itself visits and retrains on all data so far, which brings the bound down to the order of Tε. The guarantee needs repeated rounds, each harvested with the latest policy.</p>
+      <p><a rel="noopener" target="_blank" href="https://arxiv.org/abs/1810.02890">HG-DAgger</a> makes DAgger usable with a human expert. The learner drives; the human takes over when the state looks unsafe, keeps full control until the robot is back on track, and hands back. Only the takeover segments are labelled. The human expert is also the bottleneck: every recovery needs a person, both to record it and to check it. A simulator with state snapshots makes both ideas concrete, because we can return to any failure the policy produced, as often as we want. On the new tasks we replaced the human expert with scripted controllers and a stronger policy, and moved most of the checking to an AI agent, with a person making the final decision.</p>
+    </div>
+  </div>
+</section>
+
+<section id="setup">
+  <div class="wrap">
+    <div class="shead">
+      <h2>The 2026 BEHAVIOR Challenge</h2>
+      <p class="eyebrow">Setup</p>
+    </div>
+    <div class="prose">
+      <div class="scroll"><table class="design">
+        <tbody>
+          <tr><th scope="row">Tasks</th><td>100 full-length household tasks in OmniGibson: the 50 tasks of the 2025 challenge and 50 new ones, in 7 scenes. The mean demonstration lasts 351 s and passes through 27 skill segments.</td></tr>
+          <tr><th scope="row">Robot</th><td>R1Pro, a wheeled bimanual robot with a four-joint torso.</td></tr>
+          <tr><th scope="row">Inputs</th><td>RGB, depth and proprioception from a head camera and two wrist cameras. Privileged simulator state may be used for training but not at evaluation.</td></tr>
+          <tr><th scope="row">Score</th><td>The Q-score: the share of a task’s goal predicates that hold at the end of the episode, averaged over tasks. Each task has 20 public and 20 hidden test instances.</td></tr>
+          <tr><th scope="row">Data</th><td>20,000 teleoperated demonstrations (200 per task, 1,950 hours, 3.27 TB in LeRobot format), annotated with 31 skills.</td></tr>
+          <tr><th scope="row">Policies</th><td>All π0.5 models in one stack, a fork of Team Comet’s 2025 submission. <b>pt50</b> is Team Comet’s checkpoint for the 50 tasks of 2025. <b>The follower</b> is the team’s instruction-following π0.5 for the new tasks: it executes one phase at a time (“pick up the broom”) and needs a planner that sequences the phases and decides when each is done.</td></tr>
+          <tr><th scope="row">Deadline</th><td>16 October 2026.</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">Most results below are phase success rates: the fleet restores the start of a phase from a held-out demonstration, the policy executes that phase alone with a budget of twice the demonstration’s duration, and a privileged detector decides whether the phase goal was reached. Phases are paired across policies, with 95 % bootstrap intervals over tasks.</p>
+    </div>
+  </div>
+</section>
+
+<section id="method">
+  <div class="wrap">
+    <div class="shead">
+      <h2>The recovery pipeline</h2>
+      <p class="eyebrow">Method</p>
+    </div>
+    <div class="prose">
+      <p>Both experts follow the same stages: harvest the learner’s failures, mark them, recover them, record the recovery, and review it before it is published. The third expert, a stronger policy, uses the same harvest and detector.</p>
+      <figure class="fig"><div class="fig-scroll"><svg class="fig" viewBox="0 0 960 306" role="img" aria-labelledby="f1-t f1-d" xmlns="http://www.w3.org/2000/svg"><title id="f1-t">The recovery pipeline</title><desc id="f1-d">Two lanes of five stages. 2025 tasks, human expert: harvest (pt50 runs unattended, snapshots every 30 steps), review (a person marks where the failure begins), recover in VR (the policy drives, the operator takes over with button B, corrects and hands back; 82 recoveries on one task), record (a LeRobot episode with a per-frame intervention mask), train (human frames only). New tasks, privileged expert: harvest (the follower replays each demo phase start, a detector judges it), route (each failed phase to its skill’s recoverer, 11 skills), recover in code (inverse kinematics on object poses, DART noise, the detector checks the goal; 3,436 of 8,303 failed phases), AI review (718 look right, 310 flagged), human decision (855 published, 173 denied).</desc><text x="102" y="56" class="ink" font-size="12" font-weight="600" text-anchor="end">2025 tasks</text><text x="102" y="71" class="ink" font-size="12" font-weight="600" text-anchor="end">human</text><text x="102" y="86" class="ink" font-size="12" font-weight="600" text-anchor="end">expert</text><rect x="118" y="22" width="150" height="84" rx="7" class="aw as" stroke-width="1.2"/><text x="193.0" y="43" class="ink" font-size="12.5" font-weight="600" text-anchor="middle">Harvest</text><text x="193.0" y="61" class="ink2" font-size="11" text-anchor="middle">pt50 runs unattended;</text><text x="193.0" y="76" class="ink2" font-size="11" text-anchor="middle">failures kept with</text><text x="193.0" y="91" class="ink2" font-size="11" text-anchor="middle">snapshots every 30 steps</text><line x1="270" y1="64.0" x2="283" y2="64.0" class="gs" stroke-width="1.2"/><path d="M282,60.0 L289,64.0 L282,68.0 Z" class="gf"/><rect x="290" y="22" width="150" height="84" rx="7" class="hw hs" stroke-width="1.2"/><text x="365.0" y="43" class="ink" font-size="12.5" font-weight="600" text-anchor="middle">Review</text><text x="365.0" y="61" class="ink2" font-size="11" text-anchor="middle">a person marks where</text><text x="365.0" y="76" class="ink2" font-size="11" text-anchor="middle">the failure begins</text><text x="365.0" y="91" class="ink2" font-size="11" text-anchor="middle">and its phase</text><line x1="442" y1="64.0" x2="455" y2="64.0" class="gs" stroke-width="1.2"/><path d="M454,60.0 L461,64.0 L454,68.0 Z" class="gf"/><rect x="462" y="22" width="150" height="84" rx="7" class="hw hs" stroke-width="1.2"/><text x="537.0" y="43" class="ink" font-size="12.5" font-weight="600" text-anchor="middle">Recover in VR</text><text x="537.0" y="61" class="ink2" font-size="11" text-anchor="middle">policy drives; operator</text><text x="537.0" y="76" class="ink2" font-size="11" text-anchor="middle">takes over (button B),</text><text x="537.0" y="91" class="ink2" font-size="11" text-anchor="middle">corrects, hands back</text><line x1="614" y1="64.0" x2="627" y2="64.0" class="gs" stroke-width="1.2"/><path d="M626,60.0 L633,64.0 L626,68.0 Z" class="gf"/><rect x="634" y="22" width="150" height="84" rx="7" class="aw as" stroke-width="1.2"/><text x="709.0" y="43" class="ink" font-size="12.5" font-weight="600" text-anchor="middle">Record</text><text x="709.0" y="61" class="ink2" font-size="11" text-anchor="middle">LeRobot v2.1 episode</text><text x="709.0" y="76" class="ink2" font-size="11" text-anchor="middle">with a per-frame</text><text x="709.0" y="91" class="ink2" font-size="11" text-anchor="middle">intervention mask</text><line x1="786" y1="64.0" x2="799" y2="64.0" class="gs" stroke-width="1.2"/><path d="M798,60.0 L805,64.0 L798,68.0 Z" class="gf"/><rect x="806" y="22" width="150" height="84" rx="7" class="aw as" stroke-width="1.2"/><text x="881.0" y="43" class="ink" font-size="12.5" font-weight="600" text-anchor="middle">Train</text><text x="881.0" y="61" class="ink2" font-size="11" text-anchor="middle">human frames only;</text><text x="881.0" y="76" class="ink2" font-size="11" text-anchor="middle">intervals of at least</text><text x="881.0" y="91" class="ink2" font-size="11" text-anchor="middle">32 frames</text><text x="537.0" y="121" class="ink3 mono" font-size="10.5" text-anchor="middle">82 recoveries on one task</text><text x="102" y="200" class="ink" font-size="12" font-weight="600" text-anchor="end">new tasks</text><text x="102" y="215" class="ink" font-size="12" font-weight="600" text-anchor="end">privileged</text><text x="102" y="230" class="ink" font-size="12" font-weight="600" text-anchor="end">expert</text><rect x="118" y="166" width="150" height="84" rx="7" class="aw as" stroke-width="1.2"/><text x="193.0" y="187" class="ink" font-size="12.5" font-weight="600" text-anchor="middle">Harvest</text><text x="193.0" y="205" class="ink2" font-size="11" text-anchor="middle">the follower replays</text><text x="193.0" y="220" class="ink2" font-size="11" text-anchor="middle">each demo phase start;</text><text x="193.0" y="235" class="ink2" font-size="11" text-anchor="middle">a detector judges it</text><line x1="270" y1="208.0" x2="283" y2="208.0" class="gs" stroke-width="1.2"/><path d="M282,204.0 L289,208.0 L282,212.0 Z" class="gf"/><rect x="290" y="166" width="150" height="84" rx="7" class="aw as" stroke-width="1.2"/><text x="365.0" y="187" class="ink" font-size="12.5" font-weight="600" text-anchor="middle">Route</text><text x="365.0" y="205" class="ink2" font-size="11" text-anchor="middle">each failed phase</text><text x="365.0" y="220" class="ink2" font-size="11" text-anchor="middle">to its skill’s</text><text x="365.0" y="235" class="ink2" font-size="11" text-anchor="middle">recoverer (11 skills)</text><line x1="442" y1="208.0" x2="455" y2="208.0" class="gs" stroke-width="1.2"/><path d="M454,204.0 L461,208.0 L454,212.0 Z" class="gf"/><rect x="462" y="166" width="150" height="84" rx="7" class="aw as" stroke-width="1.2"/><text x="537.0" y="187" class="ink" font-size="12.5" font-weight="600" text-anchor="middle">Recover in code</text><text x="537.0" y="205" class="ink2" font-size="11" text-anchor="middle">IK on object poses,</text><text x="537.0" y="220" class="ink2" font-size="11" text-anchor="middle">DART noise; detector</text><text x="537.0" y="235" class="ink2" font-size="11" text-anchor="middle">checks the goal</text><line x1="614" y1="208.0" x2="627" y2="208.0" class="gs" stroke-width="1.2"/><path d="M626,204.0 L633,208.0 L626,212.0 Z" class="gf"/><rect x="634" y="166" width="150" height="84" rx="7" class="aw as" stroke-width="1.2"/><text x="709.0" y="187" class="ink" font-size="12.5" font-weight="600" text-anchor="middle">AI review</text><text x="709.0" y="205" class="ink2" font-size="11" text-anchor="middle">watches each clip:</text><text x="709.0" y="220" class="ink2" font-size="11" text-anchor="middle">718 look right,</text><text x="709.0" y="235" class="ink2" font-size="11" text-anchor="middle">310 flagged</text><line x1="786" y1="208.0" x2="799" y2="208.0" class="gs" stroke-width="1.2"/><path d="M798,204.0 L805,208.0 L798,212.0 Z" class="gf"/><rect x="806" y="166" width="150" height="84" rx="7" class="hw hs" stroke-width="1.2"/><text x="881.0" y="187" class="ink" font-size="12.5" font-weight="600" text-anchor="middle">Human decision</text><text x="881.0" y="205" class="ink2" font-size="11" text-anchor="middle">855 published,</text><text x="881.0" y="220" class="ink2" font-size="11" text-anchor="middle">173 denied</text><text x="537.0" y="265" class="ink3 mono" font-size="10.5" text-anchor="middle">3,436 of 8,303 failed phases</text><rect x="118" y="290" width="18" height="10" rx="2" class="hw hs" stroke-width="1.2"/><text x="142" y="299" class="ink2" font-size="11">stages done by people</text><rect x="300" y="290" width="18" height="10" rx="2" class="aw as" stroke-width="1.2"/><text x="324" y="299" class="ink2" font-size="11">the policy, code or an AI agent</text><text x="960" y="299" class="ink3 mono" font-size="10.5" text-anchor="end">counts as of 14 October 2026</text></svg></div><figcaption>Figure 1. The recovery pipeline. Top: HG-DAgger with a human expert on the 2025 tasks. Bottom: the scaled variant on the 50 new tasks, where per-skill controllers replace the human expert and a detector replaces the human gate; for seven skills, an AI reviewer and a person decide afterwards which recordings are published.</figcaption></figure>
+      <h3>Human-gated recovery in VR</h3>
+      <p>On the 2025 tasks, pt50 runs unattended on the cluster and saves a simulator snapshot every 30 control steps; every rollout that ends below a perfect score is kept with its video. A reviewer watches each failure at four times speed and marks where it began. An operator in a Meta Quest 3S or Pico 4 Enterprise headset then stands in the scene behind the robot, rendered over NVIDIA CloudXR, and the simulation resumes from the snapshot nearest the mark:</p>
+      <ol class="steps">
+        <li>The policy drives, served over the challenge’s websocket protocol.</li>
+        <li>The operator presses the right controller’s B button to take over. The arms are hot-swapped to inverse-kinematics controllers that follow the operator’s hands; the torso moves along the one direction that holds 97 % of the variance of 427,000 demonstration torso poses.</li>
+        <li>The operator corrects the robot the way the demonstrations do, and presses B again to hand back. The original controllers are restored.</li>
+        <li>The console records a 15-second tail of policy driving after the hand-back, and saves the episode.</li>
+      </ol>
+      <p>Each recovery is one LeRobot v2.1 episode with a per-frame intervention mask (1 = human). Human steps are labelled with the joint positions the robot actually reached at the next step, the commanded base velocity and the latched gripper command, so the label does not depend on which controller produced the motion. Control runs at 30 Hz with physics at 120 Hz.</p>
+      <figure><video controls playsinline preload="metadata" poster="media/behavior-vr-recovery-2026-poster.jpg" width="1280" height="540" aria-label="VR recovery: three robot camera views while a human operator picks up a can"><source src="media/behavior-vr-recovery-2026.mp4" type="video/mp4">Your browser does not play MP4 video. <a href="media/behavior-vr-recovery-2026.mp4">Download the clip</a>.</video><figcaption>Video 1. A VR recovery on “picking up trash”: the robot’s head, left-wrist and right-wrist cameras. The overlay turns red while the human drives.</figcaption></figure>
+      <h3>Privileged per-skill recoverers</h3>
+      <p>Human recovery does not scale to thousands of cases. On the new tasks the follower executes one phase at a time, so the harvest changes shape: the fleet restores the start of each phase of each demonstration, lets the follower take it from there, and a privileged phase detector checks whether the phase goal is reached in time. From 8 October, the expert for these failures is a set of scripted recoverers, one per skill, that read the simulator state and solve inverse kinematics on object poses. They cover 11 skills: pick, place, open/close, hand-over, toggle, pour, sweep, chop, wipe, attach and insert. AI coding agents wrote and iterated them (chop went through nine versions, attach through eight). As in <a rel="noopener" target="_blank" href="https://arxiv.org/abs/1703.09327">DART</a>, the executed actions are perturbed while the recorded labels stay clean. The detector then confirms that the phase goal is reached: 3,436 of 8,303 failed phases (41 %).</p>
+      <div class="vgrid">
+        <figure><video controls playsinline preload="metadata" poster="media/behavior-ai-chop-2026-poster.jpg" width="1440" height="480" aria-label="Scripted recoverer chops a Brussels sprout"><source src="media/behavior-ai-chop-2026.mp4" type="video/mp4">Your browser does not play MP4 video. <a href="media/behavior-ai-chop-2026.mp4">Download the clip</a>.</video><figcaption>Video 2. Chop: halving a Brussels sprout (left wrist, right wrist, head).</figcaption></figure>
+        <figure><video controls playsinline preload="metadata" poster="media/behavior-ai-toggle-2026-poster.jpg" width="1440" height="480" aria-label="Scripted recoverer turns on a stove burner"><source src="media/behavior-ai-toggle-2026.mp4" type="video/mp4">Your browser does not play MP4 video. <a href="media/behavior-ai-toggle-2026.mp4">Download the clip</a>.</video><figcaption>Video 3. Toggle: turning on a burner.</figcaption></figure>
+        <figure><video controls playsinline preload="metadata" poster="media/behavior-ai-pour-2026-poster.jpg" width="1440" height="480" aria-label="Scripted recoverer pours a brisket from a pan onto a board"><source src="media/behavior-ai-pour-2026.mp4" type="video/mp4">Your browser does not play MP4 video. <a href="media/behavior-ai-pour-2026.mp4">Download the clip</a>.</video><figcaption>Video 4. Pour: brisket from the pan to the board.</figcaption></figure>
+        <figure><video controls playsinline preload="metadata" poster="media/behavior-ai-attach-2026-poster.jpg" width="1440" height="480" aria-label="Scripted recoverer mounts a smoke detector on a wall, two times speed"><source src="media/behavior-ai-attach-2026.mp4" type="video/mp4">Your browser does not play MP4 video. <a href="media/behavior-ai-attach-2026.mp4">Download the clip</a>.</video><figcaption>Video 5. Attach: a smoke detector to the wall (2× speed).</figcaption></figure>
+      </div>
+      <h3>AI review before the human decision</h3>
+      <p>The detector judges only the end state. A recording can pass because the goal holds at the end even if the robot got there badly, for example by cutting an egg while chopping a vegetable. Recordings of the toggle, pour, sweep, chop, wipe, attach and insert recoverers go through a review page: an AI agent running Claude Opus 5.5 watches each one and writes one line on how the robot reached the goal (“Fingertip on burner knob marker, red→green, pan untouched”), marking it “looks right” or “flagged”, and a person then accepts or denies it. Of 1,028 recordings reviewed this way, the agent marked 718 as looking right and flagged 310; the person published 855 and denied 173. The person accepted 704 of the 718 clips the agent called right (98 %) and denied 159 of the 310 it flagged (51 %), so 159 of the 173 denials (92 %) had been flagged first. The agent is a cautious filter: it caught most bad recordings but flagged about as many good ones, which concentrated the person’s attention on 30 % of the clips. Pick, place, hand-over and articulation recordings were published on the detector gate alone.</p>
+      <figure><video controls playsinline preload="metadata" poster="media/behavior-ai-chop-declined-2026-poster.jpg" width="1440" height="480" aria-label="Denied recording: the detector passed, but the egg was cut by accident"><source src="media/behavior-ai-chop-declined-2026.mp4" type="video/mp4">Your browser does not play MP4 video. <a href="media/behavior-ai-chop-declined-2026.mp4">Download the clip</a>.</video><figcaption>Video 6. Denied. The detector passed this chop, but the egg was cut by accident; a person caught it.</figcaption></figure>
+      <h3>The strongest 2025 policy as the expert</h3>
+      <p>The third expert is pt50. Many objects and skills of the new tasks also appear in the 2025 tasks, on which pt50 was trained. For a failed pick-up or place phase of the follower, the fleet restores the case snapshot and lets pt50 drive, prompted with the name of a 2025 task that contains the same skill, and the detector keeps the attempts that reach the phase goal. The yield is low, 754 of 4,181 attempts, but the actions come from a policy trained on the same kind of human teleoperation as the follower’s demonstrations. The 500 confirmed recordings of the first round, made on 14 October on 35 of the new tasks (459 pick-ups and 41 places), are the recovery data of the submitted follower; a second round on doors, switches and lids added 254 more.</p>
+    </div>
+  </div>
+</section>
+
+<section id="data">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Collected recordings</h2>
+      <p class="eyebrow">Data</p>
+    </div>
+    <div class="prose">
+      <div class="scroll"><table class="data">
+        <thead><tr><th>Expert and gate</th><th>Tasks</th><th>Recordings</th><th>Used in</th></tr></thead>
+        <tbody>
+          <tr><td>Human in VR, takeover from a policy rollout (HG-DAgger)</td><td>2 (2025)</td><td>84; 115 merged episodes, 20,912 human frames</td><td>Pilot 1, not trained</td></tr>
+          <tr><td>Human in VR, from the failed state</td><td>new tasks</td><td>111</td><td>end-of-phase detector (66 of them)</td></tr>
+          <tr><td>Privileged per-skill controllers, detector gate</td><td>48 (new)</td><td>4,166 on 3,739 cases</td><td>policy fine-tunes (hurt); phase classifier; end-of-phase detector</td></tr>
+          <tr><td>pt50 on the 2025 tasks</td><td>2 (2025)</td><td>66 segments</td><td>instr100_recov, c_gp1k</td></tr>
+          <tr><td>pt50 on the new tasks, detector gate</td><td>35 (new)</td><td>500 pick and place, +254 other skills</td><td><b>the submitted follower</b>, d_optB_1000</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">Counts in the team’s bucket on 16 October 2026; the human recoveries of the 2025 tasks as merged on 2 October.</p>
+      <p>The harvest found failures faster than people could recover them. On the 2025 tasks, pt50 failed 381 of 387 harvested episodes, and in 269 of the failures (71 %) the robot never made progress, so a short correction cannot generalize from them; the addressable pool was about 112 episodes. Recording was slow: 78 human recoveries in the first four days, all on one task. On the new tasks the privileged recoverers reached the phase goal in 3,436 of 8,303 failed phases. Contact-rich skills with a dedicated recoverer recover best, and the skills where the follower fails most recover worst. Each privileged recording is a one-phase clip of about 15 s that starts from the end state of a failed follower attempt; pick-ups are the largest group (1,966), followed by places (760) and toggles (322).</p>
+      <figure class="fig"><div class="fig-scroll"><svg class="fig" viewBox="0 0 960 464" role="img" aria-labelledby="f2-t f2-d" xmlns="http://www.w3.org/2000/svg"><title id="f2-t">Recovered share of failed phases, by skill</title><desc id="f2-d">Horizontal bars, one per skill, sorted by recovery rate: hand-over 83%, chop 71%, wipe 70%, sweep 63%, toggle 58%, pick 51%, insert 50%, attach 41%, pour 33%, place 26%, open/close 18% (no dedicated recoverer). All skills together: 41%.</desc>
+<line x1="120.0" y1="32" x2="120.0" y2="414" class="hairs" stroke-width="1"/><text x="120.0" y="432.0" class="ink3 mono" font-size="11" font-weight="400" text-anchor="middle" >0%</text><line x1="275.0" y1="32" x2="275.0" y2="414" class="hairs" stroke-width="1"/><text x="275.0" y="432.0" class="ink3 mono" font-size="11" font-weight="400" text-anchor="middle" >25%</text><line x1="430.0" y1="32" x2="430.0" y2="414" class="hairs" stroke-width="1"/><text x="430.0" y="432.0" class="ink3 mono" font-size="11" font-weight="400" text-anchor="middle" >50%</text><line x1="585.0" y1="32" x2="585.0" y2="414" class="hairs" stroke-width="1"/><text x="585.0" y="432.0" class="ink3 mono" font-size="11" font-weight="400" text-anchor="middle" >75%</text><line x1="740.0" y1="32" x2="740.0" y2="414" class="hairs" stroke-width="1"/><text x="740.0" y="432.0" class="ink3 mono" font-size="11" font-weight="400" text-anchor="middle" >100%</text><line x1="376.6" y1="26" x2="376.6" y2="40" class="ink2s" stroke-width="1.25"/><line x1="376.6" y1="40" x2="376.6" y2="74" class="ink2s" stroke-width="1.25"/><line x1="376.6" y1="74" x2="376.6" y2="108" class="ink2s" stroke-width="1.25"/><line x1="376.6" y1="108" x2="376.6" y2="142" class="ink2s" stroke-width="1.25"/><line x1="376.6" y1="142" x2="376.6" y2="176" class="ink2s" stroke-width="1.25"/><line x1="376.6" y1="176" x2="376.6" y2="210" class="ink2s" stroke-width="1.25"/><line x1="376.6" y1="210" x2="376.6" y2="244" class="ink2s" stroke-width="1.25"/><line x1="376.6" y1="244" x2="376.6" y2="278" class="ink2s" stroke-width="1.25"/><line x1="376.6" y1="278" x2="376.6" y2="312" class="ink2s" stroke-width="1.25"/><text x="382.6" y="22.0" class="ink2" font-size="12" font-weight="400" text-anchor="start" >all skills 41% (3,436 / 8,303)</text><g><title>hand-over: 226 of 272 failed phases recovered (83%)</title><text x="108.0" y="61.0" class="ink" font-size="13" font-weight="400" text-anchor="end" >hand-over</text><path d="M120,48.0 H631.1 Q635.1,48.0 635.1,52.0 V62.0 Q635.1,66.0 631.1,66.0 H120 Z" class="af"/><text x="643.1" y="61.0" class="ink" font-size="13" font-weight="600" text-anchor="start" style="stroke:var(--bg,#ffffff);stroke-width:5px;paint-order:stroke;stroke-linejoin:round">83%</text><text x="681.1" y="61.0" class="ink3 mono" font-size="11" font-weight="400" text-anchor="start" style="stroke:var(--bg,#ffffff);stroke-width:5px;paint-order:stroke;stroke-linejoin:round">226 / 272</text></g><g><title>chop: 104 of 146 failed phases recovered (71%)</title><text x="108.0" y="95.0" class="ink" font-size="13" font-weight="400" text-anchor="end" >chop</text><path d="M120,82.0 H557.6 Q561.6,82.0 561.6,86.0 V96.0 Q561.6,100.0 557.6,100.0 H120 Z" class="af"/><text x="569.6" y="95.0" class="ink" font-size="13" font-weight="600" text-anchor="start" style="stroke:var(--bg,#ffffff);stroke-width:5px;paint-order:stroke;stroke-linejoin:round">71%</text><text x="607.6" y="95.0" class="ink3 mono" font-size="11" font-weight="400" text-anchor="start" style="stroke:var(--bg,#ffffff);stroke-width:5px;paint-order:stroke;stroke-linejoin:round">104 / 146</text></g><g><title>wipe: 100 of 142 failed phases recovered (70%)</title><text x="108.0" y="129.0" class="ink" font-size="13" font-weight="400" text-anchor="end" >wipe</text><path d="M120,116.0 H552.6 Q556.6,116.0 556.6,120.0 V130.0 Q556.6,134.0 552.6,134.0 H120 Z" class="af"/><text x="564.6" y="129.0" class="ink" font-size="13" font-weight="600" text-anchor="start" style="stroke:var(--bg,#ffffff);stroke-width:5px;paint-order:stroke;stroke-linejoin:round">70%</text><text x="602.6" y="129.0" class="ink3 mono" font-size="11" font-weight="400" text-anchor="start" style="stroke:var(--bg,#ffffff);stroke-width:5px;paint-order:stroke;stroke-linejoin:round">100 / 142</text></g><g><title>sweep: 84 of 134 failed phases recovered (63%)</title><text x="108.0" y="163.0" class="ink" font-size="13" font-weight="400" text-anchor="end" >sweep</text><path d="M120,150.0 H504.7 Q508.7,150.0 508.7,154.0 V164.0 Q508.7,168.0 504.7,168.0 H120 Z" class="af"/><text x="516.7" y="163.0" class="ink" font-size="13" font-weight="600" text-anchor="start" style="stroke:var(--bg,#ffffff);stroke-width:5px;paint-order:stroke;stroke-linejoin:round">63%</text><text x="554.7" y="163.0" class="ink3 mono" font-size="11" font-weight="400" text-anchor="start" style="stroke:var(--bg,#ffffff);stroke-width:5px;paint-order:stroke;stroke-linejoin:round">84 / 134</text></g><g><title>toggle: 168 of 289 failed phases recovered (58%)</title><text x="108.0" y="197.0" class="ink" font-size="13" font-weight="400" text-anchor="end" >toggle</text><path d="M120,184.0 H476.4 Q480.4,184.0 480.4,188.0 V198.0 Q480.4,202.0 476.4,202.0 H120 Z" class="af"/><text x="488.4" y="197.0" class="ink" font-size="13" font-weight="600" text-anchor="start" style="stroke:var(--bg,#ffffff);stroke-width:5px;paint-order:stroke;stroke-linejoin:round">58%</text><text x="526.4" y="197.0" class="ink3 mono" font-size="11" font-weight="400" text-anchor="start" style="stroke:var(--bg,#ffffff);stroke-width:5px;paint-order:stroke;stroke-linejoin:round">168 / 289</text></g><g><title>pick: 1,901 of 3,736 failed phases recovered (51%)</title><text x="108.0" y="231.0" class="ink" font-size="13" font-weight="400" text-anchor="end" >pick</text><path d="M120,218.0 H431.5 Q435.5,218.0 435.5,222.0 V232.0 Q435.5,236.0 431.5,236.0 H120 Z" class="af"/><text x="443.5" y="231.0" class="ink" font-size="13" font-weight="600" text-anchor="start" style="stroke:var(--bg,#ffffff);stroke-width:5px;paint-order:stroke;stroke-linejoin:round">51%</text><text x="481.5" y="231.0" class="ink3 mono" font-size="11" font-weight="400" text-anchor="start" style="stroke:var(--bg,#ffffff);stroke-width:5px;paint-order:stroke;stroke-linejoin:round">1,901 / 3,736</text></g><g><title>insert: 22 of 44 failed phases recovered (50%)</title><text x="108.0" y="265.0" class="ink" font-size="13" font-weight="400" text-anchor="end" >insert</text><path d="M120,252.0 H426.0 Q430.0,252.0 430.0,256.0 V266.0 Q430.0,270.0 426.0,270.0 H120 Z" class="af"/><text x="438.0" y="265.0" class="ink" font-size="13" font-weight="600" text-anchor="start" style="stroke:var(--bg,#ffffff);stroke-width:5px;paint-order:stroke;stroke-linejoin:round">50%</text><text x="476.0" y="265.0" class="ink3 mono" font-size="11" font-weight="400" text-anchor="start" style="stroke:var(--bg,#ffffff);stroke-width:5px;paint-order:stroke;stroke-linejoin:round">22 / 44</text></g><g><title>attach: 19 of 46 failed phases recovered (41%)</title><text x="108.0" y="299.0" class="ink" font-size="13" font-weight="400" text-anchor="end" >attach</text><path d="M120,286.0 H372.1 Q376.1,286.0 376.1,290.0 V300.0 Q376.1,304.0 372.1,304.0 H120 Z" class="af"/><text x="384.1" y="299.0" class="ink" font-size="13" font-weight="600" text-anchor="start" style="stroke:var(--bg,#ffffff);stroke-width:5px;paint-order:stroke;stroke-linejoin:round">41%</text><text x="422.1" y="299.0" class="ink3 mono" font-size="11" font-weight="400" text-anchor="start" style="stroke:var(--bg,#ffffff);stroke-width:5px;paint-order:stroke;stroke-linejoin:round">19 / 46</text></g><g><title>pour: 60 of 180 failed phases recovered (33%)</title><text x="108.0" y="333.0" class="ink" font-size="13" font-weight="400" text-anchor="end" >pour</text><path d="M120,320.0 H322.7 Q326.7,320.0 326.7,324.0 V334.0 Q326.7,338.0 322.7,338.0 H120 Z" class="af"/><text x="334.7" y="333.0" class="ink" font-size="13" font-weight="600" text-anchor="start" style="stroke:var(--bg,#ffffff);stroke-width:5px;paint-order:stroke;stroke-linejoin:round">33%</text><text x="372.7" y="333.0" class="ink3 mono" font-size="11" font-weight="400" text-anchor="start" style="stroke:var(--bg,#ffffff);stroke-width:5px;paint-order:stroke;stroke-linejoin:round">60 / 180</text></g><g><title>place: 511 of 1,944 failed phases recovered (26%)</title><text x="108.0" y="367.0" class="ink" font-size="13" font-weight="400" text-anchor="end" >place</text><path d="M120,354.0 H279.0 Q283.0,354.0 283.0,358.0 V368.0 Q283.0,372.0 279.0,372.0 H120 Z" class="af"/><text x="291.0" y="367.0" class="ink" font-size="13" font-weight="600" text-anchor="start" style="stroke:var(--bg,#ffffff);stroke-width:5px;paint-order:stroke;stroke-linejoin:round">26%</text><text x="329.0" y="367.0" class="ink3 mono" font-size="11" font-weight="400" text-anchor="start" style="stroke:var(--bg,#ffffff);stroke-width:5px;paint-order:stroke;stroke-linejoin:round">511 / 1,944</text></g><g><title>open/close: 241 of 1,370 failed phases recovered (18%)</title><text x="108.0" y="401.0" class="ink" font-size="13" font-weight="400" text-anchor="end" >open/close</text><path d="M120,388.0 H225.1 Q229.1,388.0 229.1,392.0 V402.0 Q229.1,406.0 225.1,406.0 H120 Z" class="gf"/><text x="237.1" y="401.0" class="ink" font-size="13" font-weight="600" text-anchor="start" style="stroke:var(--bg,#ffffff);stroke-width:5px;paint-order:stroke;stroke-linejoin:round">18%</text><text x="275.1" y="401.0" class="ink3 mono" font-size="11" font-weight="400" text-anchor="start" style="stroke:var(--bg,#ffffff);stroke-width:5px;paint-order:stroke;stroke-linejoin:round">241 / 1,370  ·  no dedicated recoverer</text></g><text x="0.0" y="458.0" class="ink3" font-size="11" font-weight="400" text-anchor="start" >Failed phases of the follower policy on the 50 new tasks, two harvest batches; recovered = a privileged recoverer reached the phase goal. Source: review board, 2026-10-14.</text></svg></div>
+<figcaption>Figure 2. Share of the follower’s failed phases on the new tasks that a privileged recoverer brought to the phase goal, by skill (two harvest batches, review board of 14 October 2026). Open/close has no dedicated recoverer.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="results">
+  <div class="wrap">
+    <div class="shead">
+      <h2>What the recoveries changed</h2>
+      <p class="eyebrow">Results</p>
+    </div>
+    <div class="prose">
+      <h3>Fine-tuning the follower on recoveries</h3>
+      <div class="scroll"><table class="runs">
+        <thead><tr><th>Run</th><th>Recovery data and schedule</th><th>Phase success on held-out phase starts</th></tr></thead>
+        <tbody>
+          <tr><td>instr100_recov</td><td>the 66 pt50 segments of two 2025 tasks at 10 %, 4,000 steps</td><td>+0.066 Q over the follower, CI [+0.014, +0.118]</td></tr>
+          <tr><td>c_gp1k</td><td>the same 66 segments at 10 %, 1,000 steps</td><td>held-out follower success 44 % → 48.7 % (team report), mostly from the first pick-up of an episode (42 % → 53 %)</td></tr>
+          <tr><td>r50</td><td>privileged recoveries, 10,000 steps</td><td>46.5 % → 11.6 % against the follower, −34.9 [−40.6, −29.6] (846 phases, 48 tasks)</td></tr>
+          <tr><td>d_scr</td><td>privileged recoveries with the waist twist zeroed, 10 %, step 1,000 of 2,000</td><td>mixed phases −0.5 [−8.4, +8.9]</td></tr>
+          <tr class="hl"><td>d_optB_1000 (submitted)</td><td>the 500 pt50 corrections of new-task failures at 10 %, step 1,000 of 2,000</td><td>pick-up phases 37.6 % → 44.6 %, <b>+7.0</b> [+1.0, +12.7] (383 phases, 49 tasks); mixed phases +1.6 [−3.4, +6.8]</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">Differences are paired against the demonstrations-only control e_demos1k, a 1,000-step fine-tune of the follower with no recovery data, with 95 % bootstrap intervals over tasks. The short fine-tunes share one recipe: the demonstrations of all 100 tasks plus a share of recovery data, batch 128, peak learning rate 2.5 × 10⁻⁶. The human recoveries of the 2025 task were never trained on: Pilot 1 was cancelled after a cluster staging failure.</p>
+      <p><b>The policy expert helped pick-ups.</b> On 383 held-out pick-up phase starts over 49 new tasks, the submitted follower succeeds in 44.6 % against 37.6 % for the demonstrations-only control and 35.9 % for the follower. The control itself is not separable from the follower (+2.1 points, [−2.8, +7.0]), so the gain comes from the corrections, not from the short fine-tune. On a mixed set of all skills the difference shrinks to +1.6 points: 92 % of the corrections are pick-ups, and the gain stays where the data is. Training longer did not help: with the same recipe, 1,000 steps beat 2,000 and 4,000.</p>
+      <p><b>The scripted expert hurt.</b> A 10,000-step fine-tune on the privileged recoveries collapsed phase success from 46.5 % to 11.6 %. The main cause is the robot’s waist twist, a torso joint that no demonstration moves and that the privileged controllers used freely; pinning the waist at serving time did not restore the policy. With the twist zeroed and the same share and schedule as the submitted follower, the privileged data no longer hurt, but it did not help either.</p>
+      <h3>Recoveries as images for the planner</h3>
+      <p>The challenge’s evaluator gives the policy only the task identifier, so the follower needs a planner that turns the task into a sequence of phase prompts and decides when each is done. The privileged recoveries turned out to be useful here, not as actions but as images: each one shows the robot in a state the demonstrations never reach, labelled with the phase it is in. Adding them to each task’s training data raised the accuracy of a per-task linear phase classifier on SigLIP features, on 198 recorded rollouts of the follower on held-out instances, from 80.8 % (95 % CI [77.4, 84.4]) to 84.4 % ([81.6, 87.2]); paired over the 48 tasks with recoveries, the gain is +3.6 points, and it carried over to a second checkpoint. The submitted planner instead decides when a phase is done with a separate end-of-phase detector, trained on the demonstrations, 3,830 follower rollouts and 4,227 recoveries (4,161 privileged and 66 human). On held-out rollouts it switches within −1 to +5 s of the true completion on 73 % of successful attempts, against 24 % for the previous rule, and switches wrongly on 34 % of stuck attempts, against 64 %. Its records do not isolate the recoveries’ share of this gain.</p>
+      <h3>Closed loop and the submission</h3>
+      <p>Neither effect reaches the end-to-end score yet. With oracle phase labels, the follower completed no task in 394 rollouts of the new tasks. In the closed-loop pilot of 16 October (ten new tasks, public instances 0 and 1, 20 rollouts per arm), no arm completed a task; arm B, the d_optB_1000 follower with the end-of-phase detector and a timer scaled to each skill’s pace, had the highest numbers (mean Q 0.060, 5 of 20 rollouts above zero) and became the submission. The pilot also showed that the follower is needed on the new tasks: pt50 with mapped prompts scored 0.008. At this level the follower limits the score, not the phase label.</p>
+      <p>So recovery data reaches the submission in two places: the follower on the new tasks, fine-tuned on pt50’s corrections of its own failures, and the end-of-phase detector. The 2025 tasks run on pt50, which in the team’s test of the submission settings scored a mean Q of 0.155 with 18 successes in 500 rollouts. On the new tasks, 120 rollouts of the final evaluation had finished by 18:00 HST on 16 October: mean Q 0.018, no success. The public leaderboard lists the entry with a Q-score of 0.092 and a success rate of 1.8 % (self-reported, 17 October 2026).</p>
+    </div>
+  </div>
+</section>
+
+<section id="discussion">
+  <div class="wrap">
+    <div class="shead">
+      <h2>What limited the method</h2>
+      <p class="eyebrow">Discussion</p>
+    </div>
+    <div class="prose">
+      <ul class="lim">
+        <li><b>Prevention, not recovery.</b> The operators resumed before the failure mark, and the simulator is stochastic, so the failure often did not happen again and the operator took over before it would have. Of 33 recordings of the place step, 29 began with the can already in hand. The first batch is prevention data, not recovery data; since 1 October the resume point is 3 s after the mark.</li>
+        <li><b>Expert time, not failures, was the bottleneck.</b> The harvest produced failures far faster than people could recover them, and 71 % of them could not be fixed by a short intervention. The privileged recoverers removed this bottleneck at the cost of two new ones: a detector that checks only the end state, and a person who has to decide on every recording.</li>
+        <li><b>A policy’s actions, not a script’s.</b> The two scaled experts started from the same failed states and were gated by the same detector, yet only one helped the policy. pt50’s yield was 18 %, the privileged recoverers’ 41 %, and only pt50’s data moved the policy. Our hypothesis is that pt50’s corrections stay inside the action distribution the follower learned, while the scripts solve each phase their own way. We have not tested this directly.</li>
+        <li><b>A joint the demonstrations never use.</b> The privileged recoverers reached their goals partly by moving the robot’s waist. Every check in the pipeline passed those recordings: the detector judges the end state, and the AI reviewer and the person judge from the camera views how the robot got there; none compared the recorded actions with the demonstrations. Before a recovery is accepted, its per-joint action distribution should be compared with the demonstrations’, and a joint the demonstrations never move should be a hard reject. A recovery that reaches the goal after fumbling is a success for the detector, but as training data it teaches fumbling.</li>
+        <li><b>One round, not DAgger.</b> DAgger’s guarantee comes from aggregation over many rounds. We ran at most one round per dataset, so the method as used is targeted data augmentation at failure states. The positive result is a phase success rate measured with a privileged detector, mostly on pick-ups, and it has not been shown to raise the Q-score; the closed-loop evaluations are too small to separate small differences.</li>
+      </ul>
+      <p><b>Next.</b> A second DAgger round harvested with the improved follower; corrections for the other manipulation skills; and a check of every recovery’s actions against the demonstrations before training.</p>
+    </div>
+  </div>
+</section>
+
+<section id="sources">
+  <div class="wrap">
+    <div class="prose">
+      <p class="note"><b>Sources.</b> This page follows the team’s report “Harvesting Failures for Imitation: Human-Gated and Privileged DAgger in the 2026 BEHAVIOR Challenge” (draft of October and November 2026, not yet public); numbers are as of 14 to 16 October 2026 and come from the team’s records and raw result files, as the report’s sources appendix lists. The leaderboard figures are self-reported. DAgger: Ross, Gordon and Bagnell, 2011 (arXiv:1011.0686). HG-DAgger: Kelly, Sidrane, Driggs-Campbell and Kochenderfer, 2019 (arXiv:1810.02890). DART: Laskey et al., 2017 (arXiv:1703.09327). The recordings are the team’s own, rendered by OmniGibson; the slides and this page were drafted with AI tools and checked against the report. The BEHAVIOR Challenge: Stanford Vision and Learning Lab, 2026.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="backlink"><a href="/paper-review">← All paper reviews</a></p>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <img class="footer-portrait" src="media/portrait.jpg" alt="Portrait of Pavel Bushuyeu" width="640" height="640" loading="lazy">
+      <nav aria-label="Site">
+        <h2 class="footer-h">Site</h2>
+        <ul>
+          <li><a href="/research">Research</a></li>
+          <li><a href="/teaching">Teaching</a></li>
+          <li><a href="/product-management">Product management</a></li>
+          <li><a href="/services">Services</a></li>
+          <li><a href="/projects">Projects</a></li>
+          <li><a href="/paper-review">Paper review</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Profiles">
+        <h2 class="footer-h">Elsewhere</h2>
+        <ul>
+          <li><a rel="noopener" target="_blank" href="https://linkedin.com/in/bushuyeu/">LinkedIn</a></li>
+          <li><a rel="noopener" target="_blank" href="https://github.com/bushuyeu">GitHub</a></li>
+          <li><a rel="noopener" target="_blank" href="https://huggingface.co/bushuyeu">Hugging Face</a></li>
+          <li><a rel="noopener" target="_blank" href="https://scholar.google.com/citations?user=ub3osgUAAAAJ">Google Scholar</a></li>
+          <li><a rel="noopener" target="_blank" href="https://orcid.org/0009-0009-7183-6714">ORCID</a></li>
+          <li><a rel="noopener" target="_blank" href="https://openreview.net/profile?id=~Pavel_Bushuyeu1">OpenReview</a></li>
+          <li><a rel="noopener" target="_blank" href="https://www.semanticscholar.org/author/2405429742">Semantic Scholar</a></li>
+          <li><a rel="noopener" target="_blank" href="https://www.researchgate.net/profile/Pavel-Bushuyeu">ResearchGate</a></li>
+        </ul>
+      </nav>
+      <div>
+        <h2 class="footer-h">Contact</h2>
+        <ul>
+          <li><a href="mailto:pavelbushuyeu@gmail.com">pavelbushuyeu@gmail.com</a></li>
+          <li><a rel="noopener" target="_blank" href="https://calendar.app.google/aTs1mDgEEfqNLnNf6">Schedule a call</a></li>
+          <li><a href="https://follow.it/pavel-bushuyeu-news" rel="noopener" target="_blank">Subscribe to updates</a></li>
+          <li><a href="/feed.xml">RSS feed</a></li>
+          <li><a href="Pavel-Bushuyeu-CV.pdf" download>Download Resume</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="footer-base">© 2026 Pavel Bushuyeu</p>
+  </div>
+</footer>
+
+</body>
+</html>
