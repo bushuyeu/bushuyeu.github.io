@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<script>/* Theme: apply a stored Light/Dark pick before the first paint (theme.js) */(function(){var r=document.documentElement;try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark"){r.setAttribute("data-theme",t);document.querySelector('meta[name="color-scheme"]').content=t}}catch(e){}r.classList.add("theme-js")})()</script>
+<title>Calibrated noise injection for VLA fine-tuning — Pavel Bushuyeu</title>
+<meta name="description" content="A visionary follow-up to DART: does noise sized to the learner's error still beat plain isotropic noise when the learner is a pretrained vision-language-action model with action chunks? A six-arm test on MimicGen tasks with π0, and a noise-on mode for teleoperation.">
+<link rel="canonical" href="https://bushuyeu.com/review-dart-visionary">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Calibrated noise injection for VLA fine-tuning — Pavel Bushuyeu">
+<meta property="og:description" content="A visionary follow-up to DART: does noise sized to the learner's error still beat plain isotropic noise when the learner is a pretrained vision-language-action model with action chunks? A six-arm test on MimicGen tasks with π0, and a noise-on mode for teleoperation.">
+<meta property="og:url" content="https://bushuyeu.com/review-dart-visionary">
+<meta property="og:image" content="https://bushuyeu.com/media/og-card.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Pavel Bushuyeu, AI researcher, University of Hawaiʻi at Mānoa">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://bushuyeu.com/media/og-card.jpg">
+<link rel="icon" href="favicon-32.png?v=3" type="image/png" sizes="32x32">
+<link rel="icon" href="icon-512.png?v=3" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="alternate" type="application/rss+xml" title="Pavel Bushuyeu — News" href="https://bushuyeu.com/feed.xml">
+<link rel="stylesheet" href="style.css?v=34">
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "WebPage", "author": {"@type": "Person", "@id": "https://bushuyeu.com/#person", "name": "Pavel Bushuyeu", "url": "https://bushuyeu.com/"}}
+</script>
+<style>
+/* Page-only styles. Built on the tokens in style.css; the light-theme grey is darkened here so small text passes 4.5:1. */
+:root { --ink-3: #707075; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ink-3: #86868b; } }
+:root[data-theme="dark"] { --ink-3: #86868b; }
+.facts { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 14px 28px; }
+.facts li { border-top: 1px solid var(--hair-soft); padding-top: 12px; display: flex; flex-direction: column; gap: 4px; }
+.facts b { font-size: 1.35rem; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.facts span { color: var(--ink-2); font-size: 0.93rem; }
+.facts + .prose { margin-top: 24px; }
+.prose a { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.prose table.design th[scope="row"] { font-weight: 600; white-space: nowrap; vertical-align: top; padding: 8px 18px 8px 0; border-bottom: 1px solid var(--hair-soft); }
+.prose table.design tbody tr:last-child th { border-bottom: none; }
+.prose table.nums { font-variant-numeric: tabular-nums; }
+@media (max-width: 640px) { .prose table.design th[scope="row"] { white-space: normal; } }
+.charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; margin: 24px 0 18px; }
+.charts figure { margin: 0; border: 1px solid var(--hair-soft); border-radius: 12px; padding: 12px 12px 10px; background: #fff; }
+.charts img { display: block; width: 100%; height: auto; }
+.hyp { counter-reset: h; list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.hyp li { counter-increment: h; display: grid; grid-template-columns: 2.6rem 1fr; gap: 10px; align-items: baseline; }
+.hyp li::before { content: "H" counter(h); font: 500 0.86rem var(--font-mono); color: var(--link); }
+.charts figcaption { margin-top: 8px; font-size: 0.86rem; line-height: 1.45; color: #5e5e63; }
+</style>
+<script src="faro.js" async></script>
+<script src="theme.js?v=2" defer></script>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="topbar">
+      <nav class="eyebrow eyebrow-nav" aria-label="Main">
+        <a href="/">Home</a>
+        <a href="/research">Research</a>
+        <a href="/teaching">Teaching</a>
+        <a href="/product-management">Product management</a>
+        <a href="/services">Services</a>
+      </nav>
+      <button type="button" class="theme-switch" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode">
+        <svg class="theme-switch__moon" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M13.6 9.9A5.7 5.7 0 0 1 6.1 2.4a5.8 5.8 0 1 0 7.5 7.5z"/></svg>
+        <svg class="theme-switch__sun" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1.3v1.5M8 13.2v1.5M1.3 8h1.5M13.2 8h1.5M3.3 3.3l1 1M11.7 11.7l1 1M3.3 12.7l1-1M11.7 4.3l1-1"/></svg>
+      </button>
+    </div>
+    <h1>Calibrated noise injection for VLA fine-tuning</h1>
+    <p class="sub">The project tests whether DART's noise, sized to the learner's error, still beats plain isotropic noise when the learner is a pretrained vision-language-action model that predicts action chunks. The application adds the same calibrated pushes to teleoperation, so new fine-tuning data contains recoveries.</p>
+    <div class="meta">
+      <span>Paper: <a rel="noopener" target="_blank" href="https://arxiv.org/abs/1703.09327">DART, arXiv:1703.09327</a></span>
+      <span>Role: visionary</span>
+      <span>November 2026</span>
+      <a class="pill-link" href="https://docs.google.com/presentation/d/144jBDxY-y1633DUxtttJqcweXfNAHfwRCJ9WpmMGxTE/edit?usp=sharing" rel="noopener" target="_blank" style="gap:7px" aria-label="View the slides in Google Slides (opens in a new tab)"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="12" height="9" rx="1.5"/><path d="M8 12v2M5.5 14h5"/></svg>View slides</a>
+      <a class="pill-link" href="/media/review-dart-visionary-slides.pdf" download style="gap:7px" aria-label="Download the presentation (PDF)"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v8m0 0 3.2-3.2M8 10.5 4.8 7.3M3 13.5h10"/></svg>Download presentation</a>
+    </div>
+  </div>
+</header>
+
+<section id="research">
+  <div class="wrap">
+    <div class="shead">
+      <h2>Does DART's calibration still matter for VLAs?</h2>
+      <p class="eyebrow">Proposed research</p>
+    </div>
+    <div class="prose">
+      <p>DART adds noise to the expert's executed controls, and the expert's own action at each state it reaches becomes the label. The noise covariance is fit to the learner's error and scaled to a guess of its final error. Collection stays off-policy, so the expert keeps control, and on a real robot grasping in clutter DART raised success from 49% (behavior cloning) to 79%, averaged over four human supervisors.</p>
+      <p>Two later results question the calibration. <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2507.09061">Zhang et al.</a> (2025) inject fixed-scale isotropic noise in one pass, with clean labels and half the trajectories left clean, and match DART on HalfCheetah and beat it on Humanoid, with small state-based policies. <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2310.17596">MimicGen</a>, the main generator of synthetic demonstrations, adds noise with σ = 0.05 but stores the noisy executed action as the label. <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2610.32093">DiscoDemo</a> (2026) ran DART with fixed isotropic noise for π0.5 in simulation, as a side experiment. I found no paper that sizes the noise to a pretrained VLA's own error.</p>
+      <h3>Hypotheses</h3>
+      <ol class="hyp">
+        <li><span>For π0 LoRA fine-tuning, noise sized to the learner's error beats isotropic noise of the same total size by at least 5 points of success on 2 of 3 tasks.</span></li>
+        <li><span>Noise correlated across the action chunk beats noise drawn independently at each step.</span></li>
+        <li><span>At the same noise, clean labels beat MimicGen's noisy labels.</span></li>
+      </ol>
+      <p><b>Why it matters.</b> If H1 fails, the cheaper isotropic recipe is enough for VLAs too. Either outcome changes how fine-tuning data is collected, and both are cheaper than on-policy rollouts or human corrections.</p>
+    </div>
+    <div class="charts">
+      <figure style="grid-column: 1 / -1">
+        <img src="media/dart-visionary-loop.svg" alt="The collection loop: the expert's action chunk is executed with added noise, the robot reaches a state off the expert's path, and the expert's clean action is stored as the label. The fine-tuned VLA's error on held-out expert states sets the size of the noise." width="960" height="320" loading="lazy">
+        <figcaption>One collection loop, six arms: clean; MimicGen default (σ 0.05, noisy labels); the same noise with clean labels; an isotropic sweep; DART per step; DART across the chunk.</figcaption>
+      </figure>
+    </div>
+    <div class="prose">
+      <h3>Design</h3>
+      <div class="scroll"><table class="design">
+        <tbody>
+          <tr><th scope="row">Tasks</th><td>MimicGen robosuite Square, Threading and Coffee (D1).</td></tr>
+          <tr><th scope="row">Expert</th><td>The MimicGen generator, patched to log the clean action next to the executed one.</td></tr>
+          <tr><th scope="row">Policy</th><td>π0 with LoRA through openpi (more than 22.5 GB of GPU memory); SmolVLA for the noise sweeps.</td></tr>
+          <tr><th scope="row">Round 0</th><td>200 clean demos. Fine-tune, then fit the learner's error covariance and its correlation across the action chunk on held-out expert states.</td></tr>
+          <tr><th scope="row">Round 1</th><td>800 more successful demos per arm, with the same seeds and start states across arms.</td></tr>
+          <tr><th scope="row">Metrics</th><td>Success with Wilson intervals; DART's shift gap (the loss on the policy's own states minus on demo states); the expert's success under noise; recovery after a push at test time.</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note"><b>Compute (estimate).</b> 150–250 GPU-hours for collection and LoRA fine-tunes, on one 32 GB GPU plus a university cluster. One arm is timed first.</p>
+      <p class="note"><b>Risks.</b> The pretrained VLA may already recover: the π0 paper says "the diverse (but lower quality) pre-training data allows the model to recover from mistakes". A null result still tells data collectors to skip calibration. The waypoint expert corrects arm drift, not object drift. Noise lowers the expert's success, so only successful demos are kept and the yield is reported.</p>
+    </div>
+  </div>
+</section>
+
+<section id="application">
+  <div class="wrap">
+    <div class="shead">
+      <h2>A noise-on mode for VLA teleoperation</h2>
+      <p class="eyebrow">Proposed application</p>
+    </div>
+    <div class="prose">
+      <ol>
+        <li><b>Fit</b> the noise from the first fine-tune's errors on held-out demos.</li>
+        <li><b>Push.</b> During leader-follower teleoperation (ALOHA, DROID, LeRobot), add short calibrated pushes to the follower arm.</li>
+        <li><b>Label</b> each step with the operator's command.</li>
+        <li><b>Keep the pushes short</b>, so the operator corrects the follower and does not build the push into the command.</li>
+      </ol>
+      <p><b>Why it can work.</b> In DART's robot study, twice the chosen noise hurt the human supervisors (72% instead of 79%), so the size must be calibrated, not maximal. Bayesian Disturbance Injection and DIPA inject disturbances into operator actions on real robots. <a rel="noopener" target="_blank" href="https://arxiv.org/abs/2610.39054">Robotic Data Inoculation</a> (2026) steers teleoperation toward a learner's likely errors with a learned model and keeps the clean command as the label, for a small flow policy. None of these collects VLA fine-tuning data with noise sized from the VLA's own error.</p>
+    </div>
+  </div>
+</section>
+
+<section id="prior">
+  <div class="wrap">
+    <div class="shead">
+      <h2>What this builds on</h2>
+      <p class="eyebrow">Related work</p>
+    </div>
+    <div class="prose">
+      <div class="scroll"><table class="nums">
+        <thead><tr><th>Work</th><th>What it does</th><th>What this proposal adds</th></tr></thead>
+        <tbody>
+          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/1703.09327">DART</a>, 2017</td><td>Noise sized to the learner's error, clean labels, small policies.</td><td>A pretrained VLA with action chunks.</td></tr>
+          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2507.09061">Zhang et al.</a>, 2025</td><td>One-shot isotropic noise is on par with DART and DAgger for small state-based policies.</td><td>The same test at VLA scale.</td></tr>
+          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2609.30462">Policy-Calibrated DAgger</a>, 2026</td><td>Noise statistics estimated offline from a diffusion policy, used as augmentation inside HG-DAgger.</td><td>Noise during collection, sized for a VLA.</td></tr>
+          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2310.17596">MimicGen</a>, 2023</td><td>Noise in synthetic demos; the noisy action is the label.</td><td>Clean labels and sized noise.</td></tr>
+          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2610.32093">DiscoDemo</a>, 2026</td><td>Fixed isotropic DART noise for π0.5 in simulation, a side experiment.</td><td>Noise sized to the VLA's own error.</td></tr>
+          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2610.39054">Robotic Data Inoculation</a>, 2026</td><td>Learned perturbations of teleoperation toward a learner's errors.</td><td>A VLA, and calibration without a learned model.</td></tr>
+          <tr><td><a rel="noopener" target="_blank" href="https://arxiv.org/abs/2511.14759">π*0.6 (Recap)</a>, 2025</td><td>Human corrections and greedy exploration.</td><td>Designed perturbations.</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+</section>
+
+<section id="sources">
+  <div class="wrap">
+    <div class="prose">
+      <p class="note"><b>Sources.</b> DART (Laskey, Lee, Fox, Dragan and Goldberg, CoRL 2017, arXiv:1703.09327), Sec. 4.1 and 5.1–5.2 and the appendix. Zhang, Pfrommer, Pan, Matni and Simchowitz (arXiv:2507.09061), Sec. 4.1 and 5, Fig. 2 and 10, App. E.3. Wang and Kantor (arXiv:2609.30462), Sec. IV and VI. MimicGen (arXiv:2310.17596), App. N.4, and its code (<code>mimicgen/datagen/waypoint.py</code>). DiscoDemo (Park et al., arXiv:2610.32093), App. C–D. Robotic Data Inoculation (Li, Zhou, Xu and Levine, arXiv:2610.39054). π0 (arXiv:2410.24164), Sec. V; π*0.6 (arXiv:2511.14759), Sec. IV-B and the discussion. Bayesian Disturbance Injection (arXiv:2103.13623) and DIPA (arXiv:2303.12375). openpi README for the memory needs. I read these between 1 and 2 November 2026; the list can be incomplete.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="backlink"><a href="/paper-review">← All paper reviews</a></p>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <img class="footer-portrait" src="media/portrait.jpg" alt="Portrait of Pavel Bushuyeu" width="640" height="640" loading="lazy">
+      <nav aria-label="Site">
+        <h2 class="footer-h">Site</h2>
+        <ul>
+          <li><a href="/research">Research</a></li>
+          <li><a href="/teaching">Teaching</a></li>
+          <li><a href="/product-management">Product management</a></li>
+          <li><a href="/services">Services</a></li>
+          <li><a href="/projects">Projects</a></li>
+          <li><a href="/paper-review">Paper review</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Profiles">
+        <h2 class="footer-h">Elsewhere</h2>
+        <ul>
+          <li><a rel="noopener" target="_blank" href="https://linkedin.com/in/bushuyeu/">LinkedIn</a></li>
+          <li><a rel="noopener" target="_blank" href="https://github.com/bushuyeu">GitHub</a></li>
+          <li><a rel="noopener" target="_blank" href="https://huggingface.co/bushuyeu">Hugging Face</a></li>
+          <li><a rel="noopener" target="_blank" href="https://scholar.google.com/citations?user=ub3osgUAAAAJ">Google Scholar</a></li>
+          <li><a rel="noopener" target="_blank" href="https://orcid.org/0009-0009-7183-6714">ORCID</a></li>
+          <li><a rel="noopener" target="_blank" href="https://openreview.net/profile?id=~Pavel_Bushuyeu1">OpenReview</a></li>
+          <li><a rel="noopener" target="_blank" href="https://www.semanticscholar.org/author/2405429742">Semantic Scholar</a></li>
+          <li><a rel="noopener" target="_blank" href="https://www.researchgate.net/profile/Pavel-Bushuyeu">ResearchGate</a></li>
+        </ul>
+      </nav>
+      <div>
+        <h2 class="footer-h">Contact</h2>
+        <ul>
+          <li><a href="mailto:pavelbushuyeu@gmail.com">pavelbushuyeu@gmail.com</a></li>
+          <li><a rel="noopener" target="_blank" href="https://calendar.app.google/aTs1mDgEEfqNLnNf6">Schedule a call</a></li>
+          <li><a href="https://follow.it/pavel-bushuyeu-news" rel="noopener" target="_blank">Subscribe to updates</a></li>
+          <li><a href="/feed.xml">RSS feed</a></li>
+          <li><a href="Pavel-Bushuyeu-CV.pdf" download>Download Resume</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="footer-base">© 2026 Pavel Bushuyeu</p>
+  </div>
+</footer>
+
+</body>
+</html>
