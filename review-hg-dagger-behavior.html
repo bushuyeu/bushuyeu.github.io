@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
 <script>/* Theme: apply a stored Light/Dark pick before the first paint (theme.js) */(function(){var r=document.documentElement;try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark"){r.setAttribute("data-theme",t);document.querySelector('meta[name="color-scheme"]').content=t}}catch(e){}r.classList.add("theme-js")})()</script>
-<title>HG-DAgger with VR teleoperation — Pavel Bushuyeu</title>
-<meta name="description" content="How our team used VR to correct a household robot’s failures in the 2026 BEHAVIOR Challenge: the headset workflow, the recorded data, the results and the limits.">
+<title>Teaching a household robot in VR — Pavel Bushuyeu</title>
+<meta name="description" content="Our BEHAVIOR project: saving a mistake, replaying it in a headset and recording a correction. The talk explains what the correction data changed, with timed speaking notes and the real recordings.">
 <link rel="canonical" href="https://bushuyeu.com/review-hg-dagger-behavior">
 <meta property="og:type" content="article">
-<meta property="og:title" content="HG-DAgger with VR teleoperation — Pavel Bushuyeu">
-<meta property="og:description" content="How our team used VR to correct a household robot’s failures in the 2026 BEHAVIOR Challenge: the headset workflow, the recorded data, the results and the limits.">
+<meta property="og:title" content="Teaching a household robot in VR — Pavel Bushuyeu">
+<meta property="og:description" content="Our BEHAVIOR project: saving a mistake, replaying it in a headset and recording a correction. The talk explains what the correction data changed, with timed speaking notes and the real recordings.">
 <meta property="og:url" content="https://bushuyeu.com/review-hg-dagger-behavior">
 <meta property="og:image" content="https://bushuyeu.com/media/og-card.jpg">
 <meta property="og:image:width" content="1200">
@@ -50,20 +50,21 @@
         <svg class="theme-switch__sun" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1.3v1.5M8 13.2v1.5M1.3 8h1.5M13.2 8h1.5M3.3 3.3l1 1M11.7 11.7l1 1M3.3 12.7l1-1M11.7 4.3l1-1"/></svg>
       </button>
     </div>
-<h1>HG-DAgger with VR teleoperation</h1><p class="sub">How our team used VR to correct a household robot’s failures in the 2026 BEHAVIOR Challenge: the headset workflow, the recorded data, the results and the limits.</p>
+<h1>Teaching a household robot in VR</h1><p class="sub">Our BEHAVIOR project: saving a mistake, replaying it in a headset and recording a correction. The talk explains what the correction data changed, with timed speaking notes and the real recordings.</p>
 <div class="meta"><span>ICS 685 · VR/XR</span><span>8 slides · about 10 minutes</span><span>November 2026</span>
 <a class="pill-link" href="https://docs.google.com/presentation/d/1a2_NDSSDeO8dpLSbwbsIDyjb0YuxLsrWjWHayZkUp2k/edit?usp=sharing" rel="noopener" target="_blank">View slides</a>
-<a class="pill-link" href="/media/review-hg-dagger-behavior-slides.pdf?v=20261104" download>Download presentation</a></div>
+<a class="pill-link" href="/media/review-hg-dagger-behavior-slides.pdf?v=20261104b" download>Download presentation</a>
+<a class="pill-link" href="/media/review-hg-dagger-behavior-speaking-notes.pdf?v=20261104b" download>Speaking notes</a></div>
 </div></header>
 <section id="setup"><div class="wrap"><div class="shead"><h2>Recovery from the robot’s own failures</h2><p class="eyebrow">Problem and setup</p></div><div class="prose">
-<p>The 2026 BEHAVIOR Challenge tests 100 household tasks in OmniGibson with 20,000 expert demonstrations. Our team used π0.5-based policies for a simulated R1Pro mobile robot. We saved failed rollouts and simulator states so an expert could correct a failure without repeating the full task.</p>
+<p>The 2026 BEHAVIOR Challenge tests robots on 100 household tasks in a simulator and provides 20,000 recorded demonstrations by people. Our robot has two arms and a learned controller that chooses movements from camera images and robot information. We saved failed attempts and the state of the virtual scene, like a saved game, so an expert could resume near a mistake.</p>
 <p>On the older tasks, a reviewer marked the failure in a policy rollout. On the new tasks, the follower ran from demonstration phase starts and an automatic detector marked failed phases. The challenge’s task score measures goal conditions true at the end, so completing one pick-up is not equivalent to completing a task.</p></div></div></section>
 <section id="vr"><div class="wrap"><div class="shead"><h2>One button switches full control</h2><p class="eyebrow">VR teleoperation</p></div><div class="prose">
 <p>The operator used a Quest 3S or Pico 4 Enterprise headset with NVIDIA CloudXR streaming the simulator view. The right controller’s B button handed control from the policy to inverse-kinematics controllers that followed the operator’s hands. Pressing B again restored the policy controllers. A red border identified human-control frames.</p>
 <figure><video controls playsinline preload="none" poster="/media/behavior-vr-recovery-2026-poster.jpg"><source src="/media/behavior-vr-recovery-2026.mp4" type="video/mp4"></video><figcaption>Human takeover during picking up trash, with the robot’s camera views. Red marks human control. <a href="/media/behavior-vr-recovery-2026.mp4">Open recording (MP4)</a>.</figcaption></figure>
 <p>Control ran at 30 Hz and physics at 120 Hz. These are update rates; we did not measure end-to-end VR latency. The console recorded ten seconds of policy continuation after hand-back. On the new tasks, human corrections started directly from the failed state without a policy in the loop, a variant closer to relabeling learner states than to gated online HG-DAgger.</p></div></div></section>
 <section id="labels"><div class="wrap"><div class="shead"><h2>Who controlled every frame</h2><p class="eyebrow">Data</p></div><div class="prose">
-<p>Each LeRobot v2.1 episode records a per-frame intervention mask. A human action label contains the next reached arm and torso joint positions, commanded base velocity and latched gripper command. The merge keeps contiguous human intervals and drops intervals shorter than the policy’s 32-frame action chunk.</p>
+<p>A training example pairs what the robot saw with the movement the teacher supplied. Our recording saves camera images, robot movements and a marker of who controlled each moment. The processing then keeps human corrections as examples in the robot’s action format. The speaking notes explain the technical details for questions.</p>
 <p>This format connects the VR interface to the training stack. An incorrect hand-back label can turn the learner’s own actions into purported expert examples.</p></div></div></section>
 <section id="human"><div class="wrap"><div class="shead"><h2>Replay timing changed the dataset</h2><p class="eyebrow">Human data</p></div><div class="prose">
 <p>With replay starting five seconds before the failure mark, people often prevented the mistake. In the team notebook, 29 of 33 place recordings began with the can already held, and only one included a human re-grasp. The default moved to three seconds after the mark on October 1, after 78 of the initial 82 recordings had been collected.</p>
