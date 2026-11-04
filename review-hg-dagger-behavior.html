@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<script>/* Theme: apply a stored Light/Dark pick before the first paint (theme.js) */(function(){var r=document.documentElement;try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark"){r.setAttribute("data-theme",t);document.querySelector('meta[name="color-scheme"]').content=t}}catch(e){}r.classList.add("theme-js")})()</script>
+<title>HG-DAgger with VR teleoperation — Pavel Bushuyeu</title>
+<meta name="description" content="How our team used VR to correct a household robot’s failures in the 2026 BEHAVIOR Challenge: the headset workflow, the recorded data, the results and the limits.">
+<link rel="canonical" href="https://bushuyeu.com/review-hg-dagger-behavior">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HG-DAgger with VR teleoperation — Pavel Bushuyeu">
+<meta property="og:description" content="How our team used VR to correct a household robot’s failures in the 2026 BEHAVIOR Challenge: the headset workflow, the recorded data, the results and the limits.">
+<meta property="og:url" content="https://bushuyeu.com/review-hg-dagger-behavior">
+<meta property="og:image" content="https://bushuyeu.com/media/og-card.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Pavel Bushuyeu, AI researcher, University of Hawaiʻi at Mānoa">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://bushuyeu.com/media/og-card.jpg">
+<link rel="icon" href="favicon-32.png?v=3" type="image/png" sizes="32x32">
+<link rel="icon" href="icon-512.png?v=3" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="alternate" type="application/rss+xml" title="Pavel Bushuyeu — News" href="https://bushuyeu.com/feed.xml">
+<link rel="stylesheet" href="style.css?v=34">
+
+<style>
+.prose figure video { display: block; width: 100%; height: auto; border-radius: 10px; background: var(--tint); }
+.vgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 1.6em 0; }
+.vgrid figure { margin: 0; }
+@media (max-width: 640px) { .vgrid { grid-template-columns: 1fr; } }
+</style>
+<script src="faro.js" async></script>
+<script src="theme.js?v=2" defer></script>
+</head>
+<body><header class="top"><div class="wrap">
+    <div class="topbar">
+      <nav class="eyebrow eyebrow-nav" aria-label="Main">
+        <a href="/">Home</a>
+        <a href="/research">Research</a>
+        <a href="/teaching">Teaching</a>
+        <a href="/product-management">Product management</a>
+        <a href="/services">Services</a>
+      </nav>
+      <button type="button" class="theme-switch" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode">
+        <svg class="theme-switch__moon" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M13.6 9.9A5.7 5.7 0 0 1 6.1 2.4a5.8 5.8 0 1 0 7.5 7.5z"/></svg>
+        <svg class="theme-switch__sun" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1.3v1.5M8 13.2v1.5M1.3 8h1.5M13.2 8h1.5M3.3 3.3l1 1M11.7 11.7l1 1M3.3 12.7l1-1M11.7 4.3l1-1"/></svg>
+      </button>
+    </div>
+<h1>HG-DAgger with VR teleoperation</h1><p class="sub">How our team used VR to correct a household robot’s failures in the 2026 BEHAVIOR Challenge: the headset workflow, the recorded data, the results and the limits.</p>
+<div class="meta"><span>ICS 685 · VR/XR</span><span>8 slides · about 10 minutes</span><span>November 2026</span>
+<a class="pill-link" href="https://docs.google.com/presentation/d/1a2_NDSSDeO8dpLSbwbsIDyjb0YuxLsrWjWHayZkUp2k/edit?usp=sharing" rel="noopener" target="_blank">View slides</a>
+<a class="pill-link" href="/media/review-hg-dagger-behavior-slides.pdf?v=20261104" download>Download presentation</a></div>
+</div></header>
+<section id="setup"><div class="wrap"><div class="shead"><h2>Recovery from the robot’s own failures</h2><p class="eyebrow">Problem and setup</p></div><div class="prose">
+<p>The 2026 BEHAVIOR Challenge tests 100 household tasks in OmniGibson with 20,000 expert demonstrations. Our team used π0.5-based policies for a simulated R1Pro mobile robot. We saved failed rollouts and simulator states so an expert could correct a failure without repeating the full task.</p>
+<p>On the older tasks, a reviewer marked the failure in a policy rollout. On the new tasks, the follower ran from demonstration phase starts and an automatic detector marked failed phases. The challenge’s task score measures goal conditions true at the end, so completing one pick-up is not equivalent to completing a task.</p></div></div></section>
+<section id="vr"><div class="wrap"><div class="shead"><h2>One button switches full control</h2><p class="eyebrow">VR teleoperation</p></div><div class="prose">
+<p>The operator used a Quest 3S or Pico 4 Enterprise headset with NVIDIA CloudXR streaming the simulator view. The right controller’s B button handed control from the policy to inverse-kinematics controllers that followed the operator’s hands. Pressing B again restored the policy controllers. A red border identified human-control frames.</p>
+<figure><video controls playsinline preload="none" poster="/media/behavior-vr-recovery-2026-poster.jpg"><source src="/media/behavior-vr-recovery-2026.mp4" type="video/mp4"></video><figcaption>Human takeover during picking up trash, with the robot’s camera views. Red marks human control. <a href="/media/behavior-vr-recovery-2026.mp4">Open recording (MP4)</a>.</figcaption></figure>
+<p>Control ran at 30 Hz and physics at 120 Hz. These are update rates; we did not measure end-to-end VR latency. The console recorded ten seconds of policy continuation after hand-back. On the new tasks, human corrections started directly from the failed state without a policy in the loop, a variant closer to relabeling learner states than to gated online HG-DAgger.</p></div></div></section>
+<section id="labels"><div class="wrap"><div class="shead"><h2>Who controlled every frame</h2><p class="eyebrow">Data</p></div><div class="prose">
+<p>Each LeRobot v2.1 episode records a per-frame intervention mask. A human action label contains the next reached arm and torso joint positions, commanded base velocity and latched gripper command. The merge keeps contiguous human intervals and drops intervals shorter than the policy’s 32-frame action chunk.</p>
+<p>This format connects the VR interface to the training stack. An incorrect hand-back label can turn the learner’s own actions into purported expert examples.</p></div></div></section>
+<section id="human"><div class="wrap"><div class="shead"><h2>Replay timing changed the dataset</h2><p class="eyebrow">Human data</p></div><div class="prose">
+<p>With replay starting five seconds before the failure mark, people often prevented the mistake. In the team notebook, 29 of 33 place recordings began with the can already held, and only one included a human re-grasp. The default moved to three seconds after the mark on October 1, after 78 of the initial 82 recordings had been collected.</p>
+<p>Human time limited collection: 78 recordings took four days on one task. The 82-recording batch became 115 intervention episodes. The planned policy-training pilot on this human takeover dataset was canceled, so its effect on policy performance was not tested.</p></div></div></section>
+<section id="scaling"><div class="wrap"><div class="shead"><h2>Scripts and a stronger policy as experts</h2><p class="eyebrow">Scaling</p></div><div class="prose">
+<p>On the new tasks, automatic experts corrected saved failure states. Privileged per-skill scripts produced 4,166 recordings across 48 tasks. For selected skills, an AI agent reviewed the video and a person made the acceptance decision: 1,028 clips were reviewed, with 855 published and 173 denied. Other groups used the automatic detector gate; 116 early recordings bypassed the video review.</p>
+<p>We also used Comet’s older-task policy, pt50, as the expert. It completed 754 of 3,961 attempts (19%). The first round kept 500 pick-up and place corrections; the submitted follower’s recipe lists 499. Another 254 corrections were collected later and were not trained on.</p></div></div></section>
+<section id="recordings"><div class="wrap"><div class="shead"><h2>Automatic recoveries and a rejected clip</h2><p class="eyebrow">Recordings</p></div><div class="prose"><div class="vgrid"><figure><video controls playsinline preload="none" poster="/media/behavior-ai-chop-2026-poster.jpg"><source src="/media/behavior-ai-chop-2026.mp4" type="video/mp4"></video><figcaption>Scripted chop recovery on a Brussels sprout. <a href="/media/behavior-ai-chop-2026.mp4">Open recording (MP4)</a>.</figcaption></figure><figure><video controls playsinline preload="none" poster="/media/behavior-ai-toggle-2026-poster.jpg"><source src="/media/behavior-ai-toggle-2026.mp4" type="video/mp4"></video><figcaption>Scripted toggle recovery. <a href="/media/behavior-ai-toggle-2026.mp4">Open recording (MP4)</a>.</figcaption></figure><figure><video controls playsinline preload="none" poster="/media/behavior-ai-pour-2026-poster.jpg"><source src="/media/behavior-ai-pour-2026.mp4" type="video/mp4"></video><figcaption>Scripted pour recovery. <a href="/media/behavior-ai-pour-2026.mp4">Open recording (MP4)</a>.</figcaption></figure><figure><video controls playsinline preload="none" poster="/media/behavior-ai-attach-2026-poster.jpg"><source src="/media/behavior-ai-attach-2026.mp4" type="video/mp4"></video><figcaption>Scripted attach recovery, shown at 2× speed. <a href="/media/behavior-ai-attach-2026.mp4">Open recording (MP4)</a>.</figcaption></figure><figure><video controls playsinline preload="none" poster="/media/behavior-ai-chop-declined-2026-poster.jpg"><source src="/media/behavior-ai-chop-declined-2026.mp4" type="video/mp4"></video><figcaption>Rejected chop: the detector passed the end state, but the egg was cut accidentally. <a href="/media/behavior-ai-chop-declined-2026.mp4">Open recording (MP4)</a>.</figcaption></figure></div><p>A successful final state does not establish that the recorded actions form a useful demonstration.</p></div></div></section>
+<section id="results"><div class="wrap"><div class="shead"><h2>A pick-up gain, with task-level limits</h2><p class="eyebrow">Results</p></div><div class="prose">
+<p>With a 10% share of stronger-policy corrections and 1,000 fine-tuning steps, held-out pick-up phase success rose from <b>37.6% to 44.6%</b> against a matched demonstrations-only control: <b>+7.0 percentage points</b>, 95% bootstrap interval over tasks [+1.0, +12.7], on 383 pick-up phases. This result uses a privileged phase detector and does not establish an end-to-end task-score gain.</p>
+<p>The human takeover dataset was not tested in that policy-training pilot. Separately, 66 of the 111 human recordings on new tasks were encoded for the submitted phase-end detector, with 45 in its training split and 21 in validation. Scripted recoveries hurt the policy; a waist-joint mismatch was an important explanation, with training duration and fumbling also confounded.</p>
+<p>On the 49 new tasks’ submitted instances, the follower completed zero full tasks in 490 rollouts, with mean Q 0.031. The team’s self-reported overall submission was Q 0.092 and 1.8% task success; all 18 successes came from pt50 on older tasks. These values describe the October submission and were checked in the November 3 report.</p></div></div></section>
+<section id="lessons"><div class="wrap"><div class="shead"><h2>Interface decisions become dataset decisions</h2><p class="eyebrow">Lessons for XR</p></div><div class="prose">
+<p>Make control ownership and hand-back explicit. Choose the replay point for the behavior being collected, prevention or recovery. Compare per-joint action labels with demonstrations before training. Use the same failure snapshots for a controlled study of takeover authority and delay, then run another collection-and-training round with the updated learner.</p>
+<p>The companion <a href="/review-dagger-hg-dagger">DAgger and HG-DAgger paper review</a> explains the two methods and proposes the user study.</p>
+<p class="note">Source: “Harvesting Failures for Imitation: Human-Gated and Privileged DAgger in the 2026 BEHAVIOR Challenge,” team report, November 3, 2026, Sections 3–7 and Tables 1–3. The full report remains an internal draft. The report’s authors checked the numbers against the team’s records; dates and comparators are retained here. Videos are the team’s own simulator recordings. AI tools helped draft and construct this page and the slides.</p></div></div></section>
+<section><div class="wrap"><p class="backlink"><a href="/projects">← All projects</a> · <a href="/paper-review">Paper reviews</a></p></div></section><footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <img class="footer-portrait" src="media/portrait.jpg" alt="Portrait of Pavel Bushuyeu" width="640" height="640" loading="lazy">
+      <nav aria-label="Site">
+        <h2 class="footer-h">Site</h2>
+        <ul>
+          <li><a href="/research">Research</a></li>
+          <li><a href="/teaching">Teaching</a></li>
+          <li><a href="/product-management">Product management</a></li>
+          <li><a href="/services">Services</a></li>
+          <li><a href="/projects">Projects</a></li>
+          <li><a href="/paper-review">Paper review</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Profiles">
+        <h2 class="footer-h">Elsewhere</h2>
+        <ul>
+          <li><a rel="noopener" target="_blank" href="https://linkedin.com/in/bushuyeu/">LinkedIn</a></li>
+          <li><a rel="noopener" target="_blank" href="https://github.com/bushuyeu">GitHub</a></li>
+          <li><a rel="noopener" target="_blank" href="https://huggingface.co/bushuyeu">Hugging Face</a></li>
+          <li><a rel="noopener" target="_blank" href="https://scholar.google.com/citations?user=ub3osgUAAAAJ">Google Scholar</a></li>
+          <li><a rel="noopener" target="_blank" href="https://orcid.org/0009-0009-7183-6714">ORCID</a></li>
+          <li><a rel="noopener" target="_blank" href="https://openreview.net/profile?id=~Pavel_Bushuyeu1">OpenReview</a></li>
+          <li><a rel="noopener" target="_blank" href="https://www.semanticscholar.org/author/2405429742">Semantic Scholar</a></li>
+          <li><a rel="noopener" target="_blank" href="https://www.researchgate.net/profile/Pavel-Bushuyeu">ResearchGate</a></li>
+        </ul>
+      </nav>
+      <div>
+        <h2 class="footer-h">Contact</h2>
+        <ul>
+          <li><a href="mailto:pavelbushuyeu@gmail.com">pavelbushuyeu@gmail.com</a></li>
+          <li><a rel="noopener" target="_blank" href="https://calendar.app.google/aTs1mDgEEfqNLnNf6">Schedule a call</a></li>
+          <li><a href="https://follow.it/pavel-bushuyeu-news" rel="noopener" target="_blank">Subscribe to updates</a></li>
+          <li><a href="/feed.xml">RSS feed</a></li>
+          <li><a href="Pavel-Bushuyeu-CV.pdf" download>Download Resume</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="footer-base">© 2026 Pavel Bushuyeu</p>
+  </div>
+</footer>
+
+</body>
+</html>
